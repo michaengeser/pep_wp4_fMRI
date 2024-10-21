@@ -11,7 +11,7 @@ cfg.runNum = input('Enter run number: ', 's');
 cfg.date = datetime('today');
 
 %% General Experiment Configuration
-cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwise
+cfg.mriMode = true;  % Set to true if running in the MRI scanner, false otherwise
 cfg.imageDuration = 0.25;  % Image presentation time in seconds
 cfg.iti = 2;  % Inter-trial interval in seconds
 cfg.startPad = 4;  % Time before the first trial in seconds
@@ -20,13 +20,11 @@ cfg.TargetProb = 0.16;  % Probability for living room occurrence (16%)
 cfg.ImageFileFormat = 'tif';
 
 %% Paths
-if cfg.mriMode
-    stimPath = fullfile('..', 'stimuli');
-    outputPath = 'D:\user\0251PF\experiment\sub-01\beh\';
-else
-    stimPath = fullfile('..', 'stimuli');
-    outputPath = fullfile('..', 'sourcedata', ['sub-', cfg.subjectID], 'beh');
-end
+
+stimPath = fullfile('..', 'stimuli');
+outputPath = fullfile('..', 'sourcedata', ['sub-', cfg.subjectID], 'beh');
+
+
 
 if ~exist(outputPath, 'dir')
     mkdir(outputPath);
@@ -61,12 +59,29 @@ fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\tresponseKey\tres
 
 %% Initialize Psychtoolbox
 Screen('Preference', 'SkipSyncTests', 1);  % Skip sync tests for demo purposes (remove in actual experiment)
-[window, windowRect] = PsychImaging('OpenWindow', max(Screen('Screens')), [128 128 128]);  % Open window
+PsychDefaultSetup(2)
+
+% Define colors
+Color.white = [255 255 255]; Color.black = [0 0 0]; Color.gray=(Color.black+Color.white)/2;
+Color.red = [255 0 0]; Color.yellow= [255 255 0];
+
+screenNumber = max(Screen('Screens'));  
+screencount=size(Screen('screens'),2);
+if screencount>1
+    windowrect=Screen(1,'rect');
+    screenNumber=1; %%%%%%%%%%%%%%% 2
+else
+    windowrect=Screen(0,'rect');
+    screenNumber=0;
+end
+
+[window, windowRect] = Screen('OpenWindow', screenNumber, [Color.gray], [], 32, 2,[], [],  kPsychNeed32BPCFloat);
 [xCenter, yCenter] = RectCenter(windowRect);
 ifi = Screen('GetFlipInterval', window);  % Get refresh interval
 DrawFormattedText(window, 'Loading...', 'center', 'center', [0 0 0]);
 Screen('Flip', window);  % Show fixation cross
 HideCursor; % Hide mouse cursor
+
 
 
 % Load all images as textures
@@ -138,17 +153,16 @@ end
 % define visual angle
 x_degree = 8;
 y_degree = 6;
-viewing_dist = 80;
 
-% Get the screen resolution in pixels per inch
-[imgWidth, imgHeight] = Screen('DisplaySize', window); % width and height in mm
-imgWidth = imgWidth / 10; % convert to cm
-imgHeight = imgHeight / 10; % convert to cm
+% Get the screen resolution and viewing distance
+viewing_dist = 140;
+screen_hor=70; %Convert to cm (horizontal)
+screen_vert=39.4; %Convert to cm (vertial)
 
 % Calculate pixels per centimeter
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
-pixPerCmX = screenXpixels / imgWidth;
-pixPerCmY = screenYpixels / imgHeight;
+pixPerCmX = screenXpixels / screen_hor;
+pixPerCmY = screenYpixels / screen_vert;
 
 % Calculate the size in cm for the given visual angles
 sizeCmX = 2 * viewing_dist * tan(deg2rad(x_degree) / 2);
@@ -164,6 +178,7 @@ image_rect = CenterRectOnPointd([0 0 sizePixX sizePixY], xCenter, yCenter);
 %% Initialize keyboard
 KbName('UnifyKeyNames');
 abortKey = KbName('ESCAPE');
+respKeysMRI = 1:15;
 
 %% Experiment Start
 try
@@ -171,7 +186,7 @@ try
     DrawFormattedText(window, 'Waiting for scanner...', 'center', 'center', [0 0 0]);
     Screen('Flip', window);  % Show fixation cross
     if cfg.mriMode
-        [triggerTimeStamp, ~] = GetTriggerDAQBION(dq);c
+        [triggerTimeStamp, ~] = GetTriggerDAQBION(dq);
     else
         KbWait; % Wait for any key press in dummy mode
         triggerTimeStamp = GetSecs;
@@ -233,17 +248,29 @@ try
 
                 % Check for button press (target detection task)
                 [keyIsDown, responseTime, keyCode] = KbCheck;
+                if cfg.mriMode
+                    BIONkeyCode = read(dq, 1, "OutputFormat", "Matrix");
+                    checkResp = BIONkeyCode(respKeysMRI);
+                    if sum(checkResp) >= 1
+                        keyIsDown = 1;
+                        responseTime = GetSecs;
+                    end
+                end
 
                 % Abort experiment when ESC is pressed 
                 if keyCode(abortKey)
                     error('Experiment aborted by user')
                 end
 
-                % Store first button press 
+                % Store first button press
                 if keyIsDown && ~responseFlag
-                        responseTimes(trialCount) = responseTime;
+                    responseTimes(trialCount) = responseTime;
+                    if cfg.mriMode
+                        responseKeys{trialCount} = num2str(find(BIONkeyCode));
+                    else
                         responseKeys{trialCount} = num2str(find(keyCode));
-                        responseFlag = true;
+                    end
+                    responseFlag = true;
                 end
 
                 % Show fixation cross after 250 ms
@@ -262,12 +289,21 @@ try
             trialEnd(trialCount) = GetSecs;
             
             % Log trial information
-            fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
-                cfg.subjectID, cfg.runNum, trialCount,...
-                currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
-                responseKeys{trialCount}, responseTimes(trialCount), ...
-                trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
-                char(datetime('now')), triggerTimeStamp);
+            if cfg.mriMode
+                fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%s\n', ...
+                    cfg.subjectID, cfg.runNum, trialCount,...
+                    currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
+                    responseKeys{trialCount}, responseTimes(trialCount), ...
+                    trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
+                    char(datetime('now')), triggerTimeStamp);
+            else
+                fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
+                    cfg.subjectID, cfg.runNum, trialCount,...
+                    currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
+                    responseKeys{trialCount}, responseTimes(trialCount), ...
+                    trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
+                    char(datetime('now')), triggerTimeStamp);
+            end
            
         end
     end
