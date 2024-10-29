@@ -20,11 +20,12 @@ cfg.TargetProb = 0.16;  % Probability for living room occurrence (16%)
 cfg.ImageFileFormat = 'tif';
 
 %% Paths
+stimPath = fullfile(pwd,'..', 'stimuli');
+outputPath = fullfile(pwd,'..', 'sourcedata', ['sub-', cfg.subjectID], 'beh');
+functionPath = fullfile(pwd,'functions');
 
-stimPath = fullfile('..', 'stimuli');
-outputPath = fullfile('..', 'sourcedata', ['sub-', cfg.subjectID], 'beh');
-
-
+% add functions folder to path
+addpath(function_folder)
 
 if ~exist(outputPath, 'dir')
     mkdir(outputPath);
