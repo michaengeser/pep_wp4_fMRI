@@ -25,7 +25,7 @@ outputPath = fullfile(pwd,'..', 'sourcedata', ['sub-', cfg.subjectID], 'beh');
 functionPath = fullfile(pwd,'functions');
 
 % add functions folder to path
-addpath(function_folder)
+addpath(functionPath)
 
 if ~exist(outputPath, 'dir')
     mkdir(outputPath);
@@ -187,10 +187,12 @@ try
     DrawFormattedText(window, 'Waiting for scanner...', 'center', 'center', [0 0 0]);
     Screen('Flip', window);  % Show fixation cross
     if cfg.mriMode
-        [triggerTimeStamp, ~] = GetTriggerDAQBION(dq);
+        [triggerDate, ~] = GetTriggerDAQBION(dq);
+        triggerTimeStamp = GetSecs;
     else
         KbWait; % Wait for any key press in dummy mode
         triggerTimeStamp = GetSecs;
+        triggerDate = datetime;
     end
 
     trialOnsets = zeros(1, numTrials);  % Store trial onset times
@@ -205,7 +207,7 @@ try
     for blockNum = 1:2  % Two blocks per run
 
         % alternate which category comes first
-        if mod(blockNum - cfg.runNum, 2) == 0  
+        if mod(blockNum - str2double(cfg.runNum), 2) == 0  
             currentImages = kitBlkImgs;
         else
             currentImages = batBlkImgs;
@@ -290,22 +292,13 @@ try
             trialEnd(trialCount) = GetSecs;
             
             % Log trial information
-            if cfg.mriMode
-                fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%s\n', ...
-                    cfg.subjectID, cfg.runNum, trialCount,...
-                    currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
-                    responseKeys{trialCount}, responseTimes(trialCount), ...
-                    trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
-                    char(datetime('now')), triggerTimeStamp);
-            else
-                fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
-                    cfg.subjectID, cfg.runNum, trialCount,...
-                    currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
-                    responseKeys{trialCount}, responseTimes(trialCount), ...
-                    trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
-                    char(datetime('now')), triggerTimeStamp);
-            end
-           
+            fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
+                cfg.subjectID, cfg.runNum, trialCount,...
+                currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
+                responseKeys{trialCount}, responseTimes(trialCount), ...
+                trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
+                char(triggerDate), triggerTimeStamp);
+
         end
     end
 
