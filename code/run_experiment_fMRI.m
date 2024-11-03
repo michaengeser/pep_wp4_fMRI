@@ -11,7 +11,7 @@ cfg.runNum = input('Enter run number: ', 's');
 cfg.date = datetime('today');
 
 %% General Experiment Configuration
-cfg.mriMode = true;  % Set to true if running in the MRI scanner, false otherwise
+cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwise
 cfg.imageDuration = 0.25;  % Image presentation time in seconds
 cfg.iti = 2;  % Inter-trial interval in seconds
 cfg.startPad = 4;  % Time before the first trial in seconds
@@ -55,7 +55,7 @@ runOutputFile = fullfile(outputPath, sprintf('sub-%s_task-main_run-%s_events.tsv
 fileID = fopen(runOutputFile, 'w');
 
 % Write header for the log file
-fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\tresponseKey\tresponseTime\ttrialOnset\titiOnset\ttrialEnd\tdate\ttriggerTimeStamp\n');
+fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\tresponseKey\tresponseTime\ttrialOnset\titiOnset\ttrialEnd\ttriggerDate\ttriggerTimeStamp\n');
             
 
 %% Initialize Psychtoolbox
