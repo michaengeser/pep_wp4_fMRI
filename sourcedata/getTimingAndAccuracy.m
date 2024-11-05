@@ -20,18 +20,16 @@ for i = 1:length(tsvFiles)
     % Store the table in the cell array
     if ~isempty(t)
 
+
         % make respinseKey a cell
         if ~iscell(t.responseKey)
             t.responseKey = num2cell(t.responseKey);
         end
 
         % add duration of run 
-        if isnumeric(t.triggerTimeStamp(end))
-            runDur = t.trialEnd(end) - t.triggerTimeStamp(end) + 10;
-        else
-            runDur = t.date(end) - t.triggerTimeStamp(end) + .0001;
-        end
-        t.runDur = repmat(runDur, height(t), 1);
+        runDur = t.trialEnd(end) - t.triggerTimeStamp(end) + 10;
+
+        t.runDur = repmat(seconds(runDur), height(t), 1);
         allTables{i} = t; %#ok<SAGROW>
 
     end
@@ -68,12 +66,14 @@ end
 % add mean and SD
 timing = [timing; {'mean', ...
     mean(timing.mean_stim_diff), mean(timing.max_stim_diff),...
-    mean(timing.min_stim_diff), mean(timing.trial_dur),...
+    mean(timing.min_stim_diff), mean(timing.mean_trial_dur),...
+    mean(timing.max_trial_dur_diff), mean(timing.min_trial_dur_diff),...
     mean(timing.run_dur)}];
 
 timing = [timing; {'sd', ...
     std(timing.mean_stim_diff(length(subNums))), std(timing.max_stim_diff(length(subNums))),...
-    std(timing.min_stim_diff(length(subNums))), std(timing.trial_dur(length(subNums))),...
+    std(timing.min_stim_diff(length(subNums))), std(timing.mean_trial_dur(length(subNums))),...
+    std(timing.max_trial_dur_diff(length(subNums))), std(timing.min_trial_dur_diff(length(subNums))),...
     std(timing.run_dur(length(subNums)))}];
 
 % plot timing
@@ -103,7 +103,7 @@ for subNum = subNums
     nonTargetResponses = ~strcmp(nonTargetResponses, 'none');
 
    newTable = table;
-   newTable.subNum = subNum;
+   newTable.subNum = num2cell(subNum);
    newTable.hits =  sum(targetResponses);
    newTable.misses = sum(~targetResponses);
    newTable.hitRate = sum(targetResponses)/length(targetResponses);
@@ -119,15 +119,19 @@ for subNum = subNums
 end
 
 % add mean and SD
-accuracy = [accuracy; {'mean', ...
+newRow = cell2table({'mean', ...
     mean(accuracy.hits), mean(accuracy.misses),...
     mean(accuracy.hitRate), mean(accuracy.correctRejects),...
-    mean(accuracy.falseAlarms), mean(accuracy.faRate)}];
+    mean(accuracy.falseAlarms), mean(accuracy.faRate)},...
+    'VariableNames', accuracy.Properties.VariableNames);
+accuracy = [accuracy; newRow];
 
-accuracy = [accuracy; {'sd', ...
-    std(accuracy.hits(length(subNums))), std(accuracy.misses(length(subNums))),...
-    std(accuracy.hitRate(length(subNums))), std(accuracy.correctRejects(length(subNums))),...
-    std(accuracy.falseAlarms(length(subNums))), std(accuracy.faRate(length(subNums)))}];
+newRow = cell2table({'sd', ...
+    std(accuracy.hits(1:length(subNums))), std(accuracy.misses(1:length(subNums))),...
+    std(accuracy.hitRate(1:length(subNums))), std(accuracy.correctRejects(1:length(subNums))),...
+    std(accuracy.falseAlarms(1:length(subNums))), std(accuracy.faRate(1:length(subNums)))},...
+     'VariableNames', accuracy.Properties.VariableNames);
+accuracy = [accuracy; newRow];
 
 
 
