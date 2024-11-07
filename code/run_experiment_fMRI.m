@@ -219,15 +219,15 @@ try
         messageText(1) = upper(messageText(1)); % capitalize first letter
         DrawFormattedText(window, messageText, 'center', 'center', [0 0 0]); 
         Screen('Flip', window);  % Show fixation cross
-        WaitSecs(2); 
+
+        % Wait for initial start pad (4s)
+        WaitSecs(cfg.startPad);
 
         % Display fixation cross before the trial
         DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
         Screen('Flip', window);  % Show fixation cross
+        WaitSecs(2);
 
-        % Wait for initial start pad (4s)
-        WaitSecs(cfg.startPad);
-        
         % Loop through all trials in the block
         for imgNum = 1:height(currentImages)
             trialCount = trialCount + 1;
