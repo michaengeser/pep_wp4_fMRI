@@ -52,9 +52,9 @@ glm_normalized = p.Results.glm_normalized;
 config = struct();
 
 % define paths
-config.sourcedataPath = fullfile(pwd,'..','sourcedata');
-outputPath = fullfile(pwd,'..','derivatives');
-locPath = fullfile(config.sourcedataPath, 'localizer');
+config.sourcedataPath = fullfile(pwd, '..','sourcedata');
+outputPath = fullfile(pwd, '..','derivatives');
+locPath = fullfile(pwd, '..', 'localizer');
 behPath = fullfile(config.sourcedataPath, 'beh');
 fmriPath = fullfile(config.sourcedataPath, 'fmri/bids');
 

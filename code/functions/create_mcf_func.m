@@ -3,73 +3,62 @@ function create_mcf_func(subs)
         subs (1,:) double
     end
 
-    %% Get config.
-    cfg = get_config(subs, 'create_mcf');
+    %% preparations
+    subs = cellstr(string(subs));
+    sourcedataPath = fullfile(pwd, '..','sourcedata');
+    locPath = fullfile(pwd, '..', 'localizer');
     
     % go!
-    for iSub = 1:length(cfg.subs)
-        subID = ['sub-', num2str(cfg.subs{iSub})];
-    
+    for iSub = 1:length(subs)
+        if subs(iSub) < 10
+            subID = ['sub-00', num2str(subs{iSub})];
+        elseif subs(iSub) < 100
+            subID = ['sub-0', num2str(subs{iSub})];
+        end
+
         %% Onsets for experimental runs
-        files = dir(fullfile(cfg.behPath, subID, '*.mat'));
+        subFolder = fullfile(sourcedataPath, subID, 'beh');
+        files = dir(fullfile(subFolder, '*.tsv'));
+        files = struct2table(files);
+        files = sortrows(files, 'datenum','descend');
     
         % delete sub-directory for onset files if it exists
-        if exist(fullfile(cfg.behPath, subID, 'onsets'), 'dir')
-            rmdir(fullfile(cfg.behPath, subID, 'onsets'),'s');
+        if exist(fullfile(subFolder, 'onsets'), 'dir')
+            rmdir(fullfile(subFolder, 'onsets'),'s');
         end
     
         % make sub-directory for onset files
-        mkdir(fullfile(cfg.behPath, subID, 'onsets'));
+        mkdir(fullfile(subFolder, 'onsets'));
     
-        for iRun = 1:length(files)
-            baseFileName = files(iRun).name;
-            fileData = load(fullfile(files(iRun).folder, files(iRun).name));
-    
-            % assign stimulus onsets to structure
-            i = 0;
-            for cat = 1:2  % good (= 1) or bad (= 2) image?
-                for img = 1:50  % 50 images per category
-                    i = i + 1;
-    
-                    % name images
-                    names{i,1} = ['img', num2str(i)];
-                    
-                    % find onset of current image
-                    findStim = fileData.dat.randomTrials(:,1) == cat & ...
-                               fileData.dat.randomTrials(:,2) == img;
-                    onsets{i,1} = fileData.dat.onset(findStim);
-    
-                    % code stim. duration as 0 for event-related design
-                    durations{i,1} = 0;
-                end
-            end
+        for iRun = 1:height(files)
+            fileData = readtable(char(fullfile(files.folder(iRun), files.name(iRun))),...
+                'FileType', 'text', 'Delimiter', '\t');
+
+            % sort table 
+            fileData = sortrows(fileData, 'texture','ascend');
+
+            % get names, onsets and duration
+            names = fileData.image;
+            onsets = num2cell(fileData.trialOnset - fileData.triggerTimeStamp);
+            durations = num2cell(zeros(height(fileData), 1));
             
             % save run's onsets as `.mat` file
-            fileName = sprintf( ...
-                'mcf_sub-%s_run-%s.mat', num2str(cfg.subs{iSub}), num2str(iRun) ...
-            );
-            save( ...
-                fullfile(cfg.behPath, subID, 'onsets', fileName), ...
-                'names', 'onsets', 'durations' ...
-            );
+            fileName = sprintf('mcf_%s_run-%s.mat', subID, num2str(iRun));
+            save(fullfile(subFolder, 'onsets', fileName), ...
+                'names', 'onsets', 'durations');
         end
     
         %% Onsets for localizer
         clear onsets names durations;
         
         % create sub-directory for onsets if it doesn't exist yet
-        if ~exist(fullfile(cfg.locPath, 'onsets'))
-            mkdir(fullfile(cfg.locPath, 'onsets'));
+        if ~exist(fullfile(locPath, 'onsets'))
+            mkdir(fullfile(locPath, 'onsets'));
         end
     
         % get localizer `.mat` file for current participant
-        if startsWith(cfg.subs{iSub}, '0')
-            fileID = extractAfter(cfg.subs{iSub}, '0');
-        else
-            fileID = cfg.subs{iSub};
-        end
-        
-        locFile = load(fullfile(cfg.locPath, sprintf('localizer%s.mat', fileID)));
+        locFile = load(fullfile(locPath, 'data', ...
+            sprintf('localizer%s.mat', num2str(subs(iSub)))));
     
         % assign onsets of each image block to structure
         i = 0;
@@ -93,10 +82,7 @@ function create_mcf_func(subs)
         end
 
         % save onsets
-        fileName = sprintf('mcf_sub-%s_localizer.mat', num2str(cfg.subs{iSub}));
-        save( ...
-            fullfile(cfg.locPath, 'onsets', fileName), ...
-            'names', 'onsets', 'durations' ...
-        );
+        fileName = sprintf('mcf_%s_localizer.mat', subID);
+        save(fullfile(locPath, 'onsets', fileName), 'names', 'onsets', 'durations');
     end
 end
