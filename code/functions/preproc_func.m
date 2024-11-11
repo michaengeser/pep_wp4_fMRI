@@ -152,7 +152,7 @@ function preproc_func(subs)
         matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(9) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 9)', substruct('.','val', '{}',{13}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{9}, '.','rfiles'));
         matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(10) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 10)', substruct('.','val', '{}',{13}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{10}, '.','rfiles'));
         matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(11) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 11)', substruct('.','val', '{}',{13}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{11}, '.','rfiles'));
-        matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(12) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 11)', substruct('.','val', '{}',{13}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{11}, '.','rfiles'));
+        matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(12) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 12)', substruct('.','val', '{}',{13}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{12}, '.','rfiles'));
         matlabbatch{i+4}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
                                                                    78 76 85];
         matlabbatch{i+4}.spm.spatial.normalise.write.woptions.vox = [2 2 2];

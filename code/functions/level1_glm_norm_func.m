@@ -5,16 +5,15 @@ function level1_glm_norm_func(subs)
     spm_jobman('initcfg');
     
     %% Define subjects and main path
-    subs = cellstr(string(subs));
     mainPath = fullfile(pwd, '..');
     fmriPath = fullfile(mainPath, 'sourcedata');
     
-    for sub = 1:length(subs)
+    for iSub = 1:length(subs)
        
         if subs(iSub) < 10
-            subID = ['sub-00', num2str(subs{iSub})];
+            subID = ['sub-00', num2str(subs(iSub))];
         elseif subs(iSub) < 100
-            subID = ['sub-0', num2str(subs{iSub})];
+            subID = ['sub-0', num2str(subs(iSub))];
         end 
     
         % make `derivatives` sub-directory if it doesn't exist yet
@@ -36,7 +35,7 @@ function level1_glm_norm_func(subs)
         matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
     
         % get each localizer scan's `.nii` file
-        locFiles = dir(fullfile(fmriPath, subID, 'func', ...
+        locFiles = dir(fullfile(mainPath, 'derivatives', subID, 'func', ...
                 sprintf('wr%s%s_task-localizer_bold_*.nii', subID, 'xxxx')));
         
         locPaths = cell(1, length(locFiles));
@@ -105,7 +104,7 @@ function level1_glm_norm_func(subs)
     
         % for each run, get each scan's `.nii` file
         for run = 1:10
-            expFiles = dir(fullfile(fmriPath, subID, 'func', ...
+            expFiles = dir(fullfile(mainPath, 'derivatives', subID, 'func', ...
                     sprintf('wr%s%s_task-scenes_run-%s_bold_*.nii',...
                     subID, 'xxxx', num2str(run))));
             
@@ -117,7 +116,8 @@ function level1_glm_norm_func(subs)
             % get `mcf` file
             mcf = fullfile(fmriPath, subID, 'beh', 'onsets', ...
                 sprintf('mcf_%s_run-%s.mat', subID, num2str(run)));
-    
+            mcf_file = load(mcf);
+
             % get motion regressors
             moRegs = fullfile(mainPath, 'derivatives', subID, 'func',...
                 sprintf('rp_%s%s_task-scenes_run-%s_bold_00001.txt',...
@@ -147,50 +147,30 @@ function level1_glm_norm_func(subs)
         % contrasts
         matlabbatch{3}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
        
-        % per-image contrasts
-        for img = 1:100  
-            matlabbatch{3}.spm.stats.con.consess{img}.tcon.name = sprintf('img%s', num2str(img));
-            matlabbatch{3}.spm.stats.con.consess{img}.tcon.weights = [zeros(1, img-1) 1];
+        % per-image contrasts (only non-targets)
+        totalNonTagertImg = 100;
+        for img = 1:totalNonTagertImg 
+            matlabbatch{3}.spm.stats.con.consess{img}.tcon.name = mcf_file.names{img};
+            matlabbatch{3}.spm.stats.con.consess{img}.tcon.weights = [zeros(1, img-1), 1, zeros(1, totalNonTagertImg - img)];
             matlabbatch{3}.spm.stats.con.consess{img}.tcon.sessrep = 'repl';
         end
     
-        % good > bad images
-        matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.name = 'good > bad';
+        % bathroom > kitchen images
+        matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.name = 'bathroom > kitchen';
         matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.weights = [ones(1, 50) -(ones(1, 50))];
         matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.sessrep = 'repl';
         
-        % faces > scenes
-        matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.name = 'faces > scenes';
-        matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.weights = convertWeights('faceWeights');
+        % target > non targett
+        matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.name = 'target > nonTarget';
+        matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.weights = [zeros(1, totalNonTagertImg), ones(1, 16)];
         matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.sessrep = 'repl';
-    
-        % natural > manmade
-        matlabbatch{3}.spm.stats.con.consess{img+3}.tcon.name = 'natural > manmade';
-        matlabbatch{3}.spm.stats.con.consess{img+3}.tcon.weights = convertWeights('naturalWeights');
-        matlabbatch{3}.spm.stats.con.consess{img+3}.tcon.sessrep = 'repl';
-    
-        % foreground object > no foreground object
-        matlabbatch{3}.spm.stats.con.consess{img+4}.tcon.name = 'foreground > no foreground';
-        matlabbatch{3}.spm.stats.con.consess{img+4}.tcon.weights = convertWeights('foregroundWeights');
-        matlabbatch{3}.spm.stats.con.consess{img+4}.tcon.sessrep = 'repl';
     
         % clear contrasts?
         matlabbatch{3}.spm.stats.con.delete = 0;  % no!
         
         % go!
-        spm_jobman('run_nogui', matlabbatch)
+        spm_jobman('run', matlabbatch)
         clear matlabbatch;
-        disp(['Estimated (normalized) model for subject ', char(subs(sub)), '!']);
+        disp(['Estimated (normalized) model for subject ', num2str(subs(iSub)), '!']);
     end
-end
-        
-function updatedWeights = convertWeights(weightsFile)
-    arguments
-        weightsFile {mustBeText}
-    end
-
-    w = load(sprintf('%s.mat', weightsFile));
-    w = w.stim_category';
-    w(w==2) = -1;
-    updatedWeights = w;
 end

@@ -4,16 +4,15 @@ function create_mcf_func(subs)
     end
 
     %% preparations
-    subs = cellstr(string(subs));
     sourcedataPath = fullfile(pwd, '..','sourcedata');
     locPath = fullfile(pwd, '..', 'localizer');
     
     % go!
     for iSub = 1:length(subs)
         if subs(iSub) < 10
-            subID = ['sub-00', num2str(subs{iSub})];
+            subID = ['sub-00', num2str(subs(iSub))];
         elseif subs(iSub) < 100
-            subID = ['sub-0', num2str(subs{iSub})];
+            subID = ['sub-0', num2str(subs(iSub))];
         end
 
         %% Onsets for experimental runs
