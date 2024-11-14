@@ -1,0 +1,59 @@
+Chris Rorden's dcm2niiX version v1.0.20220720  (JP2:OpenJPEG) GCC10.2.1 x86-64 (64-bit Linux)
+Found 5146 DICOM file(s)
+Slices not stacked: orientation varies (vNav or localizer?) [0.00381999 0.955776 0.294071 -0.0411688 0.293974 -0.954926] != [0.600521 0.741969 0.298088 -0.0232105 0.38881 -0.921026]
+2 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 2 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/002_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_sag_i00001 (162x162x2x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/002_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_sag_i00002 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/002_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_sag_i00003 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/002_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_sag_i00004 (162x162x1x1)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/009_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+283 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 283 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/008_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_loc_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_loc (100x100x58x283)
+320 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 320 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/019_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_resting_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_resting (100x100x58x320)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/016_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/004_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_tra_i00001 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/004_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_tra_i00002 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/004_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_tra_i00003 (162x162x1x1)
+40 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 40 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/007_0256ME-006xxxx-01ME_gre_field_mapping_fm2d2r_gre_field_mapping_e2_ph (72x72x40x1)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/014_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/015_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/017_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/010_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/011_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+128 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 128 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/001_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout (160x160x128x1)
+176 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 176 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/005_0256ME-006xxxx-01ME_t1_mprage_sag_p3_iso_FatSup_tfl3d1_16ns_t1_mprage_sag_p3_iso_FatSup (256x256x176x1)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/012_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+Slices not stacked: echo varies (TE 7.38, 4.92; echo 2, 1). Use 'merge 2D slices' option to force stacking
+40 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 40 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/006_0256ME-006xxxx-01ME_gre_field_mapping_fm2d2r_gre_field_mapping_e2 (72x72x40x1)
+40 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 40 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/006_0256ME-006xxxx-01ME_gre_field_mapping_fm2d2r_gre_field_mapping_e1 (72x72x40x1)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/013_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/003_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_cor_i00001 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/003_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_cor_i00002 (162x162x1x1)
+1 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 1 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/003_0256ME-006xxxx-01ME_AAHead_Scout_fl3d1_ns_AAHead_Scout_MPR_cor_i00003 (162x162x1x1)
+152 images have identical time, series, acquisition and instance values. DUPLICATES REMOVED.
+Convert 152 DICOM as /biondata/0256ME/bids/sub-006xxxx/.import/018_0256ME-006xxxx-01ME_ep2d_bold_p4_2.2mm_iso_TR1850_exp_epfid2d1_100_ep2d_bold_p4_2.2mm_iso_TR1850_exp (100x100x58x152)
+Conversion required 22.872336 seconds (8.650261 for core code).
