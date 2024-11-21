@@ -96,7 +96,9 @@ for iSub = 1:length(subs)
             onsetVolsByImg = ceil(cell2mat(mcf.onsets) / TR)';
 
             % fill design matrix
-            for iOnset = 1:length(onsetVolsByImg)
+            nRegressors = nImgs; % includes only non-targets
+            % nRegressors = length(onsetVolsByImg); % includes also targets
+            for iOnset = 1:nRegressors
                 designMatrix(onsetVolsByImg(iOnset), iOnset) = 1;
             end
 
