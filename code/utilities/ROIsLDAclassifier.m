@@ -16,7 +16,7 @@ for iSub = 1:length(subs)
         subID = ['sub-0', num2str(subs(iSub))];
     end
 
-    disp(['Start searchlight for subject ',  num2str(subs(iSub)), ' on ',...
+    disp(['Start ROI decoding for subject ',  num2str(subs(iSub)), ' on ',...
         map, '-map']);
 
 
@@ -155,7 +155,10 @@ rng(0); % For reproducible jitter
 jitter_amount = 0.1; % Adjust jitter spread
 for i_roi = 1:num_rois
     x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-    scatter(x_jitter, all_data(:, i_roi), 50, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+    scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+    for i_sub = 1:num_subjects
+        text(x_jitter(i_sub) + 0.03, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+    end
 end
 
 % Customize plot
@@ -163,6 +166,7 @@ xticks(1:num_rois);
 xticklabels(masks);
 xlabel('ROI');
 ylabel('Accuracy');
+ylim([0.4,0.6])
 title('Decoding Results Across ROIs');
 
 hold off;
