@@ -18,7 +18,7 @@ dataPath = fullfile(mainPath, 'sourcedata');
 dervPath = fullfile(mainPath, 'derivatives');
 
 % set parameters
-nImgs = 116; % number of total scenes
+nImgs = 100; % number of total scenes
 TR = 1.85; % TR = 1.85s
 stimDur = .25; % duration of stimulus
 filePrefix = 'wr';  % file prefix for realigned, normalized volumes
@@ -38,7 +38,6 @@ for iSub = 1:length(subs)
 
         disp(char(datetime));
         fprintf('Creating beta map for subject %d...\n', subs(iSub));
-        
 
         % prepare data
         data = {}; % fMRI data
@@ -129,43 +128,44 @@ for iSub = 1:length(subs)
         load(fullfile(betaOutDir, betaModel), 'modelmd');
         beta = modelmd;
 
-        % load event information
-        event = [];
-
-        for iRun = 1:nRuns
-            if iRun < 10
-                runStr = ['0', num2str(iRun)];
-            else
-                runStr = num2str(iRun);
-            end
-
-            dat = readtable(fullfile(dataPath, subID, 'beh', ...
-                sprintf('%s_task-main_run-%s_events.tsv', subID, runStr)),...
-                'FileType', 'text', 'Delimiter', '\t');
-
-            % get order of stimulus presentation
-            cond = 1;
-
-            % ensure correct image indices
-            scene = dat.texture' - 10;
-
-            % add everything to `event` array
-            singleRunEventArray = [];
-
-            for iScene = 1:length(scene)
-                singleRunEventArray = [ ...
-                    singleRunEventArray; [iRun, cond, scene(iScene)]];
-            end
-
-            event = [event; singleRunEventArray];
-        end
-
-        % sort event
-        event = [event (1:size(event, 1))'];
-        event = sortrows(event, [1 2 3]);  % run * cond * scene
-
-        % sort beta
-        beta = beta(:, :, :, event(:,4));  % run * cond * scene
+        % sorting betas (should be done by design matrix already
+%         % load event information
+%         event = [];
+% 
+%         for iRun = 1:nRuns
+%             if iRun < 10
+%                 runStr = ['0', num2str(iRun)];
+%             else
+%                 runStr = num2str(iRun);
+%             end
+% 
+%             dat = readtable(fullfile(dataPath, subID, 'beh', ...
+%                 sprintf('%s_task-main_run-%s_events.tsv', subID, runStr)),...
+%                 'FileType', 'text', 'Delimiter', '\t');
+% 
+%             % get order of stimulus presentation
+%             cond = 1;
+% 
+%             % ensure correct image indices
+%             scene = dat.texture' - 10;
+% 
+%             % add everything to `event` array
+%             singleRunEventArray = [];
+% 
+%             for iScene = 1:length(scene)
+%                 singleRunEventArray = [ ...
+%                     singleRunEventArray; [iRun, cond, scene(iScene)]];
+%             end
+% 
+%             event = [event; singleRunEventArray];
+%         end
+% 
+%         % sort event
+%         event = [event (1:size(event, 1))'];
+%         event = sortrows(event, [1 2 3]);  % run * cond * scene
+% 
+%         % sort beta
+%         beta = beta(:, :, :, event(:,4));  % run * cond * scene
 
         % save beta as nifti file
         ref = fullfile(dervPath, subID, 'func', realignedFile);
