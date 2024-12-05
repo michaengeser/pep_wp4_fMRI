@@ -17,6 +17,7 @@ matlabbatch{1}.spm.spatial.coreg.write.source = {
                                                  fullfile(pwd, '..', 'MNI_ROIs', 'rTOS.img,1')
                                                  fullfile(pwd, '..', 'MNI_ROIs', 'rPPA.img,1')
                                                  fullfile(pwd, '..', 'MNI_ROIs', 'rRSC.img,1')
+                                                 fullfile(pwd, '..', 'MNI_ROIs', 'rLOC.img,1')
                                                  };
 matlabbatch{1}.spm.spatial.coreg.write.roptions.interp = 4; %%% MAYBE CHANGE TO 0
 matlabbatch{1}.spm.spatial.coreg.write.roptions.wrap = [0 0 0];
