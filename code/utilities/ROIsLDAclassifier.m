@@ -7,6 +7,9 @@ classifier = @cosmo_classify_lda;
 % get number of ROI masks
 nmasks=numel(rois);
 
+% are contrast sorted already
+sortedRows = true;
+
 % loop through subjects
 for iSub = 1:length(subs)
 
@@ -23,46 +26,91 @@ for iSub = 1:length(subs)
     for j=1:nmasks
 
         mask_label=rois{j};
-        mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label), '.img']);
+        mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
+        mask_label_short = split(mask_label, '.');
+        mask_label_short = mask_label_short{1};
 
         if strcmp(map, 't')
-            % Initialize dataset cell array
-            datasets = cell(numel(nRuns), 1);
+            if exist(fullfile(pwd, '..', 'derivatives', subID,...
+                    ['WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWcosmo_dataset_', mask_label_short, '_', map, '_map.mat']), 'file')
 
-            % Loop over runs to load data
-            counter = 0;
-            for run = 1:nRuns
+                % load cosmo dataset directly
+                load(fullfile(pwd, '..', 'derivatives', subID,...
+                    ['cosmo_dataset_', mask_label_short, '_', map, '_map.mat']))
 
-                % get dir for folder
-                con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm', ...
-                    sprintf('run-%02d',run));
+            else
 
-                for trial = 1:nTrials
-                    counter = counter + 1;
+                % Initialize dataset cell array
+                datasets = cell(numel(nRuns), 1);
 
-                    % Load the contrast image for this run and trial
-                    con_file = fullfile(con_dir, sprintf('con_%04d.nii',trial));
+                % Loop over runs to load data
+                counter = 0;
+                for iRun = 1:nRuns
 
-                    % Convert to CoSMoMVPA dataset
-                    if trial <= nTrials/2; target = 1; else; target = 2;end
-                    ds = cosmo_fmri_dataset(con_file, ...
-                        'mask', mask_fn, ... % Set brain mask
-                        'targets', target, ... % Set condition labels (1 = bathroom)
-                        'chunks', run);     % Set run identifiers
+                    % runtime control
+                    fprintf('Processing run %02d \n',iRun);
+                    
+                %%%%%%%%%%%%%%%%%%%%%%%%% Changed
+                %%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % get dir for folder
+                    con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm_with_target', ...
+                        sprintf('run-%02d',iRun));
 
-                    % Store dataset
-                    datasets{counter} = ds;
+                    % get files
+                    files = dir(fullfile(con_dir, 'con*.nii'));
+
+                    % get behavioral log file
+                    runID = sprintf('run-%02d', iRun);
+                    logFile = readtable(fullfile(pwd, '..', 'sourcedata', subID, 'beh', ...
+                        sprintf('%s_task-main_%s_events.tsv', subID, runID)),...
+                        'FileType', 'text', 'Delimiter', '\t');
+
+                    % remove targets
+                    logFile = logFile(~strcmp(logFile.category, 'livingroom'),:);
+
+                    for iFile = 1:height(logFile)
+                        counter = counter + 1;
+
+                        % Load the contrast image for this run and trial
+                        con_file = fullfile(con_dir, files(iFile).name);
+
+                        % decide on target
+                        if sortedRows
+                            target = iFile;
+                        else
+                            target = logFile.texture(iFile) - 10;
+                        end
+
+                        % Convert to CoSMoMVPA dataset
+                        ds = cosmo_fmri_dataset(con_file, ...
+                            'mask', mask_fn, ... % Set brain mask
+                            'targets', target, ...
+                            'chunks', logFile.run(iFile));     % Set run identifiers
+
+                        % Store dataset
+                        datasets{counter} = ds;
+                    end
                 end
+
+                % Combine all runs into a single dataset
+                ds_per_run = cosmo_stack(datasets);
+
+                %%%%%%%%%%%%%%%%%%%%%%%%% Changed
+                %%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % save data set
+                save(fullfile(pwd, '..', 'derivatives', subID,...
+                    ['cosmo_dataset_', mask_label_short, '_', map, '_map_With_Targets.mat']), 'ds_per_run')
+
             end
 
-            % Combine all runs into a single dataset
-            ds_per_run = cosmo_stack(datasets);
+            % convert targets to bathroom vs kitchen
+            ds_per_run.sa.targets = (ds_per_run.sa.targets > 50) + 1;
 
         elseif strcmp(map, 'b')
 
             % get path
             betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
-                'beta.nii');
+                'beta_sorted.nii');
 
             % load beta map
             ds_per_run = cosmo_fmri_dataset(betaPath, ...
@@ -86,19 +134,12 @@ for iSub = 1:length(subs)
         % remove constant features
         ds=cosmo_remove_useless_data(ds_per_run);
 
-        % print dataset
-        fprintf('Dataset input:\n');
-        cosmo_disp(ds);
-
         % Define partitions
         partitions=cosmo_nfold_partitioner(ds);
 
-        % print dataset
-        fprintf('Partitions:\n');
-        cosmo_disp(partitions);
-
         % get predictions for each fold
-        [pred,accuracy] = cosmo_crossvalidate(ds, classifier, partitions);
+        opt.max_feature_count = 6000;
+        [pred,accuracy] = cosmo_crossvalidate(ds, classifier, partitions, opt);
 
         % get confusion matrix for each fold
         confusion_matrix_folds=cosmo_confusion_matrix(ds.sa.targets,pred);
@@ -107,10 +148,14 @@ for iSub = 1:length(subs)
         % resulting in an nclasses x nclasses matrix
         confusion_matrix = sum(confusion_matrix_folds,3);
 
+        % basic correaltion rdm
+        rdm_corr = corr(ds.samples', 'type', 'Spearman');
+
         % store results
         subID2 = strrep(subID, '-', '');
-        res.(subID2).(mask_label).confusion_matrix = confusion_matrix / (nRuns*nTrials);
-        res.(subID2).(mask_label).accuracy = accuracy;
+        res.(subID2).(mask_label_short).confusion_matrix = confusion_matrix / (nRuns*nTrials);
+        res.(subID2).(mask_label_short).accuracy = accuracy;
+        res.(subID2).(mask_label_short).rdm_corr = rdm_corr;
 
     end
 end

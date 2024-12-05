@@ -1,4 +1,10 @@
 function level1_glm_norm_func(subs, runwise, nRuns)
+
+%% make multiple condition files
+sortRows = true;
+includeTargets = true;
+create_mcf_func(subs, sortRows, includeTargets)
+
 %% Initialize SPM
 matlabbatch = [];
 spm('defaults', 'fmri');
@@ -90,7 +96,7 @@ for iSub = 1:length(subs)
     %% Estimate model for experimental runs
 
     % make experimental-run sub-sub-directory if it doesn't exist yet
-    outputDir = fullfile(mainPath, 'derivatives', subID, 'exp_glm1_norm', filesep);
+    outputDir = fullfile(mainPath, 'derivatives', subID, 'exp_glm1_norm_with_target', filesep);
     if ~exist(outputDir, 'dir')
         mkdir(outputDir);
     end
@@ -101,7 +107,7 @@ for iSub = 1:length(subs)
         % make run directory if needed
         if runwise
             outputDir = fullfile(mainPath, 'derivatives', subID,...
-                'exp_glm1_norm', sprintf('run-%02d', run), filesep);
+                'exp_glm1_norm_with_target', sprintf('run-%02d', run), filesep);
             if ~exist(outputDir, 'dir')
                 mkdir(outputDir);
             end
@@ -188,12 +194,12 @@ for iSub = 1:length(subs)
             matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.weights = [ones(1, 50) -(ones(1, 50))];
             matlabbatch{3}.spm.stats.con.consess{img+1}.tcon.sessrep = 'repl';
 
-            % target > non targett
-            matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.name = 'target > nonTarget';
-            contrastVec = [zeros(1, totalNonTagertImg), ones(1, 16)];
-            contrastVec = contrastVec - mean(contrastVec);
-            matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.weights = contrastVec;
-            matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.sessrep = 'repl';
+%             % target > non targett
+%             matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.name = 'target > nonTarget';
+%             contrastVec = [zeros(1, totalNonTagertImg), ones(1, 16)];
+%             contrastVec = contrastVec - mean(contrastVec);
+%             matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.weights = contrastVec;
+%             matlabbatch{3}.spm.stats.con.consess{img+2}.tcon.sessrep = 'repl';
 
             % clear contrasts?
             matlabbatch{3}.spm.stats.con.delete = 0;  % no!

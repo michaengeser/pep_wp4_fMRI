@@ -1,7 +1,5 @@
-function create_mcf_func(subs)
-    arguments
-        subs (1,:) double
-    end
+function create_mcf_func(subs, sortRows, includeTargets)
+
 
     %% preparations
     sourcedataPath = fullfile(pwd, '..','sourcedata');
@@ -19,7 +17,6 @@ function create_mcf_func(subs)
         subFolder = fullfile(sourcedataPath, subID, 'beh');
         files = dir(fullfile(subFolder, '*.tsv'));
         files = struct2table(files);
-        files = sortrows(files, 'datenum','descend');
     
         % delete sub-directory for onset files if it exists
         if exist(fullfile(subFolder, 'onsets'), 'dir')
@@ -33,12 +30,18 @@ function create_mcf_func(subs)
             fileData = readtable(char(fullfile(files.folder(iRun), files.name(iRun))),...
                 'FileType', 'text', 'Delimiter', '\t');
 
-            % sort table 
-            fileData = sortrows(fileData, 'texture','ascend');
+            if sortRows
+                % sort table
+                fileData = sortrows(fileData, 'texture','ascend');
+            end
+
+            if ~includeTargets
+                fileData = fileData(~strcmp(fileData.category, 'livingroom'), :);
+            end 
 
             % get names, onsets and duration
             names = fileData.image;
-            onsets = num2cell(fileData.trialOnset - fileData.triggerTimeStamp);
+            onsets = num2cell(fileData.trialOnset - fileData.triggerTimeStamp - 2);
             durations = num2cell(zeros(height(fileData), 1));
             
             % save run's onsets as `.mat` file

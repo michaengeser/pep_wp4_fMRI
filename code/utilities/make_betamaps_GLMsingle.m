@@ -4,7 +4,7 @@
     Flieger (September 2024).
 %}
 
-function make_betamaps_GLMsingle(subs, nRuns)
+function make_betamaps_GLMsingle(subs, nRuns, nTrials)
 
 % add toolboxes
 addpath(genpath(fullfile(pwd,'utilities','GLMsingle','matlab')));
@@ -18,10 +18,15 @@ dataPath = fullfile(mainPath, 'sourcedata');
 dervPath = fullfile(mainPath, 'derivatives');
 
 % set parameters
-nImgs = 100; % number of total scenes
+nImgs = nTrials; % number of total scenes
 TR = 1.85; % TR = 1.85s
 stimDur = .25; % duration of stimulus
 filePrefix = 'wr';  % file prefix for realigned, normalized volumes
+
+%% make multiple condition files
+sortRows = true;
+includeTargets = true;
+create_mcf_func(subs, sortRows, includeTargets)
 
 %% Estimate betas
 for iSub = 1:length(subs)
@@ -117,7 +122,7 @@ for iSub = 1:length(subs)
         if ~exist(betaOutDir, 'dir'); mkdir(betaOutDir); end
 
         % estimate beta and save it in output directory
-        opt.wantmemoryoutputs = [1, 1, 1, 1];
+        opt.wantmemoryoutputs = [0, 0, 0, 1];
         opt.extraregressors = motion;
         GLMestimatesingletrial(design, data, stimDur, TR, betaOutDir, opt);
 
@@ -128,44 +133,56 @@ for iSub = 1:length(subs)
         load(fullfile(betaOutDir, betaModel), 'modelmd');
         beta = modelmd;
 
-        % sorting betas (should be done by design matrix already
-%         % load event information
-%         event = [];
-% 
-%         for iRun = 1:nRuns
-%             if iRun < 10
-%                 runStr = ['0', num2str(iRun)];
-%             else
-%                 runStr = num2str(iRun);
-%             end
-% 
-%             dat = readtable(fullfile(dataPath, subID, 'beh', ...
-%                 sprintf('%s_task-main_run-%s_events.tsv', subID, runStr)),...
-%                 'FileType', 'text', 'Delimiter', '\t');
-% 
-%             % get order of stimulus presentation
-%             cond = 1;
-% 
-%             % ensure correct image indices
-%             scene = dat.texture' - 10;
-% 
-%             % add everything to `event` array
-%             singleRunEventArray = [];
-% 
-%             for iScene = 1:length(scene)
-%                 singleRunEventArray = [ ...
-%                     singleRunEventArray; [iRun, cond, scene(iScene)]];
-%             end
-% 
-%             event = [event; singleRunEventArray];
-%         end
-% 
-%         % sort event
-%         event = [event (1:size(event, 1))'];
-%         event = sortrows(event, [1 2 3]);  % run * cond * scene
-% 
-%         % sort beta
-%         beta = beta(:, :, :, event(:,4));  % run * cond * scene
+        % sorting beta
+        % load event information
+        event = [];
+
+        for iRun = 1:nRuns
+            if iRun < 10
+                runStr = ['0', num2str(iRun)];
+            else
+                runStr = num2str(iRun);
+            end
+
+            % get log file 
+            dat = readtable(fullfile(dataPath, subID, 'beh', ...
+                sprintf('%s_task-main_run-%s_events.tsv', subID, runStr)),...
+                'FileType', 'text', 'Delimiter', '\t');
+
+            % remove target trials 
+            dat = dat(~strcmp(dat.category, 'livingroom'), :);
+
+            % ensure correct image indices
+            scene = dat.texture' - 10;
+            scene = scene(scene <= nTrials);
+
+            % get condition
+            cond = zeros(1, nTrials);
+            for tr = 1:nTrials
+                if strcmp(dat.category{tr}, 'bathroom')
+                    cond(tr) = 1;
+                else
+                    cond(tr) = 2;
+                end
+            end
+
+            % add everything to `event` array
+            singleRunEventArray = [];
+
+            for iScene = 1:length(scene)
+                singleRunEventArray = [ ...
+                    singleRunEventArray; [iRun, cond(iScene), scene(iScene)]];
+            end
+
+            event = [event; singleRunEventArray];
+        end
+
+        % sort event
+        event = [event (1:size(event, 1))'];
+        event = sortrows(event, [1 2 3]);  % run * cond * scene
+
+        % sort beta
+        beta = beta(:, :, :, event(:,4));  % run * cond * scene
 
         % save beta as nifti file
         ref = fullfile(dervPath, subID, 'func', realignedFile);

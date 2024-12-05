@@ -1,0 +1,186 @@
+function res = PairwiseROIsLDAclassifier(subs, nRuns, nTrials, map, rois)
+
+
+% Define classifiers
+classifier = @cosmo_classify_lda;
+
+% get number of ROI masks
+nmasks=numel(rois);
+
+% loop through subjects
+for iSub = 1:length(subs)
+
+    if subs(iSub) < 10
+        subID = ['sub-00', num2str(subs(iSub))];
+    elseif subs(iSub) < 100
+        subID = ['sub-0', num2str(subs(iSub))];
+    end
+
+    % progress report
+    disp(['Starting pairwise ROI decoding for subject ',  num2str(subs(iSub)), ' on ',...
+        map, '-map']);
+
+
+    for j=1:nmasks
+
+        mask_label=rois{j};
+        mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
+
+        disp(['Using mask ',  mask_label]);
+        disp(char(datetime))
+
+        if strcmp(map, 't')
+            % Initialize dataset cell array
+            datasets = cell(numel(nRuns), 1);
+
+            % Loop over runs to load data
+            counter = 0;
+            for run = 1:nRuns
+
+                % get dir for folder
+                con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm', ...
+                    sprintf('run-%02d',run));
+
+                for trial = 1:nTrials
+                    counter = counter + 1;
+
+                    % Load the contrast image for this run and trial
+                    con_file = fullfile(con_dir, sprintf('con_%04d.nii',trial));
+
+                    % Convert to CoSMoMVPA dataset
+                    ds = cosmo_fmri_dataset(con_file, ...
+                        'mask', mask_fn, ... % Set brain mask
+                        'targets', trial, ... % Set condition labels (1 = bathroom)
+                        'chunks', run);     % Set run identifiers
+
+                    % Store dataset
+                    datasets{counter} = ds;
+                end
+            end
+
+            % Combine all runs into a single dataset
+            ds_per_run = cosmo_stack(datasets);
+
+        elseif strcmp(map, 'b')
+
+            % get path
+            betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
+                'beta_sorted.nii');
+
+            % load beta map
+            ds_per_run = cosmo_fmri_dataset(betaPath, ...
+                'mask', mask_fn); % Set brain mask
+
+            % add chunks and targets
+            nSamples = height(ds_per_run.samples);
+            nSamplesPerRun = nSamples/nRuns;
+            ds_per_run.sa.targets = repmat(1:nTrials, 1, nRuns)';
+            preChunks = repmat(1:nRuns, nSamplesPerRun, 1);
+            ds_per_run.sa.chunks = reshape(preChunks,[],1);
+
+
+        else
+            error('map not defined')
+        end
+
+        % remove living room trials trials (target > 100)
+        ds_per_run = cosmo_slice(ds_per_run, (ds_per_run.sa.targets <= 100), 1);
+
+        % remove constant features
+        ds=cosmo_remove_useless_data(ds_per_run);
+
+        %% Pairwise decoding
+        % Initialize RDM
+        rdm = zeros(nTrials, nTrials);
+        disp('')
+        for s1 = 1:nTrials
+            for s2 = s1+1:nTrials
+
+                % Subset data for the two stimuli
+                ds_stim = cosmo_slice(ds, ds.sa.targets == s1 | ds.sa.targets == s2);
+
+                % Rename target
+                ds_stim.sa.targets = (ds_stim.sa.targets == s1) + 1;
+
+                % Define partitions
+                partitions=cosmo_nfold_partitioner(ds_stim);
+
+                % get predictions for each fold
+                opt.max_feature_count = 6000;
+                [~ ,accuracy] = cosmo_crossvalidate(ds_stim, classifier, partitions, opt);
+
+                % Store the accuracy
+                rdm(s1, s2) = accuracy;
+                rdm(s2, s1) = rdm(s1, s2); % Symmetric matrix
+            end
+        end
+
+        % Save the RDM
+        mask_label_short = split(mask_label, '.');
+        mask_label_short = mask_label_short{1};
+        subID2 = strrep(subID, '-', '');
+
+        res.(subID2).(mask_label_short).rdm = rdm;
+        res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm));
+    end
+end
+
+%% ploting
+
+% Get list of subjects and ROIs
+subjects = fieldnames(res);
+masks = fieldnames(res.(subjects{1}));
+
+% Initialize data storage
+num_subjects = numel(subjects);
+num_rois = numel(masks);
+all_data = nan(num_subjects, num_rois);
+
+% Collect data
+for i_sub = 1:num_subjects
+    subID = subjects{i_sub};
+    for i_roi = 1:num_rois
+        mask_label = masks{i_roi};
+        all_data(i_sub, i_roi) = res.(subID).(mask_label).mean_accuracy;
+    end
+end
+
+% Compute mean and standard deviation for each ROI
+mean_data = mean(all_data, 1);
+std_data = std(all_data, 0, 1);
+
+% Create bar plot
+figure;
+hold on;
+
+% Bar plot with error bars
+bar_handle = bar(mean_data, 'FaceColor', 'flat');
+errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+
+% Add horizontal line at chance level
+yline(0.5, '--r', 'Chance Level', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+
+% Add jittered individual points
+rng(0); % For reproducible jitter
+jitter_amount = 0.1; % Adjust jitter spread
+for i_roi = 1:num_rois
+    x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+    scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+    for i_sub = 1:num_subjects
+        text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+    end
+end
+
+% Customize plot
+xticks(1:num_rois);
+xticklabels(masks);
+xlabel('ROI');
+ylabel('Accuracy');
+ylim([0.4,0.6])
+title('Mean Pairwise Decoding Results Across ROIs');
+
+hold off;
+
+
+
+end
