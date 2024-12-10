@@ -99,7 +99,7 @@ for iSub = 1:length(subs)
                 %%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % save data set
                 save(fullfile(pwd, '..', 'derivatives', subID,...
-                    ['cosmo_dataset_', mask_label_short, '_', map, '_map_With_Targets.mat']), 'ds_per_run')
+                    ['cosmo_dataset_', mask_label_short, '_', map, '_map.mat']), 'ds_per_run')
 
             end
 

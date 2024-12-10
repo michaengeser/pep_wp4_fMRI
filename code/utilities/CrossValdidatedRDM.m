@@ -64,7 +64,7 @@ for iSub = 1:length(subs)
 
             % get path
             betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
-                'beta.nii');
+                'beta_sorted.nii');
 
             % load beta map
             ds_per_run = cosmo_fmri_dataset(betaPath, ...
@@ -91,7 +91,7 @@ for iSub = 1:length(subs)
         %% Crossvalidated RDM 
 
         % Initialize RDM
-        rdm = zeros(nTrials, nTrials);
+        rdm = ones(nTrials, nTrials);
 
         % get combination to split 10 into 2 halfs
         splits = nchoosek(1:10, 5);
@@ -99,6 +99,24 @@ for iSub = 1:length(subs)
 
         % just do even/odd for now
         %splits = [1,3,5,7,9];
+
+        % abbaabbaab style
+        %splits = [1,4,5,8,9];
+
+        % equal number of even and odd
+        for iSplit = 1:height(splits)
+            split = splits(iSplit, :);
+            numOdd = sum(mod(split, 2));
+
+            if numOdd < 2 || numOdd > 3
+                splits(iSplit, :) = nan;
+            end
+        end
+        splits = splits(~isnan(splits(:,1)),:);
+
+
+        % all splits rdm
+        all_splits_rdms = ones(nTrials, nTrials, height(splits));
 
         disp('')
         for s1 = 1:nTrials
@@ -113,17 +131,17 @@ for iSub = 1:length(subs)
                 % loop over splits
                 crossValdidatedRs = zeros(1, height(splits));
                 for iSplit = 1:height(splits)
-                    split = splits(iSplit, :);
+                    current_split = splits(iSplit, :);
 
                     % split data
                     dataSplit1Cond1 = cosmo_slice(ds_stim, ds_stim.sa.targets == 1 &...
-                        ismember(ds_stim.sa.chunks, split));
+                        ismember(ds_stim.sa.chunks, current_split));
                     dataSplit1Cond2 = cosmo_slice(ds_stim, ds_stim.sa.targets == 2 &...
-                        ismember(ds_stim.sa.chunks, split));
+                        ismember(ds_stim.sa.chunks, current_split));
                     dataSplit2Cond1 = cosmo_slice(ds_stim, ds_stim.sa.targets == 1 &...
-                        ~ismember(ds_stim.sa.chunks, split));
+                        ~ismember(ds_stim.sa.chunks, current_split));
                     dataSplit2Cond2 = cosmo_slice(ds_stim, ds_stim.sa.targets == 2 &...
-                        ~ismember(ds_stim.sa.chunks, split));
+                        ~ismember(ds_stim.sa.chunks, current_split));
 
                     % take mean for each split
                     meanData = zeros(width(dataSplit1Cond1.samples), 4);
@@ -146,16 +164,20 @@ for iSub = 1:length(subs)
                 % Store the correlation
                 rdm(s1, s2) = mean(crossValdidatedRs);
                 rdm(s2, s1) = rdm(s1, s2); % Symmetric matrix
+
+                % add to all msplits rdms
+                all_splits_rdms(s2, s1, :) = crossValdidatedRs;
+                all_splits_rdms(s1, s2, :) = crossValdidatedRs;
             end
         end
 
         % Save the RDM
-        mask_label_short = split(mask_label, '.');
+        mask_label_short = current_split(mask_label, '.');
         mask_label_short = mask_label_short{1};
         subID2 = strrep(subID, '-', '');
 
         res.(subID2).(mask_label_short).rdm = rdm;
-        res.(subID2).(mask_label_short).mean_cor = mean(squareform(rdm));
+        res.(subID2).(mask_label_short).mean_cor = mean(squareform(1-rdm));
     end
 end
 
@@ -215,7 +237,31 @@ title('Mean Pairwise Decoding Results Across ROIs');
 
 hold off;
 
-
-
+% %% plot all RDMS for single sub and roi
+% 
+% % Determine the number of splits
+% nSplits = size(all_splits_rdms, 3);
+% 
+% % Create a figure with tiled layout
+% figure;
+% %tiledlayout(7, 20, 'Padding', 'compact', 'TileSpacing', 'compact'); % Adjust grid size as needed
+% 
+% for splitIdx = 1:nSplits
+%     % Extract the RDM for the current split
+%     rdm = all_splits_rdms(:, :, splitIdx);
+% 
+%     % Convert the row of numbers in `splits` to a string
+%     titleStr = mat2str(splits(splitIdx, :));
+% 
+%     % Create a new tile for each RDM
+%     nexttile;
+%     imagesc(rdm, [-0.2, 0.4]); % Display the RDM with colorbar range
+% 
+%     title(titleStr, 'FontSize', 8); % Add the split title
+%     axis square; % Ensure square aspect ratio for RDM
+% end
+% 
+% % Add a global title or axis labels if needed
+% sgtitle('RDMs for Each Split', 'FontSize', 14); % Super-title for the figure
 
 end
