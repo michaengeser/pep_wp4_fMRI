@@ -158,7 +158,7 @@ for iSub = 1:length(subs)
         matlabbatch{1}.spm.stats.fmri_spec.sess(sessNum).multi = {mcf};
         matlabbatch{1}.spm.stats.fmri_spec.sess(sessNum).regress = struct('name', {}, 'val', {});
         matlabbatch{1}.spm.stats.fmri_spec.sess(sessNum).multi_reg = {moRegs};
-        matlabbatch{1}.spm.stats.fmri_spec.sess(sessNum).hpf = 128;
+        matlabbatch{1}.spm.stats.fmri_spec.sess(sessNum).hpf = 10000;
 
         % do it after each run or only after the last one
         if run == nRuns || runwise

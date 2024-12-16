@@ -2,7 +2,7 @@ function res = CrossValdidatedRDM(subs, nRuns, nTrials, map, rois)
 
 
 %% get data 
-dist = 'euclidean';
+dist = 'spearman';
 % get number of ROI masks
 nmasks=numel(rois);
 
@@ -37,7 +37,7 @@ for iSub = 1:length(subs)
             for run = 1:nRuns
                 disp(num2str(run));
                 % get dir for folder
-                con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm_with_target/', ...
+                con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm/', ...
                     sprintf('run-%02d',run));
 
                 for trial = 1:nTrials
@@ -63,19 +63,18 @@ for iSub = 1:length(subs)
         elseif strcmp(map, 'b')
 
             % get path
-            betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
-                'beta_sorted.nii');
+            betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
+                'GLMsingle_betas.nii');
 
             % load beta map
             ds_per_run = cosmo_fmri_dataset(betaPath, ...
                 'mask', mask_fn); % Set brain mask
 
             % add chunks and targets
-            nSamples = height(ds_per_run.samples);
-            nSamplesPerRun = nSamples/nRuns;
-            ds_per_run.sa.targets = repmat(1:nTrials, 1, nRuns)';
-            preChunks = repmat(1:nRuns, nSamplesPerRun, 1);
-            ds_per_run.sa.chunks = reshape(preChunks,[],1);
+            load(fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
+                'trialIDs.mat'));
+            ds_per_run.sa.targets = trialIDs(:, 1);
+            ds_per_run.sa.chunks = trialIDs(:, 2);
 
 
         else
@@ -104,15 +103,15 @@ for iSub = 1:length(subs)
         %splits = [1,4,5,8,9];
 
         % equal number of even and odd
-        for iSplit = 1:height(splits)
-            split = splits(iSplit, :);
-            numOdd = sum(mod(split, 2));
-
-            if numOdd < 2 || numOdd > 3
-                splits(iSplit, :) = nan;
-            end
-        end
-        splits = splits(~isnan(splits(:,1)),:);
+%         for iSplit = 1:height(splits)
+%             split = splits(iSplit, :);
+%             numOdd = sum(mod(split, 2));
+% 
+%             if numOdd < 2 || numOdd > 3
+%                 splits(iSplit, :) = nan;
+%             end
+%         end
+%         splits = splits(~isnan(splits(:,1)),:);
 
 
         % all splits rdm

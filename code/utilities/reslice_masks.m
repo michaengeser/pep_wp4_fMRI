@@ -25,3 +25,21 @@ matlabbatch{1}.spm.spatial.coreg.write.roptions.mask = 0;
 matlabbatch{1}.spm.spatial.coreg.write.roptions.prefix = 'w';
 spm_jobman('run_nogui',matlabbatch)
 clear matlabbatch
+
+
+
+
+%% create a functional image for the space to reslice to
+matlabbatch{1}.spm.spatial.coreg.write.ref = {fullfile(pwd, '..', 'derivatives', 'sub-001', 'func', 'wrsub-001xxxx_task-localizer_bold_00018.nii')};
+
+%% bring MNI mask into voxel space
+matlabbatch{1}.spm.spatial.coreg.write.source = {
+                                                 fullfile(pwd, '..', 'MNI_ROIs', 'visualCortex.nii,1')
+                                                 };
+matlabbatch{1}.spm.spatial.coreg.write.roptions.interp = 4; %%% MAYBE CHANGE TO 0
+matlabbatch{1}.spm.spatial.coreg.write.roptions.wrap = [0 0 0];
+matlabbatch{1}.spm.spatial.coreg.write.roptions.mask = 0;
+matlabbatch{1}.spm.spatial.coreg.write.roptions.prefix = 'w';
+spm_jobman('run_nogui',matlabbatch)
+clear matlabbatch
+

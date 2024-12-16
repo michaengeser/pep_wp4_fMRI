@@ -5,7 +5,7 @@ tr = 1.85;
 nTrials = 100;
 nVols = 152;
 stimdur = 0.25;
-
+showReliability = true;
 
 
 %% make multiple condition files
@@ -13,8 +13,6 @@ sortRows = true;
 includeTargets = false;
 create_mcf_func(subs, sortRows, includeTargets)
 
-
-spm_jobman('initcfg');
 
 %% Define subjects and main path
 mainPath = fullfile(pwd, '..');
@@ -46,7 +44,7 @@ for iSub = 1:length(subs)
     %% Loop through runs
 
     % for each run, get each scan's `.nii` file
-    data_new = cell(1, nRuns);
+    data = cell(1, nRuns);
     design = cell(1, nRuns);
     trialIDs = [];
     %motion = cell(1, nRuns); % not  necessary
@@ -63,7 +61,8 @@ for iSub = 1:length(subs)
         end
 
         % load data
-        data_new{iRun} = load_untouch_nii(funcFile);
+        v = load_untouch_nii(funcFile);
+        data{iRun} = double(v.img);
 
         % get `mcf` file
         mcf = fullfile(fmriPath, subID, 'beh', 'onsets', ...
@@ -72,7 +71,8 @@ for iSub = 1:length(subs)
 
         % add trial IDs
         trialIDs = [trialIDs; cell2mat(mcf_file.trialIDs),...
-             ones(size(mcf_file.trialIDs))*iRun];
+            ones(size(mcf_file.trialIDs))*iRun,...
+            cell2mat(mcf_file.onsets)];
 
 
         % check if number of conditions match onsets
@@ -100,33 +100,97 @@ for iSub = 1:length(subs)
     % set options
     opt = struct('wantmemoryoutputs',[0 0 0 1]); % only type d model should be written to memory
     opt.wantfileoutputs = [0 0 0 1];
-    opt.extraregressors = motion;
+    %opt.extraregressors = motion;
 
     % run GLM single
-    [results designSINGLE] = GLMestimatesingletrial(design,data,stimdur,tr,outputdir,opt);
+    [results, ~] = GLMestimatesingletrial(design,data,stimdur,tr,outputdir,opt);
+    model = results{4}.modelmd;
+
+    % sort and save trials IDs
+    trialIDs = sortrows(trialIDs, [2, 3]);
+    save(fullfile(outputdir, 'trialIDs.mat'), 'trialIDs')
+
+    % save model estimates
+    V.fname = 'GLMsingle_betas.nii';
+    V.dim = size(model);
+    V.dt = [16, 0]; % Data type (e.g., 16 = float32)
+    V.mat = eye(4); % Identity matrix for affine transformation
+    V.descrip = 'GLMsingle TypeD model estimates NIfTI file';
+
+    % Write NIfTI file
+    niftiwrite(model, fullfile(outputdir, 'GLMsingle_betas.nii'));
+
+
+
+        v.img = model;
+        v.hdr.dime.datatype = 16;
+        v.hdr.dime.dim(2:5) = size(model);
+        save_untouch_nii(v, fullfile(outputdir, 'GLMsingle_betas.nii'));
+
 
     %% get reliability
 
-    % Create output variable for reliability values
-    pairs = nchoosek(1:10,2);
-    vox_reliabilities = cell(1,length(pairs));
+    if showReliability
+        % Consolidate design matrices
+        designALL = cat(1,design{:});
 
-    % For each pair of trials
-    for p = 1 : length(pairs)
+        % Construct a vector containing 1-indexed condition numbers in
+        % chronological order.
 
-        % Get the GLM betas
-        betas = models.(model_names{p}).modelmd(:,:,:,repindices);  % use indexing to pull out the trials we want
-        betas_reshaped = reshape(betas,size(betas,1),size(betas,2),size(betas,3),2,[]);  % reshape to X x Y x Z x 2 x CONDITIONS
+        corder = [];
+        for p=1:size(designALL,1)
+            if any(designALL(p,:))
+                corder = [corder find(designALL(p,:))];
+            end
+        end
 
-        % compute reliabilities using an efficient (vectorized) utility
-        % function
-        vox_reliabilities{p} = calccorrelation(betas_reshaped(:,:,:,1,:),betas_reshaped(:,:,:,2,:),5);
+        % Get indices of repeated stimuli (columns are conditions, rows
+        % runs/repetitions)
+        repindices = [];
+        for p=1:size(designALL,2)
+            temp = find(corder==p);
+            repindices = cat(2,repindices,temp');  % note that for images with 3 presentations, we are simply ignoring the third trial
+        end
 
-        % Note that calccorrelation.m is a utility function that computes
-        % correlations in a vectorized fashion (for optimal speed).
+        % get voxel reliabilities
+        pairs = nchoosek(1:10,2);
+        vox_reliabilities = cell(1,length(pairs));
 
+        % For each pair of trials
+        for p = 1 : length(pairs)
+
+            % Get the GLM betas
+            betas = model(:,:,:,repindices);  % use indexing to pull out the trials we want
+            betas_reshaped = reshape(betas, size(betas,1), size(betas,2), size(betas, 3),...
+                nRuns, []);  % reshape to X x Y x Z x nRuns x nTrials
+
+            % compute reliabilities using an efficient (vectorized) utility
+            % function
+            vox_reliabilities{p} = calccorrelation(...
+                betas_reshaped(:, :, :, pairs(p, 1), :), ...
+                betas_reshaped(:, :, :, pairs(p, 2), :), 5);
+
+            % Note that calccorrelation.m is a utility function that computes
+            % correlations in a vectorized fashion (for optimal speed).
+
+        end
+
+        % average across all pairs
+        sumMatrix = zeros(size(vox_reliabilities{1}));
+        for i = 1:numel(vox_reliabilities)
+            sumMatrix = sumMatrix + vox_reliabilities{i};
+        end
+        averageMatrix = sumMatrix / numel(vox_reliabilities);
+
+
+        % get visual cortex ROI
+        roiDir = fullfile(pwd, '..', 'MNI_ROIs', 'wvisualCortex.nii');
+        v = load_untouch_nii(roiDir);
+        ROI = double(v.img);
+
+        % display reliability
+        disp(['The median reliability of voxels in the viusal cortex across repetitions is: ', ...
+            num2str(nanmedian(averageMatrix(ROI==1)))])
     end
-
-
 end
 
