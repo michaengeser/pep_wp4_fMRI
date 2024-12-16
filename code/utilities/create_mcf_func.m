@@ -30,24 +30,29 @@ function create_mcf_func(subs, sortRows, includeTargets)
             fileData = readtable(char(fullfile(files.folder(iRun), files.name(iRun))),...
                 'FileType', 'text', 'Delimiter', '\t');
 
+            if ~includeTargets
+                fileData = fileData(~strcmp(fileData.category, 'livingroom'), :);
+            end
+            fileData.newTrialNum = (1:height(fileData))';
+
             if sortRows
                 % sort table
                 fileData = sortrows(fileData, 'texture','ascend');
             end
 
-            if ~includeTargets
-                fileData = fileData(~strcmp(fileData.category, 'livingroom'), :);
-            end 
+
 
             % get names, onsets and duration
             names = fileData.image;
-            onsets = num2cell(fileData.trialOnset - fileData.triggerTimeStamp - 2);
+            onsets = num2cell(fileData.trialOnset - fileData.triggerTimeStamp);
             durations = num2cell(zeros(height(fileData), 1));
-            
+            trialIDs = num2cell(fileData.texture - 10);
+            trialNums = num2cell(fileData.newTrialNum);
+
             % save run's onsets as `.mat` file
             fileName = sprintf('mcf_%s_run-%s.mat', subID, num2str(iRun));
             save(fullfile(subFolder, 'onsets', fileName), ...
-                'names', 'onsets', 'durations');
+                'names', 'onsets', 'durations', 'trialIDs', 'trialNums');
         end
     
         %% Onsets for localizer
