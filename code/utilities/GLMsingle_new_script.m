@@ -1,4 +1,4 @@
-
+function GLMsingle_new_script(subs)
 
 nRuns = 10;
 tr = 1.85;
@@ -6,11 +6,12 @@ nTrials = 100;
 nVols = 152;
 stimdur = 0.25;
 showReliability = true;
+nTargets = 50;
 
 
 %% make multiple condition files
 sortRows = true;
-includeTargets = false;
+includeTargets = true;
 create_mcf_func(subs, sortRows, includeTargets)
 
 
@@ -62,7 +63,7 @@ for iSub = 1:length(subs)
 
         % load data
         v = load_untouch_nii(funcFile);
-        data{iRun} = double(v.img);
+        data{iRun} = single(v.img);
 
         % get `mcf` file
         mcf = fullfile(fmriPath, subID, 'beh', 'onsets', ...
@@ -81,12 +82,23 @@ for iSub = 1:length(subs)
         end
 
         % make design matrix
-        design{iRun} = zeros(nVols,nTrials);
+        if includeTargets
+            design{iRun} = zeros(nVols, nTrials + nTargets);
+        else
+            design{iRun} = zeros(nVols, nTrials);
+        end
 
         % set onset in correct TR
-        for iTrials=1:nTrials     %
-            design{iRun}(round(cell2mat(mcf_file.onsets(iTrials)) / tr) + 1,...
-                iTrials) = 1;
+        for iTrials=1:size(design{iRun}, 2)
+            if ismember(iTrials, cell2mat(mcf_file.trialIDs))
+
+                % get idx of condition column
+                condIdx = find(iTrials == cell2mat(mcf_file.trialIDs));
+
+                % set correct tr to 1
+                design{iRun}(round(cell2mat(mcf_file.onsets(condIdx)) / tr) + 1,...
+                    iTrials) = 1;
+            end
         end
 
         %     % get motion regressors
@@ -97,35 +109,33 @@ for iSub = 1:length(subs)
 
     end
 
+    %% run GLM single
+
     % set options
     opt = struct('wantmemoryoutputs',[0 0 0 1]); % only type d model should be written to memory
     opt.wantfileoutputs = [0 0 0 1];
     %opt.extraregressors = motion;
 
-    % run GLM single
-    [results, ~] = GLMestimatesingletrial(design,data,stimdur,tr,outputdir,opt);
+    % get model estimate
+    [results, ~] = GLMestimatesingletrial(design, data, stimdur, tr, outputdir, opt);
     model = results{4}.modelmd;
 
     % sort and save trials IDs
     trialIDs = sortrows(trialIDs, [2, 3]);
     save(fullfile(outputdir, 'trialIDs.mat'), 'trialIDs')
 
-    % save model estimates
-    V.fname = 'GLMsingle_betas.nii';
-    V.dim = size(model);
-    V.dt = [16, 0]; % Data type (e.g., 16 = float32)
-    V.mat = eye(4); % Identity matrix for affine transformation
-    V.descrip = 'GLMsingle TypeD model estimates NIfTI file';
+    %     % save model estimates
+    %     V.fname = 'GLMsingle_betas.nii';
+    %     V.dim = size(model);
+    %     V.dt = [16, 0]; % Data type (e.g., 16 = float32)
+    %     V.mat = eye(4); % Identity matrix for affine transformation
+    %     V.descrip = 'GLMsingle TypeD model estimates NIfTI file';
 
     % Write NIfTI file
-    niftiwrite(model, fullfile(outputdir, 'GLMsingle_betas.nii'));
-
-
-
-        v.img = model;
-        v.hdr.dime.datatype = 16;
-        v.hdr.dime.dim(2:5) = size(model);
-        save_untouch_nii(v, fullfile(outputdir, 'GLMsingle_betas.nii'));
+    v.img = model;
+    v.hdr.dime.datatype = 16;
+    v.hdr.dime.dim(2:5) = size(model);
+    save_untouch_nii(v, fullfile(outputdir, 'GLMsingle_betas.nii'));
 
 
     %% get reliability
@@ -144,10 +154,10 @@ for iSub = 1:length(subs)
             end
         end
 
-        % Get indices of repeated stimuli (columns are conditions, rows
-        % runs/repetitions)
+        % Get indices of repeated stimuli (not targets, columns are conditions, 
+        % rows are runs/repetitions)
         repindices = [];
-        for p=1:size(designALL,2)
+        for p=1:nTrials
             temp = find(corder==p);
             repindices = cat(2,repindices,temp');  % note that for images with 3 presentations, we are simply ignoring the third trial
         end
@@ -194,3 +204,4 @@ for iSub = 1:length(subs)
     end
 end
 
+end
