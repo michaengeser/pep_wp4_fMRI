@@ -69,8 +69,8 @@ for iSub = 1:length(subs)
     subID2 = strrep(subID, '-', '');
     RDMstruct.(subID2) = rdm_corr;
 
-    figure; imagesc(rdm_corr, [-1,1]);
-
+    figure; imagesc(rdm_corr, [-1,1]); colorbar
+ title('Pairwise Correlation in COMSMO');
 end
 
 

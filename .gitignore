@@ -2,3 +2,5 @@
 *.nii
 *.json
 /derivatives
+drawings/002_bat.tiff
+*.tiff
