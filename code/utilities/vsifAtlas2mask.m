@@ -6,16 +6,21 @@ output_dir = fullfile(pwd, '..', 'MNI_ROIs');
 atlas = niftiread(atlas_path);
 atlas_info = niftiinfo(atlas_path);
 
-% % Define ROI indices for each mask
+% Define ROI indices for each mask
+
+
 % roi_indices = struct(...
 %     'lV1', [12, 15], ... % lh_v1d_retinotopic (12) and lh_v1v_retinotopic (15)
 %     'rV1', [28, 31], ... % rh_v1d_retinotopic (28) and rh_v1v_retinotopic (31)
 %     'lV2', [13, 16], ... % lh_v2d_retinotopic (13) and lh_v2v_retinotopic (16)
 %     'rV2', [29, 32]);    % rh_v2d_retinotopic (29) and rh_v2v_retinotopic (32)
 
-
 roi_indices = struct(...
-    'visualCortex', 1:33);   % get all visual ROIs
+    'V1', [12, 15, 28, 31], ...
+    'V2', [13, 16, 29, 32]);
+
+% roi_indices = struct(...
+%     'visualCortex', 1:33);   % get all visual ROIs
 
 % Loop through ROIs and create masks
 fields = fieldnames(roi_indices);
