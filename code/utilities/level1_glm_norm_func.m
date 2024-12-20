@@ -2,7 +2,7 @@ function level1_glm_norm_func(subs, runwise, nRuns, hpf)
 
 %% make multiple condition files
 sortRows = true;
-includeTargets = false;
+includeTargets = true;
 create_mcf_func(subs, sortRows, includeTargets)
 
 %% Initialize SPM

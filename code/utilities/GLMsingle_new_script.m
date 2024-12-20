@@ -5,7 +5,7 @@ tr = 1.85;
 nTrials = 100;
 nVols = 152;
 stimdur = 0.25;
-showReliability = true;
+showReliability = false;
 nTargets = 50;
 
 
@@ -18,8 +18,6 @@ create_mcf_func(subs, sortRows, includeTargets)
 %% Define subjects and main path
 mainPath = fullfile(pwd, '..');
 fmriPath = fullfile(mainPath, 'sourcedata');
-
-
 
 %% get data
 
@@ -57,11 +55,40 @@ for iSub = 1:length(subs)
             sprintf('wr%s%s_task-scenes_run-%s_bold.nii',...
             subID, 'xxxx', num2str(iRun)));
 
+        %% check if 4D file exists
         if ~exist(funcFile, 'file')
-            error('make 4D file')
+
+            % get 3D files
+            funcFiles = dir(strrep(funcFile, 'bold', 'bold_0*'));
+
+            if height(funcFiles) ~= nVols
+                warning(['Number of volumnes is not ', num2str(nVols)])
+            end
+
+            % convert 3D files to 4D file
+            disp(['Convert 3D files to 4D files for run ', num2str(iRun)])
+
+            fileCell = cell(height(funcFiles), 1);
+            for iVol = 1:height(funcFiles)
+
+                fileCell{iVol, 1} = fullfile(funcFiles(iVol).folder,...
+                    [funcFiles(iVol).name, ',1']);
+
+            end
+            % init. SPM
+            spm('defaults', 'fmri');
+            spm_jobman('initcfg');
+            matlabbatch = [];
+            
+            % run spm
+            matlabbatch{1}.spm.util.cat.vols = fileCell;
+            matlabbatch{1}.spm.util.cat.name = funcFile;
+            matlabbatch{1}.spm.util.cat.dtype = 4;
+            matlabbatch{1}.spm.util.cat.RT = tr;
+            spm_jobman('run',matlabbatch)
         end
 
-        % load data
+        %% load data
         v = load_untouch_nii(funcFile);
         data{iRun} = single(v.img);
 
@@ -81,7 +108,7 @@ for iSub = 1:length(subs)
             warning('Onsets does not match number of conditions')
         end
 
-        % make design matrix
+        %% make design matrix
         if includeTargets
             design{iRun} = zeros(nVols, nTrials + nTargets);
         else
@@ -119,6 +146,9 @@ for iSub = 1:length(subs)
     % get model estimate
     [results, ~] = GLMestimatesingletrial(design, data, stimdur, tr, outputdir, opt);
     model = results{4}.modelmd;
+
+
+    %% save results 
 
     % sort and save trials IDs
     trialIDs = sortrows(trialIDs, [2, 3]);
@@ -195,8 +225,8 @@ for iSub = 1:length(subs)
 
         % get visual cortex ROI
         roiDir = fullfile(pwd, '..', 'MNI_ROIs', 'wvisualCortex.nii');
-        v = load_untouch_nii(roiDir);
-        ROI = double(v.img);
+        vROI = load_untouch_nii(roiDir);
+        ROI = double(vROI.img);
 
         % display reliability
         disp(['The median reliability of voxels in the viusal cortex across repetitions is: ', ...
