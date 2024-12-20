@@ -118,6 +118,18 @@ for iSub = 1:length(subs)
 
     end
 end
+
+%% saving
+
+% define output folder and name
+outputFolder = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM');
+outputName = ['results_RDM_of_mean_correaltion_on_', map, '-map.mat'];
+
+% save 
+save(fullfile(outputFolder, outputName), 'res')
+
+
+
 %% ploting
 
 % Get list of subjects and ROIs
