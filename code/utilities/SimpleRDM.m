@@ -64,7 +64,7 @@ for iSub = 1:length(subs)
 
             % get path
             betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
-                'GLMsingle_betas_mean.nii');
+                'GLMsingle_betas.nii');
 
             % load beta map
             ds_per_run = cosmo_fmri_dataset(betaPath, ...
@@ -86,7 +86,6 @@ for iSub = 1:length(subs)
 
             meanBeta = [];
             for s1 = 1:nTrials
-                disp(num2str(s1))
 
                 % Subset data for the two stimuli
                 ds_stim = cosmo_slice(ds, ds.sa.targets == s1);
@@ -203,7 +202,7 @@ for i_roi = 1:num_rois
     allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
 
     % plot RDM
-    imagesc(roiRDM, [-1, 1])
+    imagesc(roiRDM, [0, 0.5])
     colorbar;
     title(masks{i_roi});
 end
