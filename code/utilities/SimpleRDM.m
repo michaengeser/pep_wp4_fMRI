@@ -202,7 +202,7 @@ for i_roi = 1:num_rois
     allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
 
     % plot RDM
-    imagesc(roiRDM, [0, 0.5])
+    imagesc(roiRDM, [-1, 1])
     colorbar;
     title(masks{i_roi});
 end
