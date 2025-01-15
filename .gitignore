@@ -9,3 +9,4 @@ drawings/002_bat.tiff
 /vgg16_imagenet
 temp/res_struct_spm_correaltion_simple.mat
 *.fig
+*.asv
