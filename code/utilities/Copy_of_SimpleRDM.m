@@ -159,7 +159,7 @@ title('Within - Between category pairwise correaltion');
 
 hold off;
 
-%% make tiled figure with mean rsm of each ROI
+%% make tiled figure with mean rdm of each ROI
 figure;
 title('Mean pairwise correlation');
 allRoiRDMs = nan(nTrials^2, num_rois);
