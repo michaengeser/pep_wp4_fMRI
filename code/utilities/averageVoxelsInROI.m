@@ -3,6 +3,7 @@ function dat = averageVoxelsInROI(cfg)
 % evaluate input
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
+if ~isfield(cfg, 'nVols'); cfg.nVols = 152;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
 if ~isfield(cfg, 'nTargets'); cfg.nTargets = 16; end
 if ~isfield(cfg, 'halfTrials'); cfg.halfTrials =  cfg.nTrials / 2;end
@@ -120,7 +121,22 @@ for iSub = 1:length(subs)
             matlabbatch{1}.spm.util.cat.name = funcFile;
             matlabbatch{1}.spm.util.cat.dtype = 4;
             matlabbatch{1}.spm.util.cat.RT = cfg.tr;
-            spm_jobman('run',matlabbatch)
+
+            % repeat 3 times when crashing
+            maxRetries = 3;
+            for attempt = 1:maxRetries
+                try
+                    spm_jobman('run', matlabbatch);
+                    break; % Exit loop if successful
+                catch ME
+                    if attempt == maxRetries
+                        error('Failed after %d attempts: %s', maxRetries, ME.message);
+                    else
+                        disp(['Retrying: Attempt ', num2str(attempt)]);
+                        pause(1); % Small delay before retry
+                    end
+                end
+            end
         end
 
         %% load data and trial information
