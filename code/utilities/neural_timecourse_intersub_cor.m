@@ -24,6 +24,7 @@ for category = cfg.categories
         roi = char(cfg.rois{iRoi});
         mask_label_short = split(roi, '.');
         mask_label_short = mask_label_short{1};
+        mask_label_short = mask_label_short(2:end);
 
         % loop through run
         runsCorrelationMatrix = nan(cfg.n, cfg.n, cfg.nRuns);

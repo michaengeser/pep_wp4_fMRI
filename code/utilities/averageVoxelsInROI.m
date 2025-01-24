@@ -204,9 +204,25 @@ for iSub = 1:length(subs)
             mask_label=cfg.rois{j};
             mask_label_short = split(mask_label, '.');
             mask_label_short = mask_label_short{1};
+            mask_label_short = mask_label_short(2:end);
+
+            % check if functional or anatomical ROI
+            if ismember(mask_label_short, {'PPA', 'OPA', 'RSC', 'LOC'})
+                mask_fn=fullfile(pwd, '..', 'MNI_ROIs', 'func_ROIs', subID,...
+                    [mask_label_short, '_funcROI.nii']);
+            else
+                mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
+            end
+
+            % get mask
+            mask = load_untouch_nii(mask_fn);
+            newMaskImg =double(mask.img);
+            if max(max(max(double(newMaskImg)))) > 1
+                newMaskImg = newMaskImg/max(max(max(newMaskImg)));
+            end
 
             % make 4D mask
-            currentROI = maskImg{j};
+            currentROI = newMaskImg;
             currentROI4D = repmat(currentROI, ...
                 [1, 1, 1, size(bathroomData{iRun}, 4)]);
 
