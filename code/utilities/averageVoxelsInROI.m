@@ -81,8 +81,6 @@ for iSub = 1:length(subs)
     data = cell(1, cfg.nRuns);
     bathroomData = data;
     kitchenData = data;
-    design = cell(1, cfg.nRuns);
-    trialIDs = [];
 
     for iRun = 1:cfg.nRuns
 
@@ -111,6 +109,7 @@ for iSub = 1:length(subs)
                     [funcFiles(iVol).name, ',1']);
 
             end
+
             % init. SPM
             spm('defaults', 'fmri');
             spm_jobman('initcfg');
@@ -190,15 +189,12 @@ for iSub = 1:length(subs)
         kitchenData{iRun} = runData(:, :, :, ...
             firstKitchenTR : firstKitchenTR + timecourseLength);
 
-
         % check size of timecourse
         disp(['Run: ', num2str(iRun)])
         disp(['Size bathroom: ', num2str(size(bathroomData{iRun}))])
         disp(['Size kitchen: ', num2str(size(kitchenData{iRun}))])
 
-
-
-        %% average cross voxels for each mask
+        %% average across voxels for each mask
 
         bathroomMeans = {};
         kitchenMeans = {};

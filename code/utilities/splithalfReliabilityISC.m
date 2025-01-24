@@ -70,7 +70,14 @@ for category = cfg.categories
         ylabel('Split Half Correlation')
         xlabel('ROI')
         xticklabels(cfg.rois)
-        ylim([min(allRoiCorr) - 0.01, max(allRoiCorr) + 0.01])
+
+        if (min(allRoiCorr) - 0.01) > 0
+            yMin = 0;
+        else
+            yMin = min(allRoiCorr);
+        end 
+
+        ylim([yMin, max(allRoiCorr) + 0.01])
         title(['Split-half Reliability of ISC across Runs - ', category])
     end 
 end % category loop

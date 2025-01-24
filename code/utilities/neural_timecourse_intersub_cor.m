@@ -6,6 +6,7 @@ warning('off');
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
 
 % convert to local configurations
 if cfg.plotting; plotting = true; else plotting = false; end
@@ -43,8 +44,31 @@ for category = cfg.categories
 
             end
 
+            % get goub average
+            if cfg.regressOutMean
+                % get mean
+                groupMean = mean(sub_table, 2);
+
+                % loop through subjects and regress out mean
+                regressedTimecourses = zeros(size(sub_table)); % Initialize
+                for iSub = 1:cfg.n
+                    % Design matrix: group-average timecourse and intercept
+                    X = [groupMean, ones(height(sub_table), 1)];
+                    % Perform regression
+                    beta = X \ sub_table(:, iSub); % Compute coefficients
+                    predicted = X * beta; % Predicted values based on the group average
+                    % Residual (subject timecourse with group average regressed out)
+                    regressedTimecourses(:, iSub) = sub_table(:, iSub) - predicted;
+                end
+
+                % overwrite the subject table
+                sub_table = regressedTimecourses;
+            end
+
+
             % make RDM
             cfg.labels = num2cell(cfg.subNums);
+            cfg.correlation_type = 'Pearson';
             [~, runsCorrelationMatrix(:, :, iRun), ~] = make_RDM(sub_table, cfg);
 
             % store results
@@ -61,13 +85,6 @@ for category = cfg.categories
         d.([category,'_RDM']).timecourseRDM(iRoi).color = [0, 0, 0];
         d.([category,'_RDM']).timecourseRDM(iRoi).RDM = mean(runsCorrelationMatrix, 3);
 
-
-        if cfg.saving == 1
-            % saving figure
-            fig_path = fullfile(pwd, '..', 'figures', ['exp_', num2str(cfg.exp_num)], 'neural_ISC_RDMS', category);
-            save_plot(fig_name, fig_path)
-        end
-
     end % roi loop
 
     %% plotting
@@ -75,7 +92,7 @@ for category = cfg.categories
 
         % Create a new figure
         figure;
-        t = tiledlayout(numel(cfg.rois), cfg.nRuns, 'TileSpacing', 'Compact', 'Padding', 'Compact');
+        tiledlayout(numel(cfg.rois), cfg.nRuns, 'TileSpacing', 'Compact', 'Padding', 'Compact');
 
         % loop through rois and runs
         medianMat = nan(cfg.nRuns, numel(cfg.rois));
@@ -87,6 +104,7 @@ for category = cfg.categories
                 nexttile;
                 currentRDM = d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).RDM;
                 imagesc(currentRDM, [-1,1])
+                colormap(cfg.colormaps.white_zero)
                 xticklabels([]);
                 yticklabels([]);
 
@@ -128,7 +146,7 @@ for category = cfg.categories
         ylabel('Median ISC')
         xlabel('ROI')
         xticklabels(cfg.rois)
-        ylim([0, max(mean(medianMat))+0.01])
+        ylim([min(mean(medianMat))-0.01, max(mean(medianMat))+0.01])
         title(['Median ISC for each ROI (avergaed across runs) - ', category])
 
     end
