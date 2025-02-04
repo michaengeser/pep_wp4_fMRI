@@ -1,8 +1,8 @@
 function funcROIs(cfg)
 
 %% Configuration
-if ~isfield(cfg, 'roi_names'); cfg.roi_names = {'PPA', 'OPA', 'RSC', 'LOC'}; end
-if ~isfield(cfg, 'n_voxels'); cfg.n_voxels = 200; end
+if ~isfield(cfg, 'roi_names'); cfg.roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
+if ~isfield(cfg, 'n_voxels'); cfg.n_voxels = 100; end
 
 
 % Define subject IDs
@@ -18,9 +18,10 @@ if ~exist(output_dir, 'dir')
 end
 
 %% Load ROI masks
-roi_masks = cell(1, numel(cfg.rois));
-for j = 1:numel(cfg.rois)
-    mask_nii = load_untouch_nii(fullfile(ROI_dir, cfg.rois{j}));
+roi_masks = cell(1, numel(cfg.roi_names));
+for j = 1:numel(cfg.roi_names)
+    roiFilName = ['w', cfg.roi_names{j}, '.nii'];
+    mask_nii = load_untouch_nii(fullfile(ROI_dir, roiFilName));
     newMaskImg = mask_nii.img;
     if max(max(max(double(newMaskImg)))) > 1
         newMaskImg = newMaskImg/max(max(max(double(newMaskImg))));
@@ -53,7 +54,7 @@ for s = 1:numel(cfg.subNums)
         disp(['  Generating ROI: ', cfg.roi_names{r}]);
 
         % Select the appropriate contrast map based on ROI
-        if ismember(cfg.roi_names{r}, {'PPA', 'OPA', 'RSC'})
+        if ismember(cfg.roi_names{r}, {'PPA', 'TOS', 'RSC'})
             contrast_map = single(contrast_data{1}); % Scene > Objects
         elseif ismember(cfg.roi_names{r}, {'LOC'})
             contrast_map = single(contrast_data{2}); % Objects > Scramble

@@ -31,7 +31,7 @@ for category = cfg.categories
                 currentRDM = {d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(splits(iSplit,:)).RDM};
                 currentRDM = cell2mat(currentRDM);
                 currentRDM = reshape(currentRDM, cfg.n, cfg.n, []);
-                mean1stHalf = mean(currentRDM, 3);
+                mean1stHalf = mean(currentRDM, 3, 'omitnan');
                 mean1stHalf(eye(cfg.n) == 1) = 0;
                 mean1stHalf = squareform(mean1stHalf);
 
@@ -40,7 +40,7 @@ for category = cfg.categories
                 currentRDM = {d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(otherRuns).RDM};
                 currentRDM = cell2mat(currentRDM);
                 currentRDM = reshape(currentRDM, cfg.n, cfg.n, []);
-                mean2ndHalf = mean(currentRDM, 3);
+                mean2ndHalf = mean(currentRDM, 3, 'omitnan');
                 mean2ndHalf(eye(cfg.n) == 1) = 0;
                 mean2ndHalf = squareform(mean2ndHalf);
 
@@ -51,7 +51,7 @@ for category = cfg.categories
             end 
 
             % take mean across splits
-            allRoiCorr(iRoi) = mean(allSplitCorr);
+            allRoiCorr(iRoi) = mean(allSplitCorr, 'omitnan');
             d.splitHalfISC.(Category).(mask_label_short).allSplitCorr = allSplitCorr;
 
     end % roi loop

@@ -1,4 +1,4 @@
-function d = neural_timecourse_intersub_cor(d, cfg, timecourses)
+function d = neural_timecourse_intersub_cor(d, cfg)
 
 warning('off');
 
@@ -13,6 +13,8 @@ if cfg.plotting; plotting = true; else plotting = false; end
 if cfg.saving; saving = true; else saving = false; end
 cfg.plotting = false;
 cfg.saving = false;
+
+
 
 % loop through categories
 for category = cfg.categories
@@ -35,10 +37,14 @@ for category = cfg.categories
             for iSub = 1:cfg.n
 
                 % get subjec id
-                subID = sprintf('sub%03d',  cfg.subNums(iSub));
+                subID = sprintf('sub-%03d',  cfg.subNums(iSub));
 
                 % get timecourse
-                currentTimecourse = timecourses.(subID)(iRun).(mask_label_short).(['ROImeans', char(Category)]);
+                timecourseDir = fullfile(pwd, '..', 'derivatives', subID, 'timecourses');
+                fileName = ['mean_timecourse_', category, '_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+                load(fullfile(timecourseDir, fileName))
+                currentTimecourse = saveData;
 
                 % store in mat
                 sub_table(:, iSub) = currentTimecourse';
@@ -48,7 +54,7 @@ for category = cfg.categories
             % get goub average
             if cfg.regressOutMean
                 % get mean
-                groupMean = mean(sub_table, 2);
+                groupMean = mean(sub_table, 2, 'omitnan');
 
                 % loop through subjects and regress out mean
                 regressedTimecourses = zeros(size(sub_table)); % Initialize
@@ -84,7 +90,7 @@ for category = cfg.categories
         % Add name, color and RDM fields to data struct
         d.([category,'_RDM']).timecourseRDM(iRoi).name = mask_label_short;
         d.([category,'_RDM']).timecourseRDM(iRoi).color = [0, 0, 0];
-        d.([category,'_RDM']).timecourseRDM(iRoi).RDM = mean(runsCorrelationMatrix, 3);
+        d.([category,'_RDM']).timecourseRDM(iRoi).RDM = mean(runsCorrelationMatrix, 3, 'omitnan');
 
     end % roi loop
 
@@ -111,7 +117,7 @@ for category = cfg.categories
 
                 % get median for each RDM
                 currentRDM(eye(height(currentRDM)) == 1) = 0;
-                medianMat(iRun, iRoi) = median(squareform(currentRDM)); 
+                medianMat(iRun, iRoi) = median(squareform(currentRDM), 'omitnan'); 
             end
         end
 

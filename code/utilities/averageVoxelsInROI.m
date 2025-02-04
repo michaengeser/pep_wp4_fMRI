@@ -1,7 +1,8 @@
-function dat = averageVoxelsInROI(cfg)
+function averageVoxelsInROI(cfg)
 
 % evaluate input
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = true; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 152;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
@@ -16,8 +17,6 @@ end
 
 % init variables
 subs = cfg.subNums;
-dat = struct;
-dat.ROInames = cfg.rois;
 
 %% make multiple condition files
 sortRows = true;
@@ -206,6 +205,17 @@ for iSub = 1:length(subs)
             mask_label_short = mask_label_short{1};
             mask_label_short = mask_label_short(2:end);
 
+            % check if file exists already and skip if the case
+            if cfg.skipIfExists
+                fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+                if exist(fullfile(outputdir, fileName), 'file')
+                    disp(['file for ', mask_label_short, ' and ', num2str(iRun), ...
+                        ' exists already'])
+                    continue
+                end
+            end
+
             % check if functional or anatomical ROI
             if ismember(mask_label_short, {'PPA', 'OPA', 'RSC', 'LOC'})
                 mask_fn=fullfile(pwd, '..', 'MNI_ROIs', 'func_ROIs', subID,...
@@ -238,15 +248,33 @@ for iSub = 1:length(subs)
             ROIImage = reshape(filtered, [], size(kitchenData{iRun}, 4));
             kitchenMeans{j} = mean(ROIImage, 1);
 
-            % store roi means in a struct
-            dat.(subID2)(iRun).(mask_label_short).ROImeansBathroom = bathroomMeans{j};
-            dat.(subID2)(iRun).(mask_label_short).ROImeansKitchen = kitchenMeans{j};
+            % for subjects 1 in run 10 the kitchen block was not shown
+            % correctly - make fMRI data nans
+            if subs(iSub) == 1 && iRun == 10
+                kitchenMeans{j} = nan(1, length(kitchenMeans{j}));
+            end 
+
+            % save data
+            fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
+            '_run_', num2str(iRun)];
+            saveData = bathroomMeans{j};
+            save(fullfile(outputdir, fileName), 'saveData')
+            fileName = ['mean_timecourse_kitchen_', mask_label_short, ...
+            '_run_', num2str(iRun)];
+            saveData = kitchenMeans{j};
+            save(fullfile(outputdir, fileName), 'saveData')
 
         end % rois
 
-        % store whole brain time courses in struct
-        dat.(subID2)(iRun).wholeBrainBathroom = bathroomData;
-        dat.(subID2)(iRun).wholeBrainKitchen = kitchenData;
+%         % save data
+%         fileName = ['whole_brain_timecourse_bathroom_', ...
+%             '_run_', num2str(iRun)];
+%         saveData = bathroomData;
+%         save(fullfile(outputdir, fileName), 'saveData')
+%         fileName = ['whole_brain_timecourse_kitchen_', ...
+%             '_run_', num2str(iRun)];
+%         saveData = kitchenData;
+%         save(fullfile(outputdir, fileName), 'saveData')
 
     end % runs
 end % subjects
