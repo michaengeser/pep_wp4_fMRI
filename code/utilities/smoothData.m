@@ -2,6 +2,7 @@ function smoothData(cfg)
 
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
 if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 4; end
+if ~isfield(cfg, 'nVols'); cfg.nVols = 152;end
 
 
 %% Initialize SPM
@@ -16,14 +17,20 @@ fmriPath = fullfile(mainPath, 'derivatives');
 for iSub = 1:numel(cfg.subNums)
     subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
+    disp(['Smoothing subject: ', num2str(cfg.subNums(iSub))])
+    
     % for each run, get each scan's `.nii` file
+    counter = 0;
     for iRun = 1:cfg.nRuns
 
-        folderName = fullfile(fmriPath, subID, 'func');
-        fileName = sprintf('wrsub-%0.3dxxxx_task-scenes_run-%d_bold.nii,1', cfg.subNums(iSub), iRun);
+        for iVol = 1:cfg.nVols
+            counter = counter +1;
+            folderName = fullfile(fmriPath, subID, 'func');
+            fileName = sprintf('wrsub-%0.3dxxxx_task-scenes_run-%d_bold_%0.5d.nii,1', cfg.subNums(iSub), iRun, iVol);
 
-        %%
-        matlabbatch{1}.spm.spatial.smooth.data{iRun, 1} = fullfile(folderName, fileName);
+            %%
+            matlabbatch{1}.spm.spatial.smooth.data{counter, 1} = fullfile(folderName, fileName);
+        end
 
     end
     %%

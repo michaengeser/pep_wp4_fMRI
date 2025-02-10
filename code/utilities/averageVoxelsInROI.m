@@ -10,6 +10,8 @@ if ~isfield(cfg, 'nTargets'); cfg.nTargets = 16; end
 if ~isfield(cfg, 'halfTrials'); cfg.halfTrials =  cfg.nTrials / 2;end
 if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 0;end
 if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 4;end
+if ~isfield(cfg, 'smoothing'); cfg.smoothing = false;end
+if ~isfield(cfg, 'saveWholeBrain'); cfg.saveWholeBrain = false;end
 if ~isfield(cfg, 'rois'); cfg.rois = {'wV1.nii', 'wV2.nii',...
         'wLOC.nii', 'wPPA.nii',...
         'wTOS.nii', 'wRSC.nii'};
@@ -84,9 +86,15 @@ for iSub = 1:length(subs)
     for iRun = 1:cfg.nRuns
 
         % get functional files
-        funcFile = fullfile(mainPath, 'derivatives', subID, 'func', ...
-            sprintf('wr%s%s_task-scenes_run-%s_bold.nii',...
-            subID, 'xxxx', num2str(iRun)));
+        if cfg.smoothing
+            funcFile = fullfile(mainPath, 'derivatives', subID, 'func', ...
+                sprintf('swr%s%s_task-scenes_run-%s_bold.nii',...
+                subID, 'xxxx', num2str(iRun)));
+        else
+            funcFile = fullfile(mainPath, 'derivatives', subID, 'func', ...
+                sprintf('wr%s%s_task-scenes_run-%s_bold.nii',...
+                subID, 'xxxx', num2str(iRun)));
+        end
 
         %% check if 4D file exists
         if ~exist(funcFile, 'file')
@@ -207,8 +215,15 @@ for iSub = 1:length(subs)
 
             % check if file exists already and skip if the case
             if cfg.skipIfExists
-                fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
-                    '_run_', num2str(iRun), '.mat'];
+
+                if cfg.smoothing
+                    fileName = ['smoothed_mean_timecourse_bathroom_', mask_label_short, ...
+                        '_run_', num2str(iRun), '.mat'];
+                else
+                    fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
+                        '_run_', num2str(iRun), '.mat'];
+                end
+
                 if exist(fullfile(outputdir, fileName), 'file')
                     disp(['file for ', mask_label_short, ' and ', num2str(iRun), ...
                         ' exists already'])
@@ -255,26 +270,48 @@ for iSub = 1:length(subs)
             end 
 
             % save data
-            fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
-            '_run_', num2str(iRun)];
+            if cfg.smoothing
+                fileName = ['smoothed_mean_timecourse_bathroom_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+            else
+                fileName = ['mean_timecourse_bathroom_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+            end
             saveData = bathroomMeans{j};
             save(fullfile(outputdir, fileName), 'saveData')
-            fileName = ['mean_timecourse_kitchen_', mask_label_short, ...
-            '_run_', num2str(iRun)];
+            if cfg.smoothing
+                fileName = ['smoothed_mean_timecourse_kitchen_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+            else
+                fileName = ['mean_timecourse_kitchen_', mask_label_short, ...
+                    '_run_', num2str(iRun), '.mat'];
+            end
             saveData = kitchenMeans{j};
             save(fullfile(outputdir, fileName), 'saveData')
 
         end % rois
 
-%         % save data
-%         fileName = ['whole_brain_timecourse_bathroom_', ...
-%             '_run_', num2str(iRun)];
-%         saveData = bathroomData;
-%         save(fullfile(outputdir, fileName), 'saveData')
-%         fileName = ['whole_brain_timecourse_kitchen_', ...
-%             '_run_', num2str(iRun)];
-%         saveData = kitchenData;
-%         save(fullfile(outputdir, fileName), 'saveData')
+        if cfg.saveWholeBrain && cfg.smoothing
+
+            % save whole brain data
+            fileName = ['whole_brain_timecourse_bathroom_run_', num2str(iRun)];
+
+            % check if file exists already and skip if the case
+            if cfg.skipIfExists
+
+                if exist(fullfile(outputdir, [fileName, '.mat']), 'file')
+                    disp(['file for whole brain and ', num2str(iRun), ...
+                        ' exists already'])
+                    continue
+                end
+            end
+
+            saveData = bathroomData;
+            save(fullfile(outputdir, fileName), 'saveData')
+            fileName = ['whole_brain_timecourse_kitchen_run_', num2str(iRun)];
+            saveData = kitchenData;
+            save(fullfile(outputdir, fileName), 'saveData')
+        end
 
     end % runs
 end % subjects
