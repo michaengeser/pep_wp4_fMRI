@@ -6,7 +6,10 @@ warning('off');
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
 if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
+if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
+if ~isfield(cfg, 'detrend'); cfg.detrend = true; end
 
 % convert to local configurations
 if cfg.plotting; plotting = true; else plotting = false; end
@@ -15,11 +18,13 @@ cfg.plotting = false;
 cfg.saving = false;
 
 
-
 % loop through categories
 for category = cfg.categories
     category = char(category);
     Category = strcat(upper(category(1)),lower(category(2:end))); % capitalize first letter
+
+    % clear structure
+    d.([category,'_RDM']).timecourseRDM = struct;
 
     % loop through ROIs
     for iRoi = 1:numel(cfg.rois)
@@ -27,10 +32,12 @@ for category = cfg.categories
         mask_label_short = split(roi, '.');
         mask_label_short = mask_label_short{1};
         mask_label_short = mask_label_short(2:end);
+        sub_table_concat = [];
 
         % loop through run
         runsCorrelationMatrix = nan(cfg.n, cfg.n, cfg.nRuns);
         for iRun = 1:cfg.nRuns
+            currentRun = cfg.runSample(iRun);
 
             % loop through subjects
             sub_table = [];
@@ -41,10 +48,22 @@ for category = cfg.categories
 
                 % get timecourse
                 timecourseDir = fullfile(pwd, '..', 'derivatives', subID, 'timecourses');
-                fileName = ['mean_timecourse_', category, '_', mask_label_short, ...
-                    '_run_', num2str(iRun), '.mat'];
+
+                if cfg.smoothing
+                    fileName = ['smoothed_mean_timecourse_', category, '_', ...
+                        mask_label_short, '_run_', num2str(currentRun), '.mat'];
+                else
+                    fileName = ['mean_timecourse_', category, '_', ...
+                        mask_label_short, '_run_', num2str(currentRun), '.mat'];
+                end
+
                 load(fullfile(timecourseDir, fileName))
                 currentTimecourse = saveData;
+
+                if cfg.detrend
+                    currentTimecourse = detrend(currentTimecourse);
+                    currentTimecourse = currentTimecourse - mean(currentTimecourse);
+                end
 
                 % store in mat
                 sub_table(:, iSub) = currentTimecourse';
@@ -83,6 +102,13 @@ for category = cfg.categories
             d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).name = mask_label_short;
             d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).color = [0, 0, 0];
             d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).RDM = runsCorrelationMatrix(:, :, iRun);
+
+            % concatanate tables across runs
+            if iRun == 1
+                sub_table_concat = sub_table;
+            else
+                sub_table_concat = [sub_table_concat; sub_table];
+            end
         end
 
 
@@ -91,6 +117,17 @@ for category = cfg.categories
         d.([category,'_RDM']).timecourseRDM(iRoi).name = mask_label_short;
         d.([category,'_RDM']).timecourseRDM(iRoi).color = [0, 0, 0];
         d.([category,'_RDM']).timecourseRDM(iRoi).RDM = mean(runsCorrelationMatrix, 3, 'omitnan');
+
+        % make RDM for concatanated subtable
+        cfg.labels = num2cell(cfg.subNums);
+        cfg.correlation_type = 'Pearson';
+        [~, concatMat, ~] = make_RDM(sub_table_concat, cfg);
+
+        % store results
+        % Add name, color and RDM fields to data struct
+        d.([category,'_RDM']).timecourseRDM_concat(iRoi).name = mask_label_short;
+        d.([category,'_RDM']).timecourseRDM_concat(iRoi).color = [0, 0, 0];
+        d.([category,'_RDM']).timecourseRDM_concat(iRoi).RDM = concatMat;
 
     end % roi loop
 
@@ -117,7 +154,7 @@ for category = cfg.categories
 
                 % get median for each RDM
                 currentRDM(eye(height(currentRDM)) == 1) = 0;
-                medianMat(iRun, iRoi) = median(squareform(currentRDM), 'omitnan'); 
+                medianMat(iRun, iRoi) = median(squareform(currentRDM), 'omitnan');
             end
         end
 

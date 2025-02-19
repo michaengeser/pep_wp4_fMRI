@@ -31,24 +31,6 @@ fmriPath = fullfile(mainPath, 'sourcedata');
 
 %% load ROI mask
 nmasks = numel(cfg.rois);
-maskImg = {};
-for j=1:nmasks
-
-    mask_label=cfg.rois{j};
-    mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
-
-    disp(['Using mask ',  mask_label]);
-    disp(char(datetime))
-
-    % get mask
-    mask = load_untouch_nii(mask_fn);
-    newMaskImg = mask.img;
-    if max(max(max(double(newMaskImg)))) > 1
-        newMaskImg = newMaskImg/max(max(max(double(newMaskImg))));
-    end
-    maskImg{j} = newMaskImg;
-end
-
 
 %% get data
 
@@ -232,7 +214,7 @@ for iSub = 1:length(subs)
             end
 
             % check if functional or anatomical ROI
-            if ismember(mask_label_short, {'PPA', 'OPA', 'RSC', 'LOC'})
+            if ismember(mask_label_short, {'PPA', 'TOS', 'RSC', 'LOC'})
                 mask_fn=fullfile(pwd, '..', 'MNI_ROIs', 'func_ROIs', subID,...
                     [mask_label_short, '_funcROI.nii']);
             else
@@ -306,10 +288,10 @@ for iSub = 1:length(subs)
                 end
             end
 
-            saveData = bathroomData;
+            saveData = bathroomData{iRun};
             save(fullfile(outputdir, fileName), 'saveData')
             fileName = ['whole_brain_timecourse_kitchen_run_', num2str(iRun)];
-            saveData = kitchenData;
+            saveData = kitchenData{iRun};
             save(fullfile(outputdir, fileName), 'saveData')
         end
 

@@ -32,7 +32,7 @@ end
 %% Process each subject
 for s = 1:numel(cfg.subNums)
     sub_id = sprintf('sub-%0.3d', cfg.subNums(s));
-    disp(['Processing subject: ', sub_id]);
+    %disp(['Processing subject: ', sub_id]);
 
     % Subject-specific contrast path
     contrast_path = fullfile(main_path, sub_id, contrast_folder);
@@ -51,7 +51,7 @@ for s = 1:numel(cfg.subNums)
 
     % Generate ROIs for each region
     for r = 1:numel(cfg.roi_names)
-        disp(['  Generating ROI: ', cfg.roi_names{r}]);
+        %disp(['  Generating ROI: ', cfg.roi_names{r}]);
 
         % Select the appropriate contrast map based on ROI
         if ismember(cfg.roi_names{r}, {'PPA', 'TOS', 'RSC'})

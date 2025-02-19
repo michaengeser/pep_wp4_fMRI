@@ -4,7 +4,7 @@ function cfg = defaultCfg(cfg)
 
 % exp parameters
 if ~isfield(cfg, 'subNums'); cfg.subNums = 2:5;end
-if ~isfield(cfg, 'n'); cfg.n = length(cfg.subNums);end
+cfg.n = length(cfg.subNums);
 if ~isfield(cfg, 'categories'); cfg.categories = {'bathroom', 'kitchen'};end
 if ~isfield(cfg, 'exp_num'); cfg.exp_num = 1;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
