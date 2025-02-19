@@ -2,16 +2,13 @@
 *.nii
 *.json
 /derivatives
-drawings/002_bat.tiff
 *.tiff
 *.jpg
 *.png
 /vgg16_imagenet
-temp/res_struct_spm_correaltion_simple.mat
 *.fig
 *.asv
 /dnn_features
-
 /ISCtoolbox/kitchen/fMRIpreprocessed
 /ISCtoolbox/bathroom/fMRIpreprocessed
 /ISCtoolbox/kitchen/stats
