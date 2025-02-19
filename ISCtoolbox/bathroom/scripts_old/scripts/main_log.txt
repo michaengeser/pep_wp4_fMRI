@@ -1,0 +1,568 @@
+11-Feb-2025 15:20:37
+Grid computing disabled
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+Started at: 11-Feb-2025, 15:20:37.056
+The project with name "Test" already exists in the given directory.
+Mapping ISC matrices:
+Mapping stats  session 1, band 0
+Data already exist, quit memory mapping...
+Finished at: 11-Feb-2025, 15:20:37.104
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+ 
+Calculating ISC matrices:
+Band: 0, Session: 1
+Started at: 11-Feb-2025, 15:20:37.114
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 2
+Started at: 11-Feb-2025, 15:20:37.14
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 3
+Started at: 11-Feb-2025, 15:20:37.164
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 4
+Started at: 11-Feb-2025, 15:20:37.189
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 5
+Started at: 11-Feb-2025, 15:20:37.213
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 6
+Started at: 11-Feb-2025, 15:20:37.238
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 7
+Started at: 11-Feb-2025, 15:20:37.261
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 8
+Started at: 11-Feb-2025, 15:20:37.285
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 9
+Started at: 11-Feb-2025, 15:20:37.309
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 10
+Started at: 11-Feb-2025, 15:20:37.332
+Correlation matrices written already, canceling computation...
+Analysis run earlier, no need to gather pointers. (file nr. 1)
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+ 
+Calculating critical thresholds:
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+
+ans =
+
+    '11-Feb-2025 15:20:37'
+
+ 
+Saving Nii
+Saving results to nii:
+   Saving the correlation statistics
+      Band 0
+         Session 1
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.iofun.internal.memmapfile.hMapFile')" style="font-weight:bold">matlab.iofun.internal.memmapfile.hMapFile</a>
+Unable to obtain information for file 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität
+Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\results\simMeasure_cor_band0_Session1_DWT.bin': No error.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/hCreateMap', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 329)" style="font-weight:bold">memmapfile/hCreateMap</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,0)">line 329</a>)
+        matlab.iofun.internal.memmapfile.hMapFile(mapfileInputStruct);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/subsref', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 794)" style="font-weight:bold">indexing</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',794,0)">line 794</a>)
+                    hCreateMap(obj);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('saveNiiResults', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m', 30)" style="font-weight:bold">saveNiiResults</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m',30,0)">line 30</a>)
+        img=memMaps.resultMap.whole.(['band' num2str(nrBand)]).(['Session' num2str(nrSession)]).cor.Data.xyz;
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 572)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',572,0)">line 572</a>)
+saveNiiResults(Params)
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+        runAnalysis(handles.Params);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+        feval(varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+    gui_mainfcn(gui_State, varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+} 
+<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,1)">329 </a>        matlab.iofun.internal.memmapfile.hMapFile(mapfileInputStruct);
+ 
+Parameters already succesfully validated!
+ 
+Parameters already succesfully validated!
+Clearing the log and script files from scripts directory
+[Warning: scripts/ folder cannot be deleted, changing the name of the folder to scripts_old/] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('initScriptsFolder', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m', 14)" style="font-weight:bold">initScriptsFolder</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m',14,0)">line 14</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 46)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',46,0)">line 46</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/hCreateMap', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 329)" style="font-weight:bold">memmapfile/hCreateMap</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,0)">line 329</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/subsref', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 794)" style="font-weight:bold">indexing</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',794,0)">line 794</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('saveNiiResults', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m', 30)" style="font-weight:bold">saveNiiResults</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m',30,0)">line 30</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 572)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',572,0)">line 572</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('uiwait', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\uitools\uiwait.m', 81)" style="font-weight:bold">uiwait</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\uitools\uiwait.m',81,0)">line 81</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>ISCanalysis_OpeningFcn', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 94)" style="font-weight:bold">ISCanalysis>ISCanalysis_OpeningFcn</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',94,0)">line 94</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 220)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',220,0)">line 220</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)] 
+Error using movefile
+Der Prozess kann nicht auf die Datei zugreifen, da sie von einem anderen Prozess verwendet wird.
+
+[Warning: Directory already exists.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('initScriptsFolder', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m', 24)" style="font-weight:bold">initScriptsFolder</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m',24,0)">line 24</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 46)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',46,0)">line 46</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/hCreateMap', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 329)" style="font-weight:bold">memmapfile/hCreateMap</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,0)">line 329</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/subsref', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 794)" style="font-weight:bold">indexing</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',794,0)">line 794</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('saveNiiResults', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m', 30)" style="font-weight:bold">saveNiiResults</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m',30,0)">line 30</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 572)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',572,0)">line 572</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('uiwait', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\uitools\uiwait.m', 81)" style="font-weight:bold">uiwait</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\uitools\uiwait.m',81,0)">line 81</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>ISCanalysis_OpeningFcn', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 94)" style="font-weight:bold">ISCanalysis>ISCanalysis_OpeningFcn</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',94,0)">line 94</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 220)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',220,0)">line 220</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)] 
+11-Feb-2025 15:21:42
+Grid computing disabled
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+Started at: 11-Feb-2025, 15:21:42.218
+The project with name "Test" already exists in the given directory.
+Mapping ISC matrices:
+Mapping stats  session 1, band 0
+Data already exist, quit memory mapping...
+Finished at: 11-Feb-2025, 15:21:42.265
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+ 
+Calculating ISC matrices:
+Band: 0, Session: 1
+Started at: 11-Feb-2025, 15:21:42.272
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 2
+Started at: 11-Feb-2025, 15:21:42.3
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 3
+Started at: 11-Feb-2025, 15:21:42.327
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 4
+Started at: 11-Feb-2025, 15:21:42.352
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 5
+Started at: 11-Feb-2025, 15:21:42.379
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 6
+Started at: 11-Feb-2025, 15:21:42.405
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 7
+Started at: 11-Feb-2025, 15:21:42.43
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 8
+Started at: 11-Feb-2025, 15:21:42.455
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 9
+Started at: 11-Feb-2025, 15:21:42.479
+Correlation matrices written already, canceling computation...
+Band: 0, Session: 10
+Started at: 11-Feb-2025, 15:21:42.504
+Correlation matrices written already, canceling computation...
+Analysis run earlier, no need to gather pointers. (file nr. 1)
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+ 
+Calculating critical thresholds:
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+Standard inter-subject synchronization analysis not specified, critical values not calculated....
+
+ans =
+
+    '11-Feb-2025 15:21:42'
+
+ 
+Saving Nii
+Saving results to nii:
+   Saving the correlation statistics
+      Band 0
+         Session 1
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.iofun.internal.memmapfile.hMapFile')" style="font-weight:bold">matlab.iofun.internal.memmapfile.hMapFile</a>
+Unable to obtain information for file 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität
+Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\results\simMeasure_cor_band0_Session1_DWT.bin': No error.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/hCreateMap', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 329)" style="font-weight:bold">memmapfile/hCreateMap</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,0)">line 329</a>)
+        matlab.iofun.internal.memmapfile.hMapFile(mapfileInputStruct);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('memmapfile/subsref', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m', 794)" style="font-weight:bold">indexing</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',794,0)">line 794</a>)
+                    hCreateMap(obj);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('saveNiiResults', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m', 30)" style="font-weight:bold">saveNiiResults</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\saveNiiResults.m',30,0)">line 30</a>)
+        img=memMaps.resultMap.whole.(['band' num2str(nrBand)]).(['Session' num2str(nrSession)]).cor.Data.xyz;
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 572)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',572,0)">line 572</a>)
+saveNiiResults(Params)
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+        runAnalysis(handles.Params);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+        feval(varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+    gui_mainfcn(gui_State, varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+} 
+<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\iofun\@memmapfile\memmapfile.m',329,1)">329 </a>        matlab.iofun.internal.memmapfile.hMapFile(mapfileInputStruct);
+if system_dependent('IsDebugMode')==1, dbquit; end
+if system_dependent('IsDebugMode')==1, dbquit; end
+{Operation terminated by user during <a href="matlab:matlab.internal.language.introspective.errorDocCallback('uiwait')" style="font-weight:bold">uiwait</a>
+
+
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>ISCanalysis_OpeningFcn', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 94)" style="font-weight:bold">ISCanalysis>ISCanalysis_OpeningFcn</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',94,0)">line 94</a>)
+uiwait(handles.figure1);
+
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 220)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',220,0)">line 220</a>)
+    feval(gui_State.gui_OpeningFcn, gui_hFigure, [], guidata(gui_hFigure), varargin{:});
+
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+    gui_mainfcn(gui_State, varargin{:});
+} 
+Clearing the log and script files from scripts directory
+[Warning: scripts/ folder cannot be deleted, changing the name of the folder to scripts_old/] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('initScriptsFolder', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m', 14)" style="font-weight:bold">initScriptsFolder</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m',14,0)">line 14</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 46)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',46,0)">line 46</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>] 
+Error using movefile
+Der Prozess kann nicht auf die Datei zugreifen, da sie von einem anderen Prozess verwendet wird.
+
+[Warning: Directory already exists.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('initScriptsFolder', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m', 24)" style="font-weight:bold">initScriptsFolder</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m',24,0)">line 24</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 46)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',46,0)">line 46</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>] 
+11-Feb-2025 15:22:41
+Grid computing disabled
+
+ans =
+
+    '11-Feb-2025 15:22:41'
+
+Started at: 11-Feb-2025, 15:22:41.118
+Created a new project with name "Test"...
+Mapping ISC matrices:
+Mapping stats  session 1, band 0
+Mapping stats  session 2, band 0
+Mapping stats  session 3, band 0
+Mapping stats  session 4, band 0
+Mapping stats  session 5, band 0
+Mapping stats  session 6, band 0
+Mapping stats  session 7, band 0
+Mapping stats  session 8, band 0
+Mapping stats  session 9, band 0
+Mapping stats  session 10, band 0
+ 
+Finished at: 11-Feb-2025, 15:22:41.893
+
+ans =
+
+    '11-Feb-2025 15:22:41'
+
+
+ans =
+
+    '11-Feb-2025 15:22:41'
+
+ 
+Calculating ISC matrices:
+Band: 0, Session: 1
+Started at: 11-Feb-2025, 15:22:41.904
+{Unrecognized field name "origMap".
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('calculateCorMats', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\calculateCorMats.m', 57)" style="font-weight:bold">calculateCorMats</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\calculateCorMats.m',57,0)">line 57</a>)
+    mMapOrig = memMaps.(Priv.origMapName).([Priv.prefixSession num2str(nrSession)]);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 353)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',353,0)">line 353</a>)
+                calculateCorMats(Params,nrBand,nrSession);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+        runAnalysis(handles.Params);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+        feval(varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+    gui_mainfcn(gui_State, varargin{:});
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>
+} 
+<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\calculateCorMats.m',57,1)">57  </a>    mMapOrig = memMaps.(Priv.origMapName).([Priv.prefixSession num2str(nrSession)]);
+if system_dependent('IsDebugMode')==1, dbquit; end
+You must succesfully validate parameters before running the analysis!
+Validating parameters...
+ 
+Searching and validating fMRI data...
+Checking subject data sizes...
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_1.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_2.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_3.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_4.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_5.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_6.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_7.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_8.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_9.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-001\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-002\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-003\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-004\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-005\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-007\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-008\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-009\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-010\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-011\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-012\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-013\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-014\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-015\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+File: C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\derivatives\sub-016\timecourses\whole_brain_timecourse_bathroom_run_10.mat
+Ok!
+Ok!
+ 
+Set private parameters...
+Ok!
+ 
+Checking TR...
+ 
+Validation successful!!
+ 
+Parameter file 'Test_params.mat' saved to directory C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\bathroom\.
+Cleaning the old runs from the folders...
+   No matching files named 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\bathroom\PFsession\*.mat' were found.
+   No matching files named 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\bathroom\PF\*.mat' were found.
+   No matching files named 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\bathroom\phase\*.mat' were found.
+   No matching files named 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI\ISCtoolbox\bathroom\within\*.mat' were found.
+Clearing the log and script files from scripts directory
+[Warning: scripts/ folder cannot be deleted, changing the name of the folder to scripts_old/] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('initScriptsFolder', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m', 14)" style="font-weight:bold">initScriptsFolder</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\initScriptsFolder.m',14,0)">line 14</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('runAnalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m', 46)" style="font-weight:bold">runAnalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\runAnalysis.m',46,0)">line 46</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis>pushbuttonRun_Callback', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 602)" style="font-weight:bold">ISCanalysis>pushbuttonRun_Callback</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',602,0)">line 602</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('gui_mainfcn', 'C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m', 95)" style="font-weight:bold">gui_mainfcn</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2022a\toolbox\matlab\guide\gui_mainfcn.m',95,0)">line 95</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ISCanalysis', 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m', 43)" style="font-weight:bold">ISCanalysis</a> (<a href="matlab: opentoline('C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\MATLAB\ISCtoolbox_v3_R340\ISCanalysis\ISCanalysis.m',43,0)">line 43</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis(''pushbuttonRun_Callback'',hObject,eventdata,guidata(hObject))')" style="font-weight:bold">matlab.graphics.internal.figfile.FigFile/read>@(hObject,eventdata)ISCanalysis('pushbuttonRun_Callback',hObject,eventdata,guidata(hObject))</a>] 

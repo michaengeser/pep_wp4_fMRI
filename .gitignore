@@ -11,5 +11,8 @@ temp/res_struct_spm_correaltion_simple.mat
 *.fig
 *.asv
 /dnn_features
-/ISCtoolbox/
 
+/ISCtoolbox/kitchen/fMRIpreprocessed
+/ISCtoolbox/bathroom/fMRIpreprocessed
+/ISCtoolbox/kitchen/stats
+/ISCtoolbox/bathroom/stats
