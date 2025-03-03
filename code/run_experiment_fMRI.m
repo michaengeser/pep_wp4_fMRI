@@ -15,7 +15,7 @@ cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwi
 cfg.imageDuration = 0.25;  % Image presentation time in seconds
 cfg.iti = 2;  % Inter-trial interval in seconds
 cfg.startPad = 4;  % Time before the first trial in seconds
-cfg.endPad = 15;  % Time after the last trial in seconds
+cfg.endPad = 10;  % Time after the last trial in seconds
 cfg.ImageFileFormat = 'tif';
 
 %% Paths
@@ -36,10 +36,15 @@ if cfg.mriMode
 end
 
 %% Image Loading
-if mod(str2double(cfg.runNum), 2) == 0
-    runCategory = 'kitchen';
+if str2double(cfg.runNum) == 0
+    runCategory = 'practice';
+    targetNum = str2double(cfg.runNum);
 else
-    runCategory = 'bathroom';
+    if mod(str2double(cfg.runNum), 2) == 0
+        runCategory = 'kitchen';
+    else
+        runCategory = 'bathroom';
+    end
 end
 runImages = dir(fullfile(stimPath, runCategory, ['*.', cfg.ImageFileFormat]));
 numTrials = length(runImages)*2;
@@ -50,7 +55,7 @@ runOutputFile = fullfile(outputPath, sprintf('sub-%s_task-main_run-%s_events.tsv
 fileID = fopen(runOutputFile, 'w');
 
 % Write header for the log file
-fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\tresponseKey\tresponseTime\ttrialOnset\titiOnset\ttrialEnd\ttriggerDate\ttriggerTimeStamp\tOnsets\n');
+fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\ttrialOnset\titiOnset\ttrialEnd\ttriggerDate\ttriggerTimeStamp\tOnsets\tresponseKey\tresponseTime\n');
 
 %% Initialize Psychtoolbox
 Screen('Preference', 'SkipSyncTests', 1);  % Skip sync tests for demo purposes (remove in actual experiment)
@@ -91,24 +96,30 @@ rng(str2double(cfg.runNum));  % Run number as seed
 blkImgs = table;
 blkImgs.texture = runTextures';
 blkImgs.category = repmat({runCategory}, 1, length(runTextures))';
-blkImgs.image_name = {runImages.name}';
+blkImgs.imgName = {runImages.name}';
 
 % Shuffle rows
 blkImgs1 = blkImgs(randperm(height(blkImgs)),:);
 blkImgs2 = blkImgs(randperm(height(blkImgs)),:);
-blkImgs = [blkImgs1; blkImgs2];
-
-if str2double(cfg.runNum) == 11
-    blkImgs = blkImgs(1:10, :);
-end 
-
+if str2double(cfg.runNum) == 0
+    blkImgs = blkImgs1(1:10, :);
+else
+    blkImgs = [blkImgs1; blkImgs2];
+end
 
 % get targets
 load(fullfile(functionPath, 'targets.mat'), 'targetStruct')
+if str2double(cfg.runNum) == 0
+    targetNum = numel(targetStruct);
+else
+    targetNum = str2double(cfg.runNum);
+end
 
-sca
-error('stop')
+% init accuracy vector
+accuracy = nan(1, numel(targetStruct(targetNum).imgName));
 
+sca 
+error('Hello')
 %% Calculate size for desired degree of visual angle
 
 % define visual angle
@@ -140,6 +151,15 @@ image_rect = CenterRectOnPointd([0 0 sizePixX sizePixY], xCenter, yCenter);
 KbName('UnifyKeyNames');
 abortKey = KbName('ESCAPE');
 respKeysMRI = 1:15;
+% define target keys
+if cfg.mriMode
+    error('define keys')
+    presentKey = 14;
+    absentKey = 15;
+else
+    presentKey = 37;
+    absentKey = 39;
+end
 
 %% Experiment Start
 try
@@ -161,29 +181,28 @@ try
     responseTimes = nan(1, numTrials);  % Store response times
     responseKeys = cell(1, numTrials);  % Store response keys
 
-    % Wait for initial start pad (4s)
-    WaitSecs(cfg.startPad);
-
     % Display fixation cross before the trial
     DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
     Screen('Flip', window);  % Show fixation cross
-    WaitSecs(2);
+
+    % Wait for initial start pad (4s)
+    WaitSecs(cfg.startPad);
 
     % Loop through all trials in the block
-    for imgNum = 1:height(currentImages)
+    for iImg = 1:height(blkImgs)
 
         % Initialize trial
         trialDuration = cfg.imageDuration + cfg.iti;
         responseFlag = false;
         itiFlag = false;
-        responseTimes(trialCount) = NaN;
-        responseKeys{trialCount} = 'none';
+        responseTimes(iImg) = NaN;
+        responseKeys{iImg} = 'none';
         elapsedTime = 0;
 
         % Present image
-        Screen('DrawTexture', window, currentTexture, [], image_rect);
+        Screen('DrawTexture', window, blkImgs.texture(iImg), [], image_rect);
         DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
-        trialOnsets(trialCount) = Screen('Flip', window);  % Get trial onset time
+        trialOnsets(iImg) = Screen('Flip', window);  % Get trial onset time
 
         % trial timing
         while elapsedTime < trialDuration - ifi * 0.5
@@ -204,45 +223,116 @@ try
                 error('Experiment aborted by user')
             end
 
-            % Store first button press
-            if keyIsDown && ~responseFlag
-                responseTimes(trialCount) = responseTime;
-                if cfg.mriMode
-                    responseKeys{trialCount} = num2str(find(BIONkeyCode));
-                else
-                    responseKeys{trialCount} = num2str(find(keyCode));
-                end
-                responseFlag = true;
-            end
-
             % Show fixation cross after 250 ms
             if ~itiFlag && elapsedTime > cfg.imageDuration - ifi * 0.5
                 % Inter-trial interval (ITI)
                 DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Show fixation cross during ITI
-                itiOnsets(trialCount) = Screen('Flip', window);  % Show fixation cross
+                itiOnsets(iImg) = Screen('Flip', window);  % Show fixation cross
                 itiFlag = true;
             end
 
             % Update timer
-            elapsedTime = GetSecs - trialOnsets(trialCount);
+            elapsedTime = GetSecs - trialOnsets(iImg);
         end
 
         % Log trial end time
-        trialEnd(trialCount) = GetSecs;
+        trialEnd(iImg) = GetSecs;
+
+        % check if target trial
+        if ismember(iImg, targetStruct(targetNum).trialNum)
+
+            % get target trial
+            targetIdx = find(iImg == targetStruct(targetNum).trialNum);
+
+            % check if target image is correct
+            if strcmp(targetStruct(targetNum).imgName{targetIdx}, ...
+                    blkImgs.imgName{iImg})
+                disp('Correct target was selected')
+            else
+                disp(['Selected target: ', targetStruct(targetNum).imgName{targetIdx}])
+                disp(['Current trial: ',  blkImgs.imgName{iImg}])
+                error('Target names do not match')
+            end
+
+            % show target message
+            targetMsg = ['Was the following object in the last image:',...
+                newline,  targetStruct(targetNum).targetName{targetIdx}];
+            DrawFormattedText(window, targetMsg, 'center', 'center', [0 0 0]);
+            qTime = Screen('Flip', window);
+
+            % Wait for response
+            waitDuration = 5;
+            responseFlag = false;
+            while elapsedTime < waitDuration - ifi * 0.5
+                % Check for button press (target detection task)
+                [keyIsDown, responseTime, keyCode] = KbCheck;
+                if cfg.mriMode
+                    BIONkeyCode = read(dq, 1, "OutputFormat", "Matrix");
+                    checkResp = BIONkeyCode(respKeysMRI);
+                    if sum(checkResp) >= 1
+                        keyIsDown = 1;
+                        responseTime = GetSecs;
+                    end
+                end
+
+                % Abort experiment when ESC is pressed
+                if keyCode(abortKey)
+                    error('Experiment aborted by user')
+                end
+
+                % Store first button press
+                if keyIsDown && ~responseFlag
+                    responseTimes(iImg) = responseTime;
+                    if cfg.mriMode
+                        responseKeys{iImg} = num2str(find(BIONkeyCode));
+                    else
+                        responseKeys{iImg} = num2str(find(keyCode));
+                    end
+                    % show fixation cross after response is provided
+                    DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Show fixation cross during ITI
+                    Screen('Flip', window); 
+                    responseFlag = true;
+                end
+
+                % Update timer
+                elapsedTime = GetSecs - qTime;
+            end
+
+            % get accuracy
+            if targetStruct(targetNum).targetPresent(targetIdx) == 1
+                accuracy(targetIdx) = str2double(responseKeys{iImg}) == presentKey;
+            else
+                accuracy(targetIdx) = str2double(responseKeys{iImg}) == absentKey;
+            end
+
+            % Display fixation cross before the next trial
+            DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
+            Screen('Flip', window);  % Show fixation cross
+            WaitSecs(2);
+        end
 
         % Log trial information
         fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
-            cfg.subjectID, cfg.runNum, trialCount,...
-            currentImages.texture(imgNum), char(currentImages.category(imgNum)), char(currentImages.image_name(imgNum)), ...
-            responseKeys{trialCount}, responseTimes(trialCount), ...
-            trialOnsets(trialCount), itiOnsets(trialCount), trialEnd(trialCount), ...
-            char(triggerDate), triggerTimeStamp);
-
+            cfg.subjectID, cfg.runNum, iImg,...
+            blkImgs.texture(iImg), char(blkImgs.category(iImg)), char(blkImgs.imgName(iImg)), ...
+            trialOnsets(iImg), itiOnsets(iImg), trialEnd(iImg), ...
+            char(triggerDate), triggerTimeStamp, trialOnsets(iImg) - triggerTimeStamp,...
+            responseKeys{iImg}, responseTimes(iImg)); 
     end
 
-
-    % Wait for end pad (10s)
+    % Wait for end pad
     WaitSecs(cfg.endPad);
+
+    % show feedback message
+    feedbackMsg = ['The end', newline,...
+        'You answered ', num2str(round(mean(accuracy, 'omitnan')*100)), ...
+        '% of the questions correctly', newline, ...
+        'Thank you!'];
+    DrawFormattedText(window, feedbackMsg, 'center', 'center', [0 0 0]);
+    Screen('Flip', window);
+
+    % Wait for end pad
+    WaitSecs(5);
 
     % Close log file
     fclose(fileID);
