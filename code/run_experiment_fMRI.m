@@ -11,11 +11,12 @@ cfg.runNum = input('Enter run number: ', 's');
 cfg.date = datetime('today');
 
 %% General Experiment Configuration
+cfg.debugTimingFactor = 1; % Must be 1 for accurat timing (< 1 will give faster timing)
 cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwise
-cfg.imageDuration = 0.25;  % Image presentation time in seconds
-cfg.iti = 2;  % Inter-trial interval in seconds
-cfg.startPad = 4;  % Time before the first trial in seconds
-cfg.endPad = 10;  % Time after the last trial in seconds
+cfg.imageDuration = 0.25 * cfg.debugTimingFactor;  % Image presentation time in seconds
+cfg.iti = 2 * cfg.debugTimingFactor;  % Inter-trial interval in seconds
+cfg.startPad = 4 * cfg.debugTimingFactor;  % Time before the first trial in seconds
+cfg.endPad = 10 * cfg.debugTimingFactor;  % Time after the last trial in seconds
 cfg.ImageFileFormat = 'tif';
 
 %% Paths
@@ -52,10 +53,15 @@ numTrials = length(runImages)*2;
 %% Output File Setup
 % BIDS-compliant log file
 runOutputFile = fullfile(outputPath, sprintf('sub-%s_task-main_run-%s_events.tsv', cfg.subjectID, cfg.runNum));
+
+% Check if file name exists already to avoid overwriting 
+if exist(runOutputFile, 'file')
+    error('FIle name exists already')
+end 
 fileID = fopen(runOutputFile, 'w');
 
 % Write header for the log file
-fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\ttrialOnset\titiOnset\ttrialEnd\ttriggerDate\ttriggerTimeStamp\tOnsets\tresponseKey\tresponseTime\n');
+fprintf(fileID, 'subject\trun\ttrial\ttexture\tcategory\timage\ttrialOnset\titiOnset\ttrialEnd\ttriggerDate\ttriggerTimeStamp\tOnsets\tresponseKey\tresponseTime\taccuracy\n');
 
 %% Initialize Psychtoolbox
 Screen('Preference', 'SkipSyncTests', 1);  % Skip sync tests for demo purposes (remove in actual experiment)
@@ -78,6 +84,7 @@ end
 [window, windowRect] = Screen('OpenWindow', screenNumber, [Color.gray], [], 32, 2,[], [],  kPsychNeed32BPCFloat);
 [xCenter, yCenter] = RectCenter(windowRect);
 ifi = Screen('GetFlipInterval', window);  % Get refresh interval
+Screen('TextSize', window, 40) % define font size
 DrawFormattedText(window, 'Loading...', 'center', 'center', [0 0 0]);
 Screen('Flip', window);  % Show fixation cross
 HideCursor; % Hide mouse cursor
@@ -178,6 +185,7 @@ try
     trialEnd = nan(1, numTrials);  % Store trial end
     responseTimes = nan(1, numTrials);  % Store response times
     responseKeys = cell(1, numTrials);  % Store response keys
+    trialAccuracy = nan(1, numTrials);  % Store response accuracy
 
     % Display fixation cross before the trial
     DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
@@ -195,6 +203,7 @@ try
         itiFlag = false;
         responseTimes(iImg) = NaN;
         responseKeys{iImg} = 'none';
+        trialAccuracy(iImg) = NaN;
         elapsedTime = 0;
 
         % Present image
@@ -253,13 +262,13 @@ try
             end
 
             % show target message
-            targetMsg = ['Was the following object in the last image:',...
+            targetMsg = ['Was the following object in the last image:', newline, ...
                 newline,  targetStruct(targetNum).targetName{targetIdx}];
             DrawFormattedText(window, targetMsg, 'center', 'center', [0 0 0]);
             qTime = Screen('Flip', window);
 
             % Wait for response
-            waitDuration = 5;
+            waitDuration = 5  * cfg.debugTimingFactor;
             responseFlag = false;
             while elapsedTime < waitDuration - ifi * 0.5
                 % Check for button press (target detection task)
@@ -296,26 +305,30 @@ try
                 elapsedTime = GetSecs - qTime;
             end
 
-            % get accuracy
-            if targetStruct(targetNum).targetPresent(targetIdx) == 1
-                accuracy(targetIdx) = str2double(responseKeys{iImg}) == presentKey;
+            % get accuracy if response was recorded
+            if strcmp(responseKeys{iImg}, 'none')
+                accuracy(targetIdx) = NaN;
             else
-                accuracy(targetIdx) = str2double(responseKeys{iImg}) == absentKey;
+                if targetStruct(targetNum).targetPresent(targetIdx) == 1
+                    accuracy(targetIdx) = str2double(responseKeys{iImg}) == presentKey;
+                else
+                    accuracy(targetIdx) = str2double(responseKeys{iImg}) == absentKey;
+                end
+                trialAccuracy(iImg) = accuracy(targetIdx);
             end
 
             % Display fixation cross before the next trial
             DrawFormattedText(window, '+', 'center', 'center', [0 0 0]);  % Black fixation cross
             Screen('Flip', window);  % Show fixation cross
-            WaitSecs(2);
+            WaitSecs(2 * cfg.debugTimingFactor);
         end
 
-        % Log trial information
-        fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%s\t%.6f\t%.6f\t%.6f\t%.6f\t%s\t%.6f\n', ...
+        fprintf(fileID, '%s\t%s\t%d\t%d\t%s\t%s\t%.6f\t%.6f\t%.6f\t%s\t%.6f\t%.6f\t%s\t%.6f\t%.6f\n', ...
             cfg.subjectID, cfg.runNum, iImg,...
             blkImgs.texture(iImg), char(blkImgs.category(iImg)), char(blkImgs.imgName(iImg)), ...
             trialOnsets(iImg), itiOnsets(iImg), trialEnd(iImg), ...
             char(triggerDate), triggerTimeStamp, trialOnsets(iImg) - triggerTimeStamp,...
-            responseKeys{iImg}, responseTimes(iImg)); 
+            responseKeys{iImg}, responseTimes(iImg), trialAccuracy(iImg)); 
     end
 
     % Wait for end pad
@@ -330,7 +343,7 @@ try
     Screen('Flip', window);
 
     % Wait for end pad
-    WaitSecs(5);
+    WaitSecs(5 * cfg.debugTimingFactor);
 
     % Close log file
     fclose(fileID);
@@ -338,6 +351,10 @@ try
     % Close Psychtoolbox Screen
     Screen('CloseAll');
     ShowCursor;
+
+    % Show experiment duration 
+    totalLength = GetSecs - triggerTimeStamp;
+    disp(['The run duration was: ', char(minutes(totalLength/60))])
 
 catch ME
     % Handle errors
