@@ -118,8 +118,6 @@ end
 % init accuracy vector
 accuracy = nan(1, numel(targetStruct(targetNum).imgName));
 
-sca 
-error('Hello')
 %% Calculate size for desired degree of visual angle
 
 % define visual angle
