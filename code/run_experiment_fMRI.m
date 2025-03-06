@@ -169,7 +169,9 @@ end
 %% Experiment Start
 try
     % Wait for Scanner Trigger
-    DrawFormattedText(window, 'Waiting for scanner...', 'center', 'center', [0 0 0]);
+    msg = ['Block ', cfg.runNum, newline, newline,
+        'Waiting for scanner...'];
+    DrawFormattedText(window, msg, 'center', 'center', [0 0 0]);
     Screen('Flip', window);  % Show fixation cross
     if cfg.mriMode
         [triggerDate, ~] = GetTriggerDAQBION(dq);
