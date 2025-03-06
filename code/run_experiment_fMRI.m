@@ -12,7 +12,7 @@ cfg.date = datetime('today');
 
 %% General Experiment Configuration
 cfg.debugTimingFactor = 1; % Must be 1 for accurat timing (< 1 will give faster timing)
-cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwise
+cfg.mriMode = true;  % Set to true if running in the MRI scanner, false otherwise
 cfg.imageDuration = 0.25 * cfg.debugTimingFactor;  % Image presentation time in seconds
 cfg.iti = 2 * cfg.debugTimingFactor;  % Inter-trial interval in seconds
 cfg.startPad = 4 * cfg.debugTimingFactor;  % Time before the first trial in seconds
@@ -158,9 +158,8 @@ abortKey = KbName('ESCAPE');
 respKeysMRI = 1:15;
 % define target keys
 if cfg.mriMode
-    error('define keys')
-    presentKey = 14;
-    absentKey = 15;
+    presentKey = 5;
+    absentKey = 6;
 else
     presentKey = 37;
     absentKey = 39;
@@ -169,9 +168,7 @@ end
 %% Experiment Start
 try
     % Wait for Scanner Trigger
-    msg = ['Block ', cfg.runNum, newline, newline,
-        'Waiting for scanner...'];
-    DrawFormattedText(window, msg, 'center', 'center', [0 0 0]);
+    DrawFormattedText(window, 'Waiting for scanner...', 'center', 'center', [0 0 0]);
     Screen('Flip', window);  % Show fixation cross
     if cfg.mriMode
         [triggerDate, ~] = GetTriggerDAQBION(dq);
@@ -214,7 +211,7 @@ try
         trialOnsets(iImg) = Screen('Flip', window);  % Get trial onset time
 
         % trial timing
-        while elapsedTime < trialDuration - ifi * 0.5
+        while elapsedTime < trialDuration - ifi * 0.75
 
             % Check for button press (target detection task)
             [keyIsDown, responseTime, keyCode] = KbCheck;
@@ -272,7 +269,7 @@ try
             % Wait for response
             waitDuration = 5  * cfg.debugTimingFactor;
             responseFlag = false;
-            while elapsedTime < waitDuration - ifi * 0.5
+            while elapsedTime < waitDuration - ifi * 0.75
                 % Check for button press (target detection task)
                 [keyIsDown, responseTime, keyCode] = KbCheck;
                 if cfg.mriMode
