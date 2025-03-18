@@ -12,7 +12,7 @@ cfg.date = datetime('today');
 
 %% General Experiment Configuration
 cfg.debugTimingFactor = 1; % Must be 1 for accurat timing (< 1 will give faster timing)
-cfg.mriMode = true;  % Set to true if running in the MRI scanner, false otherwise
+cfg.mriMode = false;  % Set to true if running in the MRI scanner, false otherwise
 cfg.imageDuration = 0.25 * cfg.debugTimingFactor;  % Image presentation time in seconds
 cfg.iti = 2 * cfg.debugTimingFactor;  % Inter-trial interval in seconds
 cfg.startPad = 4 * cfg.debugTimingFactor;  % Time before the first trial in seconds

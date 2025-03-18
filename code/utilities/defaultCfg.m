@@ -3,17 +3,17 @@ function cfg = defaultCfg(cfg)
 %% set default values for cfg
 
 % exp parameters
-if ~isfield(cfg, 'subNums'); cfg.subNums = 2:5;end
+if ~isfield(cfg, 'subNums'); cfg.subNums = 101:102;end
 cfg.n = length(cfg.subNums);
 if ~isfield(cfg, 'categories'); cfg.categories = {'bathroom', 'kitchen'};end
 if ~isfield(cfg, 'exp_num'); cfg.exp_num = 1;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
-if ~isfield(cfg, 'nTargets'); cfg.nTargets = 16;end
+if ~isfield(cfg, 'nTargets'); cfg.nTargets = 0;end
 
 % frmi parameter
-if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
-if ~isfield(cfg, 'nVols'); cfg.nVols = 152;end
+if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 if ~isfield(cfg, 'map'); cfg.map = 't';end
 if ~isfield(cfg, 'rois'); cfg.rois = {'wV1.nii', 'wV2.nii',...
         'wLOC.nii', 'wPPA.nii',...
@@ -29,6 +29,13 @@ if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = true; end
 
 
+% define paths
+cfg.sourcedataPath = fullfile(pwd, '..','sourcedata');
+cfg.outputPath = fullfile(pwd, '..','derivatives');
+cfg.locPath = fullfile(pwd, '..', 'localizer');
+cfg.behPath = fullfile(cfg.sourcedataPath, 'beh');
+cfg.fmriPath = fullfile(cfg.sourcedataPath, 'fmri/bids');
+cfg.spmPath = (fullfile(pwd, '..', '..', '..', 'MATLAB', 'spm12', 'tpm'));
 
 
 end

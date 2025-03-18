@@ -1,48 +1,51 @@
-function res = PairwiseROIsLDAclassifier(subs, nRuns, nTrials, map, rois)
+function res = PairwiseROIsLDAclassifier(cfg)
 
 
 % Define classifiers
 classifier = @cosmo_classify_lda;
 
 % get number of ROI masks
-nmasks=numel(rois);
+nmasks=numel(cfg.rois);
 
 % loop through subjects
-for iSub = 1:length(subs)
+for iSub = 1:length(cfg.subNums)
 
-    if subs(iSub) < 10
-        subID = ['sub-00', num2str(subs(iSub))];
-    elseif subs(iSub) < 100
-        subID = ['sub-0', num2str(subs(iSub))];
-    end
+    subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
     % progress report
-    disp(['Starting pairwise ROI decoding for subject ',  num2str(subs(iSub)), ' on ',...
-        map, '-map']);
+    disp(['Starting pairwise ROI decoding for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
+        cfg.map, '-map']);
 
 
     for j=1:nmasks
 
-        mask_label=rois{j};
+        mask_label=cfg.rois{j};
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
 
         disp(['Using mask ',  mask_label]);
         disp(char(datetime))
 
-        if strcmp(map, 't')
+        if strcmp(cfg.map, 't')
             % Initialize dataset cell array
-            datasets = cell(numel(nRuns), 1);
+            datasets = cell(cfg.nTrials, cfg.nRuns);
 
             % Loop over runs to load data
-            counter = 0;
-            for run = 1:nRuns
+            nTrials = cfg.nTrials;
+            if isempty(gcp('nocreate'))
+            parpool(8);
+            end 
+            parfor iRun = 1:cfg.nRuns
 
                 % get dir for folder
                 con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm', ...
-                    sprintf('run-%02d',run));
+                    sprintf('run-%02d',iRun));
+
+                % load trial IDs
+                beh_dir = fullfile(pwd, '..', 'sourcedata', subID, 'beh', ...
+                    'onsets', sprintf('mcf_%s_run-%d', subID, iRun));
+                targetID = load(beh_dir, 'trialIDs')
 
                 for trial = 1:nTrials
-                    counter = counter + 1;
 
                     % Load the contrast image for this run and trial
                     con_file = fullfile(con_dir, sprintf('con_%04d.nii',trial));
@@ -50,18 +53,18 @@ for iSub = 1:length(subs)
                     % Convert to CoSMoMVPA dataset
                     ds = cosmo_fmri_dataset(con_file, ...
                         'mask', mask_fn, ... % Set brain mask
-                        'targets', trial, ... % Set condition labels (1 = bathroom)
-                        'chunks', run);     % Set run identifiers
+                        'targets', targetID.trialIDs(trial), ... % Set condition labels (1 = bathroom)
+                        'chunks', ceil(iRun/2));     % Set run identifiers
 
                     % Store dataset
-                    datasets{counter} = ds;
+                    datasets{trial, iRun} = ds;
                 end
             end
 
             % Combine all runs into a single dataset
             ds_per_run = cosmo_stack(datasets);
 
-        elseif strcmp(map, 'b')
+        elseif strcmp(cfg.map, 'b')
 
             % get path
             betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
@@ -73,9 +76,9 @@ for iSub = 1:length(subs)
 
             % add chunks and targets
             nSamples = height(ds_per_run.samples);
-            nSamplesPerRun = nSamples/nRuns;
-            ds_per_run.sa.targets = repmat(1:nTrials, 1, nRuns)';
-            preChunks = repmat(1:nRuns, nSamplesPerRun, 1);
+            nSamplesPerRun = nSamples/cfg.nRuns;
+            ds_per_run.sa.targets = repmat(1:cfg.nTrials, 1, cfg.nRuns)';
+            preChunks = repmat(1:cfg.nRuns, nSamplesPerRun, 1);
             ds_per_run.sa.chunks = reshape(preChunks,[],1);
 
 
@@ -83,18 +86,33 @@ for iSub = 1:length(subs)
             error('map not defined')
         end
 
-        % remove living room trials trials (target > 100)
-        ds_per_run = cosmo_slice(ds_per_run, (ds_per_run.sa.targets <= 100), 1);
-
         % remove constant features
+        if iscell(ds_per_run.sa.targets)
+            ds_per_run.sa.targets = cell2mat(ds_per_run.sa.targets);
+        end
         ds=cosmo_remove_useless_data(ds_per_run);
+
+%         % reduce number of features using PCA
+%         [ds, pca_params] = cosmo_map_pca(ds, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
+%         ds.sa = ds_per_run.sa;
+%         cosmo_check_dataset(ds);
 
         %% Pairwise decoding
         % Initialize RDM
-        rdm = zeros(nTrials, nTrials);
+        rdm = zeros(cfg.nTrials, cfg.nTrials);
         disp('')
-        for s1 = 1:nTrials
-            for s2 = s1+1:nTrials
+
+        % define options
+        opt.max_feature_count = 5000;
+
+        if isempty(gcp('nocreate'))
+            parpool(8);
+        end
+        parfor s1 = 1:nTrials
+            for s2 = 1:nTrials
+                if ~(s2 > s1)
+                    continue
+                end
 
                 % Subset data for the two stimuli
                 ds_stim = cosmo_slice(ds, ds.sa.targets == s1 | ds.sa.targets == s2);
@@ -106,14 +124,15 @@ for iSub = 1:length(subs)
                 partitions=cosmo_nfold_partitioner(ds_stim);
 
                 % get predictions for each fold
-                opt.max_feature_count = 6000;
                 [~ ,accuracy] = cosmo_crossvalidate(ds_stim, classifier, partitions, opt);
 
                 % Store the accuracy
-                rdm(s1, s2) = accuracy;
-                rdm(s2, s1) = rdm(s1, s2); % Symmetric matrix
+                rdm(s2, s1) = accuracy;                
             end
         end
+
+        % make rdm symetric
+        rdm = squareform(squareform(rdm));
 
         % Save the RDM
         mask_label_short = split(mask_label, '.');
@@ -123,6 +142,10 @@ for iSub = 1:length(subs)
         res.(subID2).(mask_label_short).rdm = rdm;
         res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm));
     end
+end
+
+if ~isempty(gcp('nocreate'))
+    delete(gcp('nocreate'));
 end
 
 %% ploting
