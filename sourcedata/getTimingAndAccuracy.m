@@ -86,49 +86,49 @@ disp('Timin is calculated')
 
 %% Get Accuracy 
 
-% get table subsets
-targetTable = bigTable(strcmp(bigTable.category, 'livingroom'),:);
-nonTargetTable = bigTable(~strcmp(bigTable.category, 'livingroom'),:); 
-
 % Get Timing data for each subject
 accuracy = [];
+verticalTable = [];
 subNums = unique(bigTable.subject)';
 for subNum = subNums
 
-    % Get responses for that participant
-    targetResponses = targetTable.responseKey(targetTable.subject == subNum);
-    targetResponses = ~strcmp(targetResponses, 'none');
-    nonTargetResponses = nonTargetTable.responseKey(nonTargetTable.subject == subNum);
-    nonTargetResponses = ~strcmp(nonTargetResponses, 'none');
+    % get table subsets
+    targetTable = bigTable(~isnan(bigTable.accuracy) & bigTable.subject == subNum,:);
+    subjecTable = bigTable(bigTable.subject == subNum,:);
 
-   newTable = table;
-   newTable.subNum = num2cell(subNum);
-   newTable.hits =  sum(targetResponses);
-   newTable.misses = sum(~targetResponses);
-   newTable.hitRate = sum(targetResponses)/length(targetResponses);
-   newTable.correctRejects = sum(~nonTargetResponses);
-   newTable.falseAlarms = sum(nonTargetResponses);
-   newTable.faRate = sum(nonTargetResponses)/length(nonTargetResponses);
+    newTable = table;
+    newTable.subNum = num2cell(subNum);
+    newTable.numCorrect = sum(targetTable.accuracy == 1);
+    newTable.numIncorrect = sum(targetTable.accuracy == 0);
+    newTable.meanRT = mean(targetTable.responseTime - targetTable.trialEnd);
+    newTable.meanAccuracy = mean(targetTable.accuracy);
 
-   if isempty(accuracy)
-       accuracy = newTable;
-   else
-       accuracy = [accuracy; newTable];
-   end
+    if isempty(accuracy)
+        accuracy = newTable;
+        verticalTable = subjecTable;
+    else
+        accuracy = [accuracy; newTable];
+        %
+        newNames = strcat(subjecTable.Properties.VariableNames, "_", string(repmat(subNum, 1, width(subjecTable))));
+        subjecTable.Properties.VariableNames = newNames;
+        verticalTable = [verticalTable, subjecTable];
+    end
 end
+
+verticalTable2 = verticalTable(~isnan(verticalTable.accuracy_102), :);
+verticalTable3 = verticalTable(: ,contains(verticalTable.Properties.VariableNames, 'acc'));
+cor_rdm = corr(table2array(verticalTable3), 'rows', 'pairwise');
 
 % add mean and SD
 newRow = cell2table({'mean', ...
-    mean(accuracy.hits), mean(accuracy.misses),...
-    mean(accuracy.hitRate), mean(accuracy.correctRejects),...
-    mean(accuracy.falseAlarms), mean(accuracy.faRate)},...
+    mean(accuracy.numCorrect), mean(accuracy.numIncorrect),...
+    mean(accuracy.meanRT), mean(accuracy.meanAccuracy)},...
     'VariableNames', accuracy.Properties.VariableNames);
 accuracy = [accuracy; newRow];
 
 newRow = cell2table({'sd', ...
-    std(accuracy.hits(1:length(subNums))), std(accuracy.misses(1:length(subNums))),...
-    std(accuracy.hitRate(1:length(subNums))), std(accuracy.correctRejects(1:length(subNums))),...
-    std(accuracy.falseAlarms(1:length(subNums))), std(accuracy.faRate(1:length(subNums)))},...
+    std(accuracy.numCorrect(1:length(subNums))), std(accuracy.numIncorrect(1:length(subNums))),...
+    std(accuracy.meanRT(1:length(subNums))), std(accuracy.meanAccuracy(1:length(subNums)))},...
      'VariableNames', accuracy.Properties.VariableNames);
 accuracy = [accuracy; newRow];
 
