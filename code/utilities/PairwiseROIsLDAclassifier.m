@@ -92,10 +92,10 @@ for iSub = 1:length(cfg.subNums)
         end
         ds=cosmo_remove_useless_data(ds_per_run);
 
-%         % reduce number of features using PCA
-%         [ds, pca_params] = cosmo_map_pca(ds, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
-%         ds.sa = ds_per_run.sa;
-%         cosmo_check_dataset(ds);
+        % reduce number of features using PCA
+        [ds, pca_params] = cosmo_map_pca(ds, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
+        ds.sa = ds_per_run.sa;
+        cosmo_check_dataset(ds);
 
         %% Pairwise decoding
         % Initialize RDM
