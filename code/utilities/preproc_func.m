@@ -7,7 +7,7 @@ spm('defaults', 'fmri');
 spm_jobman('initcfg');
 
 %% Run preprocessing
-for sub = 1:length(cfg.subNums)
+for iSub = 1:length(cfg.subNums)
 
     % subject ID
 
@@ -19,15 +19,12 @@ for sub = 1:length(cfg.subNums)
 
     % define paths to BOLD files
     funcFiles = {};
-    for iRun = 2:cfg.nRuns + 1
+    for iRun = 1:cfg.nRuns + 1
         if iRun == 1
 
-            %%%%%%%%%%%%%      % get experimental runs
+            % get localizer
             singleRunBOLD = fullfile(cfg.sourcedataPath, subID, 'func', ...
-                sprintf('%s_task-scenes_run-%d_bold.nii', subIDx, iRun));
-            %                 % get localizer
-            %                 singleRunBOLD = fullfile(cfg.sourcedataPath, subID, 'func', ...
-            %                     sprintf('%s_task-localizer_bold.nii', subIDx));
+                sprintf('%s_task-localizer_bold.nii', subIDx));
         else
             % get experimental runs
             singleRunBOLD = fullfile(cfg.sourcedataPath, subID, 'func', ...
@@ -146,7 +143,7 @@ for sub = 1:length(cfg.subNums)
     matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(10) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 10)', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{10}, '.','rfiles'));
     matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(11) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 11)', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{11}, '.','rfiles'));
     matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(12) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 12)', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{12}, '.','rfiles'));
-    matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(12) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 13)', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{13}, '.','rfiles'));
+    matlabbatch{i+4}.spm.spatial.normalise.write.subj.resample(13) = cfg_dep('Realign: Estimate & Reslice: Resliced Images (Sess 13)', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{13}, '.','rfiles'));
     matlabbatch{i+4}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
         78 76 85];
     matlabbatch{i+4}.spm.spatial.normalise.write.woptions.vox = [2 2 2];
@@ -155,7 +152,7 @@ for sub = 1:length(cfg.subNums)
 
     % normalize anatomy
     matlabbatch{i+5}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{16}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
-    matlabbatch{i+5}.spm.spatial.normalise.write.subj.resample(1) = cfg_dep('Coregister: Estimate: Coregistered Images', substruct('.','val', '{}',{14}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','cfiles'));
+    matlabbatch{i+5}.spm.spatial.normalise.write.subj.resample(1) = cfg_dep('Coregister: Estimate: Coregistered Images', substruct('.','val', '{}',{15}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','cfiles'));
     matlabbatch{i+5}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70
         78 76 85];
     matlabbatch{i+5}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
@@ -165,6 +162,6 @@ for sub = 1:length(cfg.subNums)
     %% Run pre-processing
     spm_jobman('run', matlabbatch)
     clear matlabbatch
-    disp(['Done pre-processing subject ', char(cfg.subNums(sub)), '!']);
+    disp(['Done pre-processing subject ', char(cfg.subNums(iSub)), '!']);
 end
 end
