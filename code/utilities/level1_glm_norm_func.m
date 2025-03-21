@@ -1,5 +1,9 @@
 function level1_glm_norm_func(cfg)
 
+% 
+if ~isfield(cfg, 'hpf'); cfg.hpf = 128; end
+if ~isfield(cfg, 'runwise'); cfg.runwise = true; end
+
 %% make multiple condition files
 cfg.sortRows = true;
 create_mcf_func(cfg)
@@ -117,7 +121,7 @@ for iSub = 1:length(cfg.subNums)
     end
 
     % for each run, get each scan's `.nii` file
-    for run = 9:cfg.nRuns
+    for run = 1:cfg.nRuns
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % make run directory if needed
@@ -197,13 +201,15 @@ for iSub = 1:length(cfg.subNums)
             matlabbatch{3}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
 
             % per-image contrasts
-            totalNonTagertImg = 100;
-            for img = 1:totalNonTagertImg
-                matlabbatch{3}.spm.stats.con.consess{img}.tcon.name = mcf_file.names{img};
-                contrastVec = [zeros(1, img-1), 1, zeros(1, totalNonTagertImg - img)];
+            runTrials = unique(cell2mat(mcf_file.trialIDs))';
+            for itrialID = 1:length(runTrials)
+                trialID = runTrials(itrialID);
+                imageName = mcf_file.names(cell2mat(mcf_file.trialIDs) == trialID);
+                matlabbatch{3}.spm.stats.con.consess{itrialID}.tcon.name = imageName{1};
+                contrastVec = cell2mat(mcf_file.trialIDs) == trialID;
                 contrastVec = contrastVec - mean(contrastVec);
-                matlabbatch{3}.spm.stats.con.consess{img}.tcon.weights = contrastVec;
-                matlabbatch{3}.spm.stats.con.consess{img}.tcon.sessrep = 'repl';
+                matlabbatch{3}.spm.stats.con.consess{itrialID}.tcon.weights = contrastVec;
+                matlabbatch{3}.spm.stats.con.consess{itrialID}.tcon.sessrep = 'repl';
             end
 
 

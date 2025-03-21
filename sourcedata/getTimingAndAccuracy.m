@@ -115,10 +115,6 @@ for subNum = subNums
     end
 end
 
-verticalTable2 = verticalTable(~isnan(verticalTable.accuracy_102), :);
-verticalTable3 = verticalTable(: ,contains(verticalTable.Properties.VariableNames, 'acc'));
-cor_rdm = corr(table2array(verticalTable3), 'rows', 'pairwise');
-
 % add mean and SD
 newRow = cell2table({'mean', ...
     mean(accuracy.numCorrect), mean(accuracy.numIncorrect),...
@@ -133,4 +129,31 @@ newRow = cell2table({'sd', ...
 accuracy = [accuracy; newRow];
 
 
+
+%% other stuff
+
+verticalTable2 = verticalTable(~isnan(verticalTable.accuracy_102), :);
+verticalTable3 = verticalTable(: ,contains(verticalTable.Properties.VariableNames, 'acc'));
+cor_rdm = corr(table2array(verticalTable3), 'rows', 'pairwise');
+
+warning('off')
+endTable = [];
+for i = 1:12
+
+    newTable = table;
+    for ii = 1:15
+        newTable.imageName(ii) = targetStruct(i).imgName(ii);
+        newTable.trialNum(ii) = targetStruct(i).trialNum(ii);
+        newTable.targetName(ii) = targetStruct(i).targetName(ii);
+        newTable.targetPresent(ii) = targetStruct(i).targetPresent(ii);
+        newTable.run(ii) = i;
+    end
+
+    if isempty(endTable)
+        endTable = newTable;
+    else
+        endTable = [endTable; newTable];
+    end
+end
+warning('on')
 
