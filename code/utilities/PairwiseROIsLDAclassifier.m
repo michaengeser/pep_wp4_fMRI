@@ -28,11 +28,6 @@ for iSub = 1:length(cfg.subNums)
         % get datasetn in Cosmo format
         ds = loadCosmoDataset(cfg, subID, mask_fn);
 
-        % reduce number of features using PCA
-        [ds, pca_params] = cosmo_map_pca(ds, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
-        ds.sa = ds_per_run.sa;
-        cosmo_check_dataset(ds);
-
         %% Pairwise decoding
         % Initialize RDM
         rdm = zeros(cfg.nTrials, cfg.nTrials);
@@ -44,17 +39,17 @@ for iSub = 1:length(cfg.subNums)
         if isempty(gcp('nocreate'))
             parpool(8);
         end
-        parfor s1 = 1:nTrials
-            for s2 = 1:nTrials
-                if ~(s2 > s1)
+        parfor stim1 = 1:nTrials
+            for stim2 = 1:nTrials
+                if ~(stim2 > stim1)
                     continue
                 end
 
                 % Subset data for the two stimuli
-                ds_stim = cosmo_slice(ds, ds.sa.targets == s1 | ds.sa.targets == s2);
+                ds_stim = cosmo_slice(ds, ds.sa.targets == stim1 | ds.sa.targets == stim2);
 
                 % Rename target
-                ds_stim.sa.targets = (ds_stim.sa.targets == s1) + 1;
+                ds_stim.sa.targets = (ds_stim.sa.targets == stim1) + 1;
 
                 % Define partitions
                 partitions=cosmo_nfold_partitioner(ds_stim);
@@ -63,7 +58,7 @@ for iSub = 1:length(cfg.subNums)
                 [~ ,accuracy] = cosmo_crossvalidate(ds_stim, classifier, partitions, opt);
 
                 % Store the accuracy
-                rdm(s2, s1) = accuracy;
+                rdm(stim2, stim1) = accuracy;
             end
         end
 

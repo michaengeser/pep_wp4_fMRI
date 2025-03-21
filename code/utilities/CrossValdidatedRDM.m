@@ -1,28 +1,24 @@
-function res = CrossValdidatedRDM(subs, nRuns, nTrials, map, rois)
+function res = CrossValdidatedRDM(cfg)
 
 
-%% get data 
+%% get data
 dist = 'spearman';
 % get number of ROI masks
-nmasks=numel(rois);
+nmasks=numel(cfg.rois);
 
 % loop through subjects
-for iSub = 1:length(subs)
+for iSub = 1:length(cfg.subNums)
 
-    if subs(iSub) < 10
-        subID = ['sub-00', num2str(subs(iSub))];
-    elseif subs(iSub) < 100
-        subID = ['sub-0', num2str(subs(iSub))];
-    end
+    subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
     % progress report
-    disp(['Starting cross validated RDMg for subject ',  num2str(subs(iSub)), ' on ',...
-        map, '-map']);
+    disp(['Starting cross validated RDMg for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
+        cfg.map, '-map']);
 
 
     for j=1:nmasks
 
-        mask_label=rois{j};
+        mask_label=cfg.rois{j};
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
@@ -31,75 +27,20 @@ for iSub = 1:length(subs)
         disp(['Using mask ',  mask_label]);
         disp(char(datetime))
 
-        if strcmp(map, 't')
-            % Initialize dataset cell array
-            datasets = cell(numel(nRuns), 1);
-
-            % Loop over runs to load data
-            counter = 0;
-            for run = 1:nRuns
-                disp(num2str(run));
-                % get dir for folder
-                con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm_with_target/', ...
-                    sprintf('run-%02d',run));
-
-                for trial = 1:nTrials
-                    counter = counter + 1;
-
-                    % Load the contrast image for this run and trial
-                    con_file = fullfile(con_dir, sprintf('con_%04d.nii',trial));
-
-                    % Convert to CoSMoMVPA dataset
-                    ds = cosmo_fmri_dataset(con_file, ...
-                        'mask', mask_fn, ... % Set brain mask
-                        'targets', trial, ... % Set condition labels (1 = bathroom)
-                        'chunks', run);     % Set run identifiers
-
-                    % Store dataset
-                    datasets{counter} = ds;
-                end
-            end
-
-            % Combine all runs into a single dataset
-            ds_per_run = cosmo_stack(datasets);
-
-        elseif strcmp(map, 'b')
-
-            % get path
-            betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
-                'GLMsingle_betas_mean.nii');
-
-            % load beta map
-            ds_per_run = cosmo_fmri_dataset(betaPath, ...
-                'mask', mask_fn); % Set brain mask
-
-            % add chunks and targets
-            load(fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
-                'trialIDs.mat'));
-            ds_per_run.sa.targets = trialIDs(:, 1);
-            ds_per_run.sa.chunks = trialIDs(:, 2);
-
-        else
-            error('map not defined')
-        end
-
-        % remove living room trials trials (target > 100)
-        ds_per_run = cosmo_slice(ds_per_run, (ds_per_run.sa.targets <= 100), 1);
-
-        % remove constant features
-        ds=cosmo_remove_useless_data(ds_per_run);
+        % get datasetn in Cosmo format
+        ds = loadCosmoDataset(cfg, subID, mask_fn);
 
         % save data set
         save(fullfile(pwd, '..', 'derivatives', subID,...
-            ['cosmo_dataset_', mask_label_short, '_', map, '_map_hpf_128.mat']), 'ds')
+            ['cosmo_dataset_', mask_label_short, '_', cfg.map, '_map_hpf_128.mat']), 'ds')
 
-        %% Crossvalidated RDM 
+        %% Crossvalidated RDM
 
         % Initialize RDM
-        rdm = zeros(nTrials, nTrials);
+        rdm = zeros(cfg.nTrials, cfg.nTrials);
 
-        % get combination to split 10 into 2 halfs
-        splits = nchoosek(1:10, 5);
+        % get combination to split 6 into 2 halfs
+        splits = nchoosek(1:cfg.nRuns/2, cfg.nRuns/2/2);
         splits = splits(1:height(splits)/2, :);
 
         % just do even/odd for now
@@ -109,29 +50,36 @@ for iSub = 1:length(subs)
         %splits = [1,4,5,8,9];
 
         % equal number of even and odd
-        for iSplit = 1:height(splits)
-            current_split = splits(iSplit, :);
-            numOdd = sum(mod(current_split, 2));
-
-            if numOdd < 2 || numOdd > 3
-                splits(iSplit, :) = nan;
-            end
-        end
-        splits = splits(~isnan(splits(:,1)),:);
+        %         for iSplit = 1:height(splits)
+        %             current_split = splits(iSplit, :);
+        %             numOdd = sum(mod(current_split, 2));
+        %
+        %             if numOdd < 2 || numOdd > 3
+        %                 splits(iSplit, :) = nan;
+        %             end
+        %         end
+        %         splits = splits(~isnan(splits(:,1)),:);
 
         % all splits rdm
-        all_splits_rdms = ones(nTrials, nTrials, height(splits));
+        %all_splits_rdms = ones(cfg.nTrials, cfg.nTrials, height(splits));
 
         disp('')
-        for s1 = 1:nTrials
-            disp(num2str(s1))
-            for s2 = s1+1:nTrials
+        if isempty(gcp('nocreate'))
+            parpool(8);
+        end
+        nTrials = cfg.nTrials;
+        parfor stim1 = 1:cfg.nTrials
+            disp(num2str(stim1))
+            for stim2 = 1:nTrials
+                if ~(stim2 > stim1)
+                    continue
+                end
 
                 % Subset data for the two stimuli
-                ds_stim = cosmo_slice(ds, ds.sa.targets == s1 | ds.sa.targets == s2);
+                ds_stim = cosmo_slice(ds, ds.sa.targets == stim1 | ds.sa.targets == stim2);
 
                 % Rename target
-                ds_stim.sa.targets = (ds_stim.sa.targets == s2) + 1;
+                ds_stim.sa.targets = (ds_stim.sa.targets == stim2) + 1;
 
                 % loop over splits
                 crossValdidatedRs = zeros(1, height(splits));
@@ -156,8 +104,9 @@ for iSub = 1:length(subs)
                     meanData(:, 4) = mean(dataSplit2Cond2.samples);
 
                     % correlate them
+                    distance = [];
                     if strcmp(dist, 'spearman')
-                        rvals = corr(meanData', 'type', 'Spearman');
+                        rvals = corr(meanData, 'type', 'Spearman');
                         distance = rvals;
                     elseif strcmp(dist, 'euclidean')
                         distance = squareform(pdist(meanData'));
@@ -170,21 +119,22 @@ for iSub = 1:length(subs)
 
                     if isnan(crossValdidatedRs(iSplit))
                         warning('NaN has occured, dataset might be not suitable')
-                    end 
-                end 
+                    end
+                end
 
                 % Store the correlation
-                rdm(s1, s2) = mean(crossValdidatedRs);
-                rdm(s2, s1) = rdm(s1, s2); % Symmetric matrix
+                rdm(stim2, stim1) = mean(crossValdidatedRs);
 
                 % add to all msplits rdms
-                all_splits_rdms(s2, s1, :) = crossValdidatedRs;
-                all_splits_rdms(s1, s2, :) = crossValdidatedRs;
+                %all_splits_rdms(stim2, stim1, :) = crossValdidatedRs;
             end
         end
 
+        % make rdm symetric
+        rdm = squareform(squareform(rdm));
+
         % Save the RDM
-        mask_label_short = current_split(mask_label, '.');
+        mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
         subID2 = strrep(subID, '-', '');
 
@@ -250,29 +200,29 @@ title('Mean Pairwise Decoding Results Across ROIs');
 hold off;
 
 % %% plot all RDMS for single sub and roi
-% 
+%
 % % Determine the number of splits
 % nSplits = size(all_splits_rdms, 3);
-% 
+%
 % % Create a figure with tiled layout
 % figure;
 % %tiledlayout(7, 20, 'Padding', 'compact', 'TileSpacing', 'compact'); % Adjust grid size as needed
-% 
+%
 % for splitIdx = 1:nSplits
 %     % Extract the RDM for the current split
 %     rdm = all_splits_rdms(:, :, splitIdx);
-% 
+%
 %     % Convert the row of numbers in `splits` to a string
 %     titleStr = mat2str(splits(splitIdx, :));
-% 
+%
 %     % Create a new tile for each RDM
 %     nexttile;
 %     imagesc(rdm, [-0.2, 0.4]); % Display the RDM with colorbar range
-% 
+%
 %     title(titleStr, 'FontSize', 8); % Add the split title
 %     axis square; % Ensure square aspect ratio for RDM
 % end
-% 
+%
 % % Add a global title or axis labels if needed
 % sgtitle('RDMs for Each Split', 'FontSize', 14); % Super-title for the figure
 

@@ -1,5 +1,7 @@
 function ds_out = loadCosmoDataset(cfg, subID, mask_fn)
 
+if ~isfield(cfg, 'pca'); cfg.pca = true; end
+
 if strcmp(cfg.map, 't')
     % Initialize dataset cell array
     nTrials = cfg.nTrials;
@@ -69,6 +71,12 @@ if iscell(ds_per_run.sa.targets)
     ds_per_run.sa.targets = cell2mat(ds_per_run.sa.targets);
 end
 ds_out=cosmo_remove_useless_data(ds_per_run);
+
+% reduce number of features using PCA
+if cfg.pca
+    [ds_out, pca_params] = cosmo_map_pca(ds_out, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
+    ds_out.sa = ds_per_run.sa;
+end
 
 % check the dataset
 cosmo_check_dataset(ds_out);
