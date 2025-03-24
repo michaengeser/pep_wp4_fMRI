@@ -1,19 +1,15 @@
-function GLMsingle_new_script(subs)
+function GLMsingle_new_script(cfg)
 
-nRuns = 10;
+nRuns = 12;
 tr = 1.85;
 nTrials = 100;
-nVols = 152;
+nVols = 188;
 stimdur = 0.25;
 showReliability = false;
-nTargets = 50;
-
 
 %% make multiple condition files
-sortRows = true;
-includeTargets = true;
-create_mcf_func(subs, sortRows, includeTargets)
-
+cfg.sortRows = true;
+create_mcf_func(cfg)
 
 %% Define subjects and main path
 mainPath = fullfile(pwd, '..');
@@ -21,13 +17,9 @@ fmriPath = fullfile(mainPath, 'sourcedata');
 
 %% get data
 
-for iSub = 1:length(subs)
+for iSub = 1:length(cfg.subNums)
 
-    if subs(iSub) < 10
-        subID = ['sub-00', num2str(subs(iSub))];
-    elseif subs(iSub) < 100
-        subID = ['sub-0', num2str(subs(iSub))];
-    end
+    subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
     % make `derivatives` sub-directory if it doesn't exist yet
     if ~exist(fullfile(mainPath, 'derivatives', subID), 'dir')
@@ -102,18 +94,13 @@ for iSub = 1:length(subs)
             ones(size(mcf_file.trialIDs))*iRun,...
             cell2mat(mcf_file.onsets)];
 
-
         % check if number of conditions match onsets
         if ~numel(mcf_file.onsets) == nTrials
             warning('Onsets does not match number of conditions')
         end
 
         %% make design matrix
-        if includeTargets
-            design{iRun} = zeros(nVols, nTrials + nTargets);
-        else
-            design{iRun} = zeros(nVols, nTrials);
-        end
+        design{iRun} = zeros(nVols, nTrials);
 
         % set onset in correct TR
         for iTrials=1:size(design{iRun}, 2)
