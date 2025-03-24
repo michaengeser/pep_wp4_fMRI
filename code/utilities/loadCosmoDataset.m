@@ -47,20 +47,18 @@ if strcmp(cfg.map, 't')
 elseif strcmp(cfg.map, 'b')
 
     % get path
-    betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingle_betas', ...
-        'beta_sorted.nii');
+    betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
+        'GLMsingle_betas.nii');
 
     % load beta map
     ds_per_run = cosmo_fmri_dataset(betaPath, ...
         'mask', mask_fn); % Set brain mask
 
     % add chunks and targets
-    nSamples = height(ds_per_run.samples);
-    nSamplesPerRun = nSamples/cfg.nRuns;
-    ds_per_run.sa.targets = repmat(1:cfg.nTrials, 1, cfg.nRuns)';
-    preChunks = repmat(1:cfg.nRuns, nSamplesPerRun, 1);
-    ds_per_run.sa.chunks = reshape(preChunks,[],1);
-
+    ids = load(fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
+        'trialIDs.mat'));
+    ds_per_run.sa.targets = ids.trialIDs(:, 1);
+    ds_per_run.sa.chunks = ceil(ids.trialIDs(:, 2)/2);
 
 else
     error('map not defined')
@@ -74,7 +72,7 @@ ds_out=cosmo_remove_useless_data(ds_per_run);
 
 % reduce number of features using PCA
 if cfg.pca
-    [ds_out, pca_params] = cosmo_map_pca(ds_out, 'max_feature_count', 10000, 'pca_explained_ratio', 0.99);
+    [ds_out, pca_params] = cosmo_map_pca(ds_out, 'max_feature_count', 11000, 'pca_explained_ratio', 0.99);
     ds_out.sa = ds_per_run.sa;
 end
 

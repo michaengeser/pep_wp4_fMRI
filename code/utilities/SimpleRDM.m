@@ -1,40 +1,34 @@
-function res = SimpleRDM(subs, nTrials, map, rois)
+function res = SimpleRDM(cfg)
 
 % get number of ROI masks
-nmasks=numel(rois);
+nmasks=numel(cfg.rois);
 
 % loop through subjects
-for iSub = 1:length(subs)
-
-    if subs(iSub) < 10
-        subID = ['sub-00', num2str(subs(iSub))];
-    elseif subs(iSub) < 100
-        subID = ['sub-0', num2str(subs(iSub))];
-    end
+for iSub = 1:length(cfg.subNums)
+    subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
     % progress report
-    disp(['Starting spm RDM for subject ',  num2str(subs(iSub)), ' on ',...
-        map, '-map']);
+    disp(['Starting spm RDM for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
+        cfg.map, '-map']);
 
     % loop through ROIs
     for j=1:nmasks
 
-        mask_label=rois{j};
+        mask_label=cfg.rois{j};
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
 
-
         disp(['Using mask ',  mask_label]);
         disp(char(datetime))
 
-        if strcmp(map, 't')
+        if strcmp(cfg.map, 't')
 
             % Loop over runs to load data
             counter = 0;
             con_dir = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm_220/');
 
-            for trial = 1:nTrials
+            for trial = 1:cfg.nTrials
                 counter = counter + 1;
 
                 % Load the contrast image for this run and trial
@@ -60,32 +54,15 @@ for iSub = 1:length(subs)
             % corrleate t maps
             rdm_corr = corr(ds_per_run.samples', 'type', 'Spearman');
 
-        elseif strcmp(map, 'b')
+        elseif strcmp(cfg.map, 'b')
 
-            % get path
-            betaPath = fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
-                'GLMsingle_betas.nii');
-
-            % load beta map
-            ds_per_run = cosmo_fmri_dataset(betaPath, ...
-                'mask', mask_fn); % Set brain mask
-
-            % add chunks and targets
-            load(fullfile(pwd, '..', 'derivatives', subID, 'GLMsingleEstimates', ...
-                'trialIDs.mat'));
-            ds_per_run.sa.targets = trialIDs(:, 1);
-            ds_per_run.sa.chunks = trialIDs(:, 2);
-
-            % remove living room trials trials (target > 100)
-            ds_per_run = cosmo_slice(ds_per_run, (ds_per_run.sa.targets <= 100), 1);
-
-            % remove constant features
-            ds=cosmo_remove_useless_data(ds_per_run);
+            % get datasetn in Cosmo format
+            ds = loadCosmoDataset(cfg, subID, mask_fn);
 
             %% Get mean betas of glm single estimates
 
             meanBeta = [];
-            for s1 = 1:nTrials
+            for s1 = 1:cfg.nTrials
 
                 % Subset data for the two stimuli
                 ds_stim = cosmo_slice(ds, ds.sa.targets == s1);
@@ -105,15 +82,15 @@ for iSub = 1:length(subs)
         subID2 = strrep(subID, '-', '');
 
         % get within and between category correlation
-        rdm_corr(eye(nTrials, nTrials) == 1) = 0;
-        withinCate = [squareform(rdm_corr(1:nTrials/2, 1:nTrials/2)), ...
-            squareform(rdm_corr(nTrials/2 + 1:end, nTrials/2 + 1:end))];
-        betweenCate = reshape(rdm_corr(nTrials/2 + 1:end, 1:nTrials/2), 1, []);
+        rdm_corr(eye(cfg.nTrials, cfg.nTrials) == 1) = 0;
+        withinCate = [squareform(rdm_corr(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
+            squareform(rdm_corr(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
+        betweenCate = reshape(rdm_corr(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
 
         % store in structure
-        res.(map).(subID2).(mask_label_short).rdm_corr = rdm_corr;
-        res.(map).(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr));
-        res.(map).(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
+        res.(cfg.map).(subID2).(mask_label_short).rdm_corr = rdm_corr;
+        res.(cfg.map).(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr));
+        res.(cfg.map).(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
 
     end
 end
@@ -122,9 +99,12 @@ end
 
 % define output folder and name
 outputFolder = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM');
-outputName = ['results_RDM_of_mean_correaltion_on_', map, '-map.mat'];
+if ~exist(outputFolder, 'dir')
+    mkdir(outputFolder);
+end
+outputName = ['results_RDM_of_mean_correaltion_on_', cfg.map, '-map.mat'];
 
-% save 
+% save
 save(fullfile(outputFolder, outputName), 'res')
 
 
@@ -132,22 +112,22 @@ save(fullfile(outputFolder, outputName), 'res')
 %% ploting
 
 % Get list of subjects and ROIs
-subjects = fieldnames(res.(map));
-masks = fieldnames(res.(map).(subjects{1}));
+subjects = fieldnames(res.(cfg.map));
+masks = fieldnames(res.(cfg.map).(subjects{1}));
 
 % Initialize data storage
 num_subjects = numel(subjects);
 num_rois = numel(masks);
 all_data = nan(num_subjects, num_rois);
-all_rdms = nan(num_subjects, num_rois, nTrials, nTrials);
+all_rdms = nan(num_subjects, num_rois, cfg.nTrials, cfg.nTrials);
 
 % Collect data
 for i_sub = 1:num_subjects
     subID = subjects{i_sub};
     for i_roi = 1:num_rois
         mask_label = masks{i_roi};
-        all_data(i_sub, i_roi) = res.(map).(subID).(mask_label).corr_cate_diff;
-        all_rdms(i_sub, i_roi, :, :) = res.(map).(subID).(mask_label).rdm_corr;
+        all_data(i_sub, i_roi) = res.(cfg.map).(subID).(mask_label).corr_cate_diff;
+        all_rdms(i_sub, i_roi, :, :) = res.(cfg.map).(subID).(mask_label).rdm_corr;
     end
 end
 
@@ -192,7 +172,7 @@ hold off;
 %% make tiled figure with mean rsm of each ROI
 figure;
 title('Mean pairwise correlation');
-allRoiRDMs = nan(nTrials^2, num_rois);
+allRoiRDMs = nan(cfg.nTrials^2, num_rois);
 
 for i_roi = 1:num_rois
     nexttile
@@ -202,7 +182,7 @@ for i_roi = 1:num_rois
     allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
 
     % plot RDM
-    imagesc(roiRDM, [-1, 1])
+    imagesc(roiRDM, [-0.1, 0.1])
     colorbar;
     title(masks{i_roi});
 end
@@ -211,7 +191,7 @@ end
 nexttile
 corrRois = corr(allRoiRDMs, 'type', 'Spearman');
 
-imagesc(corrRois, [0.5, 1])
+imagesc(corrRois, [-0.5, 0.5])
 colorbar;
 title('inter-ROI correlation');
 
@@ -221,5 +201,29 @@ xticklabels(masks);
 yticks(1:num_rois);
 yticklabels(masks);
 
+%% is-rdm
+
+figure;
+title('IS RDMs across the whole RDM');
+for i_roi = 1:num_rois
+    nexttile
+
+    % make a matrix with vectorized RDMs
+    for i_sub = 1:num_subjects
+        rdm = squeeze(all_rdms(i_sub, i_roi, :, :));
+        rdm(eye(size(rdm)) == 1) = 0;
+        RDMmat(:, i_sub) = squareform(rdm);
+    end
+
+    % make and plot IS-RDM
+    cfg.correlation_type = 'spearman';
+    cfg.labels = cfg.subNums;
+    cfg.cell_label_style = 'coef';
+    cfg.plotting = true;
+    cfg.new_figure = false;
+    cfg.dissimilarity = false;
+    [~, ~, ~] = make_RDM(RDMmat, cfg);
+    title(masks{i_roi});
+end
 
 end

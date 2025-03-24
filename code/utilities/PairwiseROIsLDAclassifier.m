@@ -39,6 +39,7 @@ for iSub = 1:length(cfg.subNums)
         if isempty(gcp('nocreate'))
             parpool(8);
         end
+        nTrials = cfg.nTrials;
         parfor stim1 = 1:nTrials
             for stim2 = 1:nTrials
                 if ~(stim2 > stim1)
@@ -119,7 +120,6 @@ errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth',
 yline(0.5, '--r', 'Chance Level', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
 
 % Add jittered individual points
-rng(0); % For reproducible jitter
 jitter_amount = 0.1; % Adjust jitter spread
 for i_roi = 1:num_rois
     x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
@@ -224,4 +224,30 @@ ylim([min(min(diff_per_sub))-0.005, max(max(diff_per_sub))+0.005])
 title('Within - Between category pairwise correaltion');
 
 hold off;
+
+%% is-rdm
+
+figure;
+title('IS RDMs across the whole RDM');
+
+for i_roi = 1:num_rois
+    nexttile
+
+    % make a matrix with vectorized RDMs
+    for i_sub = 1:num_subjects
+        RDMmat(:, i_sub) = squareform(all_rdm_data(:, :, i_sub, i_roi));
+    end
+
+    % make and plot IS-RDM
+    cfg.correlation_type = 'spearman';
+    cfg.labels = cfg.subNums;
+    cfg.cell_label_style = 'coef';
+    cfg.plotting = true;
+    cfg.new_figure = false;
+    cfg.dissimilarity = false;
+    [~, ~, ~] = make_RDM(RDMmat, cfg);
+    title(masks{i_roi});
+end
+
+
 end
