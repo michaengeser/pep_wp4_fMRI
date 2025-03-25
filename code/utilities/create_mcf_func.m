@@ -57,41 +57,43 @@ function create_mcf_func(cfg)
                 'names', 'onsets', 'durations', 'trialIDs', 'trialNums');
         end
     
-%         %% Onsets for localizer
-%         clear onsets names durations;
-%         
-%         % create sub-directory for onsets if it doesn't exist yet
-%         if ~exist(fullfile(locPath, 'onsets'))
-%             mkdir(fullfile(locPath, 'onsets'));
-%         end
-%     
-%         % get localizer `.mat` file for current participant
-%         locFile = load(fullfile(locPath, 'data', ...
-%             sprintf('localizer%s.mat', num2str(cfg.subNums(iSub)))));
-%     
-%         % assign onsets of each image block to structure
-%         i = 0;
-%         catName = {'scenes' 'objects' 'scramble'};
-%     
-%         for cat = 1:3  % scene, object, or scramble (excl. fixation)?
-%             i = i + 1;
-%     
-%             % get block names
-%             names{i,1} = catName{cat};
-%     
-%             % get block onset
-%             allOnsets = locFile.dat.onset( ...
-%                 locFile.dat.random_trials(:,1) == cat & ...
-%                 locFile.dat.random_trials(:,3) == 1 ...
-%             );
-%             onsets{i,1} = allOnsets;
-%     
-%             % get block duration
-%             durations{i,1} = ones(size(onsets{i,1})) * 16;
-%         end
-% 
-%         % save onsets
-%         fileName = sprintf('mcf_%s_localizer.mat', subID);
-%         save(fullfile(locPath, 'onsets', fileName), 'names', 'onsets', 'durations');
+        %% Onsets for localizer
+        clear onsets names durations;
+        
+        % create sub-directory for onsets if it doesn't exist yet
+        if ~exist(fullfile(locPath, 'onsets'))
+            mkdir(fullfile(locPath, 'onsets'));
+        end
+    
+        % get localizer `.mat` file for current participant
+        locFileDir = fullfile(locPath, ...
+            sprintf('DynLoc_%s_*.mat', num2str(cfg.subNums(iSub))));
+        locFiles = dir(locFileDir);
+        load(fullfile(locPath, locFiles(1).name),...
+            'allBlock', 'condMatrixShuffled', 'videoStartTimes')
+    
+        % make block info matrix
+        blockInfos(:, 1) = condMatrixShuffled';
+        blockInfos(:, 2) = videoStartTimes(:, 1);
+        blockInfos(:, 3) = allBlock;
+
+        % assign onsets of each image block to structure
+        catName = {'face', 'scenes' 'objects' 'scramble'};
+    
+        for i = 1:height(blockInfos)  % face, scene, object, or scramble 
+    
+            % get block names
+            names{i,1} = catName{blockInfos(i, 1)};
+    
+            % get block onset
+            onsets{i,1} = blockInfos(i, 2);
+    
+            % get block duration
+            durations{i,1} = blockInfos(i, 3);
+        end
+
+        % save onsets
+        fileName = sprintf('mcf_%s_localizer.mat', subID);
+        save(fullfile(locPath, 'onsets', fileName), 'names', 'onsets', 'durations');
     end
 end

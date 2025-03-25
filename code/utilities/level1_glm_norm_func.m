@@ -1,6 +1,6 @@
 function level1_glm_norm_func(cfg)
 
-% 
+%
 if ~isfield(cfg, 'hpf'); cfg.hpf = 128; end
 if ~isfield(cfg, 'runwise'); cfg.runwise = true; end
 
@@ -27,84 +27,88 @@ for iSub = 1:length(cfg.subNums)
         mkdir(fullfile(mainPath, 'derivatives', subID));
     end
 
-%     %% Estimate model for localizer
-%     % make localizer sub-sub-directory if it doesn't exist yet
-%     if ~exist(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'), 'dir')
-%         mkdir(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'));
-%     end
-% 
-%     % model specification
-%     matlabbatch{1}.spm.stats.fmri_spec.dir = {fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm')};
-%     matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
-%     matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.85;
-%     matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t = 16;
-%     matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
-% 
-%     % get each localizer scan's `.nii` file
-%     locFiles = dir(fullfile(mainPath, 'derivatives', subID, 'func', ...
-%         sprintf('wr%s%s_task-localizer_bold_*.nii', subID, 'xxxx')));
-% 
-%     locPaths = cell(1, length(locFiles));
-%     for i = 1:length(locFiles)
-%         locPaths{i} = [fullfile(locFiles(i).folder, locFiles(i).name), ',1'];
-%     end
-% 
-%     % get `mcf` file
-%     mcf = fullfile(mainPath, 'localizer', 'onsets',...
-%         sprintf('mcf_%s_localizer.mat', subID));
-% 
-%     % get motion regressors
-%     moRegs = fullfile(mainPath, 'derivatives', subID, 'func',...
-%         sprintf('rp_%s%s_task-localizer_bold_00001.txt', subID, 'xxxx'));
-% 
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.scans = locPaths';  % needs to be single-column cell array (hence transpose)
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.multi = {mcf};  % multiple-condition file goes here
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.multi_reg = {moRegs};  % motion regressors
-%     matlabbatch{1}.spm.stats.fmri_spec.sess.hpf = 128;
-%     matlabbatch{1}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
-%     matlabbatch{1}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
-%     matlabbatch{1}.spm.stats.fmri_spec.volt = 1;
-%     matlabbatch{1}.spm.stats.fmri_spec.global = 'None';
-%     matlabbatch{1}.spm.stats.fmri_spec.mthresh = 0.8;
-%     matlabbatch{1}.spm.stats.fmri_spec.mask = {''};
-%     matlabbatch{1}.spm.stats.fmri_spec.cvi = 'AR(1)';
-% 
-%     % model estimation
-%     matlabbatch{2}.spm.stats.fmri_est.spmmat(1) = cfg_dep('fMRI model specification: SPM.mat File', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
-%     matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
-%     matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
-% 
-%     % contrasts
-%     matlabbatch{3}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
-%     matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'scenes > objects';
-%     matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = [1 -1];
-%     matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
-%     matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'scenes > scramble';
-%     matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = [1 0 -1];
-%     matlabbatch{3}.spm.stats.con.consess{2}.tcon.sessrep = 'none';
-%     matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'objects > scramble';
-%     matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = [0 1 -1];
-%     matlabbatch{3}.spm.stats.con.consess{3}.tcon.sessrep = 'none';
-%     matlabbatch{3}.spm.stats.con.delete = 0;
-% 
-%     % go!
-%     % repeat 3 times when crashing
-%     maxRetries = 3;
-%     for attempt = 1:maxRetries
-%         try
-%             spm_jobman('run', matlabbatch);
-%             break; % Exit loop if successful
-%         catch ME
-%             if attempt == maxRetries
-%                 error('Failed after %d attempts: %s', maxRetries, ME.message);
-%             else
-%                 disp(['Retrying: Attempt ', num2str(attempt)]);
-%                 pause(1); % Small delay before retry
-%             end
-%         end
-%     end
+    %% Estimate model for localizer
+    % make localizer sub-sub-directory if it doesn't exist yet
+    if ~exist(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'), 'dir')
+        mkdir(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'));
+    end
+
+    % model specification
+    matlabbatch{1}.spm.stats.fmri_spec.dir = {fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm')};
+    matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
+    matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.85;
+    matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t = 16;
+    matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t0 = 8;
+
+    % get each localizer scan's `.nii` file
+    locFiles = dir(fullfile(mainPath, 'derivatives', subID, 'func', ...
+        sprintf('wr%s%s_task-localizer_bold_*.nii', subID, 'xxxx')));
+
+    locPaths = cell(1, length(locFiles));
+    for i = 1:length(locFiles)
+        locPaths{i} = [fullfile(locFiles(i).folder, locFiles(i).name), ',1'];
+    end
+
+    % get `mcf` file
+    mcf = fullfile(mainPath, 'localizer', 'onsets',...
+        sprintf('mcf_%s_localizer.mat', subID));
+    mcf_file = load(mcf);
+
+    % get motion regressors
+    moRegs = fullfile(mainPath, 'derivatives', subID, 'func',...
+        sprintf('rp_%s%s_task-localizer_bold_00001.txt', subID, 'xxxx'));
+
+    matlabbatch{1}.spm.stats.fmri_spec.sess.scans = locPaths';  % needs to be single-column cell array (hence transpose)
+    matlabbatch{1}.spm.stats.fmri_spec.sess.cond = struct('name', {}, 'onset', {}, 'duration', {}, 'tmod', {}, 'pmod', {}, 'orth', {});
+    matlabbatch{1}.spm.stats.fmri_spec.sess.multi = {mcf};  % multiple-condition file goes here
+    matlabbatch{1}.spm.stats.fmri_spec.sess.regress = struct('name', {}, 'val', {});
+    matlabbatch{1}.spm.stats.fmri_spec.sess.multi_reg = {moRegs};  % motion regressors
+    matlabbatch{1}.spm.stats.fmri_spec.sess.hpf = 128;
+    matlabbatch{1}.spm.stats.fmri_spec.fact = struct('name', {}, 'levels', {});
+    matlabbatch{1}.spm.stats.fmri_spec.bases.hrf.derivs = [0 0];
+    matlabbatch{1}.spm.stats.fmri_spec.volt = 1;
+    matlabbatch{1}.spm.stats.fmri_spec.global = 'None';
+    matlabbatch{1}.spm.stats.fmri_spec.mthresh = 0.8;
+    matlabbatch{1}.spm.stats.fmri_spec.mask = {''};
+    matlabbatch{1}.spm.stats.fmri_spec.cvi = 'AR(1)';
+
+    % model estimation
+    matlabbatch{2}.spm.stats.fmri_est.spmmat(1) = cfg_dep('fMRI model specification: SPM.mat File', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
+    matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
+    matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
+
+    % contrasts
+    scenesVec = strcmp('scenes', mcf_file.names)';
+    objectsVec = strcmp('objects', mcf_file.names)';
+    scrambleVec = strcmp('scramble', mcf_file.names)';
+    matlabbatch{3}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
+    matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'scenes > objects';
+    matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = scenesVec - objectsVec;
+    matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
+    matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'scenes > scramble';
+    matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = scenesVec - scrambleVec;
+    matlabbatch{3}.spm.stats.con.consess{2}.tcon.sessrep = 'none';
+    matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'objects > scramble';
+    matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = objectsVec - scrambleVec;
+    matlabbatch{3}.spm.stats.con.consess{3}.tcon.sessrep = 'none';
+    matlabbatch{3}.spm.stats.con.delete = 0;
+
+    % go!
+    % repeat 3 times when crashing
+    maxRetries = 3;
+    for attempt = 1:maxRetries
+        try
+            spm_jobman('run', matlabbatch);
+            break; % Exit loop if successful
+        catch ME
+            if attempt == maxRetries
+                error('Failed after %d attempts: %s', maxRetries, ME.message);
+            else
+                disp(['Retrying: Attempt ', num2str(attempt)]);
+                pause(1); % Small delay before retry
+            end
+        end
+    end
 
     clear matlabbatch;
 
@@ -216,25 +220,29 @@ for iSub = 1:length(cfg.subNums)
             % clear contrasts?
             matlabbatch{3}.spm.stats.con.delete = 0;  % no!
 
-            % go!
-            % repeat 3 times when crashing
-            maxRetries = 3;
-            for attempt = 1:maxRetries
-                try
-                    spm_jobman('run', matlabbatch);
-                    break; % Exit loop if successful
-                catch ME
-                    if attempt == maxRetries
-                        error('Failed after %d attempts: %s', maxRetries, ME.message);
-                    else
-                        disp(['Retrying: Attempt ', num2str(attempt)]);
-                        pause(1); % Small delay before retry
-                    end
-                end
-            end
-            disp(['Estimated (normalized) model for subject ', ...
-                num2str(cfg.subNums(iSub)), ' run ', num2str(run), '!']);
+            %             % go!
+            %             % repeat 3 times when crashing
+            %             maxRetries = 3;
+            %             for attempt = 1:maxRetries
+            %                 try
+            %                     spm_jobman('run', matlabbatch);
+            %                     break; % Exit loop if successful
+            %                 catch ME
+            %                     if attempt == maxRetries
+            %                         error('Failed after %d attempts: %s', maxRetries, ME.message);
+            %                     else
+            %                         disp(['Retrying: Attempt ', num2str(attempt)]);
+            %                         pause(1); % Small delay before retry
+            %                     end
+            %                 end
+            %             end
+            %             disp(['Estimated (normalized) model for subject ', ...
+            %                 num2str(cfg.subNums(iSub)), ' run ', num2str(run), '!']);
 
+
+            % save trial IDs
+            trialIDs = mcf_file.trialIDs;
+            save(fullfile(outputDir, 'trialIDs.mat'), "trialIDs")
         end
     end
 end
