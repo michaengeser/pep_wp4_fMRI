@@ -200,11 +200,10 @@ title('Mean of crossvalidated RDMs across ROIs');
 
 hold off;
 
-% plot rdms 
+%% plot rdms 
 
 % take mean across subjects
 mean_all_rdm_data = squeeze(mean(all_rdm_data, 3));
-
 
 figure;
 title('Mean pairwise dissimilarity');
@@ -214,12 +213,22 @@ for i_roi = 1:num_rois
 
     % get RDM for ROI
     roiRDM = mean_all_rdm_data(:, :, i_roi);
+    allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
 
     % plot RDM
     imagesc(roiRDM, [-0.05, 0.05])
     colorbar;
     title(masks{i_roi});
 end
+
+% get inter-roi correlation
+nexttile
+corrRois = corr(allRoiRDMs, 'type', 'Spearman');
+
+imagesc(corrRois, [-0.5, 0.5])
+colorbar;
+title('inter-ROI correlation');
+
 
 %% Create bar plot with comparison of within and between category
 

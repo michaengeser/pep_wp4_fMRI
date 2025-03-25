@@ -153,12 +153,22 @@ for i_roi = 1:num_rois
 
     % get RDM for ROI
     roiRDM = mean_all_rdm_data(:, :, i_roi);
-
+    allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
+    
     % plot RDM
     imagesc(roiRDM, [0.40, 0.60])
     colorbar;
     title(masks{i_roi});
 end
+
+% get inter-roi correlation
+nexttile
+corrRois = corr(allRoiRDMs, 'type', 'Spearman');
+
+imagesc(corrRois, [-0.5, 0.5])
+colorbar;
+title('inter-ROI correlation');
+
 
 % % get inter-roi correlation
 % nexttile

@@ -136,6 +136,10 @@ verticalTable2 = verticalTable(~isnan(verticalTable.accuracy_102), :);
 verticalTable3 = verticalTable(: ,contains(verticalTable.Properties.VariableNames, 'acc'));
 cor_rdm = corr(table2array(verticalTable3), 'rows', 'pairwise');
 
+% get target structure
+targetDir = fullfile('pwd', '..', 'code', 'utilities', 'targets.mat');
+load(targetDir)
+
 warning('off')
 endTable = [];
 for i = 1:12
