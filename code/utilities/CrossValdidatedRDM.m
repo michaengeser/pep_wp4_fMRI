@@ -1,6 +1,5 @@
 function res = CrossValdidatedRDM(cfg)
 
-
 %% get data
 dist = 'spearman';
 % get number of ROI masks
@@ -15,11 +14,9 @@ for iSub = 1:length(cfg.subNums)
     disp(['Starting cross validated RDMg for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
         cfg.map, '-map']);
 
-
     for j=1:nmasks
 
         mask_label=cfg.rois{j};
-        mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
 
@@ -27,7 +24,7 @@ for iSub = 1:length(cfg.subNums)
         disp(char(datetime))
 
         % get datasetn in Cosmo format
-        ds = loadCosmoDataset(cfg, subID, mask_fn);
+        ds = loadCosmoDataset(cfg, subID, mask_label);
 
         % save data set
         save(fullfile(pwd, '..', 'derivatives', subID,...

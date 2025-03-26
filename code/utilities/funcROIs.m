@@ -1,9 +1,8 @@
 function funcROIs(cfg)
 
 %% Configuration
-if ~isfield(cfg, 'roi_names'); cfg.roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
-if ~isfield(cfg, 'n_voxels'); cfg.n_voxels = 100; end
-
+if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
+if ~isfield(cfg, 'n_voxels'); cfg.n_voxels = 200; end
 
 % Define subject IDs
 main_path = fullfile(pwd, '..', 'derivatives'); % Base directory for derivatives
@@ -18,9 +17,9 @@ if ~exist(output_dir, 'dir')
 end
 
 %% Load ROI masks
-roi_masks = cell(1, numel(cfg.roi_names));
-for j = 1:numel(cfg.roi_names)
-    roiFilName = ['w', cfg.roi_names{j}, '.nii'];
+roi_masks = cell(1, numel(cfg.func_roi_names));
+for j = 1:numel(cfg.func_roi_names)
+    roiFilName = ['w', cfg.func_roi_names{j}, '.nii'];
     mask_nii = load_untouch_nii(fullfile(ROI_dir, roiFilName));
     newMaskImg = mask_nii.img;
     if max(max(max(double(newMaskImg)))) > 1
@@ -50,13 +49,13 @@ for s = 1:numel(cfg.subNums)
     end
 
     % Generate ROIs for each region
-    for r = 1:numel(cfg.roi_names)
-        %disp(['  Generating ROI: ', cfg.roi_names{r}]);
+    for r = 1:numel(cfg.func_roi_names)
+        %disp(['  Generating ROI: ', cfg.func_roi_names{r}]);
 
         % Select the appropriate contrast map based on ROI
-        if ismember(cfg.roi_names{r}, {'PPA', 'TOS', 'RSC'})
+        if ismember(cfg.func_roi_names{r}, {'PPA', 'TOS', 'RSC'})
             contrast_map = single(contrast_data{1}); % Scene > Objects
-        elseif ismember(cfg.roi_names{r}, {'LOC'})
+        elseif ismember(cfg.func_roi_names{r}, {'LOC'})
             contrast_map = single(contrast_data{2}); % Objects > Scramble
         else
             continue;
@@ -85,12 +84,12 @@ for s = 1:numel(cfg.subNums)
         if ~exist(sub_output_dir, 'dir')
             mkdir(sub_output_dir);
         end
-        output_fn = fullfile(sub_output_dir, [cfg.roi_names{r}, '_funcROI.nii']);
+        output_fn = fullfile(sub_output_dir, [cfg.func_roi_names{r}, '_funcROI.nii']);
         roi_nii = mask_nii; % Use the mask NIfTI as a template
         roi_nii.img = functional_roi;
         save_untouch_nii(roi_nii, output_fn);
 
-        disp(['    Saved functional ROI for ', cfg.roi_names{r}, ' to ', output_fn]);
+        disp(['    Saved functional ROI for ', cfg.func_roi_names{r}, ' to ', output_fn]);
     end
 end
 

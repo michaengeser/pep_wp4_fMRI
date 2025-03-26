@@ -3,7 +3,7 @@
 % This script follows the BIDS standards and is designed for fMRI use with Psychtoolbox.
 
 % Housekeeping
-clear; close all
+clear; %close all
 
 %% Collect subject ID
 cfg.subjectID = input('Enter subject number: ', 's');

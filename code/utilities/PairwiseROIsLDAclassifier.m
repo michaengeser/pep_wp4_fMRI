@@ -1,5 +1,7 @@
 function res = PairwiseROIsLDAclassifier(cfg)
 
+% evaluate input
+if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
 
 % Define classifiers
 classifier = @cosmo_classify_lda;
@@ -19,14 +21,14 @@ for iSub = 1:length(cfg.subNums)
 
     for j=1:nmasks
 
+        % get current mask 
         mask_label=cfg.rois{j};
-        mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
 
-        disp(['Using mask ',  mask_label]);
+        disp(['Using mask ', mask_label]);
         disp(char(datetime))
 
         % get datasetn in Cosmo format
-        ds = loadCosmoDataset(cfg, subID, mask_fn);
+        ds = loadCosmoDataset(cfg, subID, mask_label);
 
         %% Pairwise decoding
         % Initialize RDM

@@ -22,6 +22,10 @@ for iSub = 1:length(cfg.subNums)
     % subject ID
     subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
+    % progress report
+    disp(['Starting first level glm in SPM for subject ',...
+        num2str(cfg.subNums(iSub))]);
+
     % make `derivatives` sub-directory if it doesn't exist yet
     if ~exist(fullfile(mainPath, 'derivatives', subID), 'dir')
         mkdir(fullfile(mainPath, 'derivatives', subID));
@@ -78,18 +82,15 @@ for iSub = 1:length(cfg.subNums)
     matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
 
     % contrasts
-    scenesVec = strcmp('scenes', mcf_file.names)';
-    objectsVec = strcmp('objects', mcf_file.names)';
-    scrambleVec = strcmp('scramble', mcf_file.names)';
     matlabbatch{3}.spm.stats.con.spmmat(1) = cfg_dep('Model estimation: SPM.mat File', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','spmmat'));
     matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'scenes > objects';
-    matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = scenesVec - objectsVec;
+    matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = [0, 1, -1, 0];
     matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
     matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'scenes > scramble';
-    matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = scenesVec - scrambleVec;
+    matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = [0, 1, 0, -1];
     matlabbatch{3}.spm.stats.con.consess{2}.tcon.sessrep = 'none';
     matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'objects > scramble';
-    matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = objectsVec - scrambleVec;
+    matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = [0, 0, 1, -1];
     matlabbatch{3}.spm.stats.con.consess{3}.tcon.sessrep = 'none';
     matlabbatch{3}.spm.stats.con.delete = 0;
 
@@ -104,7 +105,7 @@ for iSub = 1:length(cfg.subNums)
             if attempt == maxRetries
                 error('Failed after %d attempts: %s', maxRetries, ME.message);
             else
-                disp(['Retrying: Attempt ', num2str(attempt)]);
+                disp(['Retrying: Attempt ', num2str(attempt + 1)]);
                 pause(1); % Small delay before retry
             end
         end

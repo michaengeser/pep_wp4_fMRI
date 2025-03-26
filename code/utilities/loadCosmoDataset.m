@@ -1,6 +1,18 @@
-function ds_out = loadCosmoDataset(cfg, subID, mask_fn)
+function ds_out = loadCosmoDataset(cfg, subID, mask_label)
 
+% evaluate input
 if ~isfield(cfg, 'pca'); cfg.pca = true; end
+
+% get mask directory
+funcROIname = [mask_label(2:4), '_funcROI.nii'];
+funcROIdir = fullfile(pwd, '..', 'MNI_ROIs', 'func_ROIs', subID, funcROIname);
+
+% if functional defined ROI available take that
+if exist(funcROIdir, 'file')
+    mask_fn = funcROIdir;
+else
+    mask_fn = fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
+end
 
 if strcmp(cfg.map, 't')
     % Initialize dataset cell array

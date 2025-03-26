@@ -8,7 +8,7 @@ for iSub = 1:length(cfg.subNums)
     subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
 
     % progress report
-    disp(['Starting spm RDM for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
+    disp(['Starting simple RDM for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
         cfg.map, '-map']);
 
     % loop through ROIs
@@ -57,7 +57,7 @@ for iSub = 1:length(cfg.subNums)
         elseif strcmp(cfg.map, 'b')
 
             % get datasetn in Cosmo format
-            ds = loadCosmoDataset(cfg, subID, mask_fn);
+            ds = loadCosmoDataset(cfg, subID, mask_label);
 
             %% Get mean betas of glm single estimates
 

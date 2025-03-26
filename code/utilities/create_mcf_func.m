@@ -80,16 +80,19 @@ function create_mcf_func(cfg)
         % assign onsets of each image block to structure
         catName = {'face', 'scenes' 'objects' 'scramble'};
     
-        for i = 1:height(blockInfos)  % face, scene, object, or scramble 
-    
+        for i = 1:4  % face, scene, object, or scramble 
+
+            % filter block info
+            catBlockInfo = blockInfos(blockInfos(:, 1)' == i, :);
+
             % get block names
-            names{i,1} = catName{blockInfos(i, 1)};
-    
+            names{i,1} = catName{i};
+
             % get block onset
-            onsets{i,1} = blockInfos(i, 2);
-    
+            onsets{i,:} = catBlockInfo(:, 2)';
+
             % get block duration
-            durations{i,1} = blockInfos(i, 3);
+            durations{i,:} = catBlockInfo(:, 3)';
         end
 
         % save onsets
