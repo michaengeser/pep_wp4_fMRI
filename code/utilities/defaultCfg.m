@@ -14,7 +14,7 @@ if ~isfield(cfg, 'nTargets'); cfg.nTargets = 0;end
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
-if ~isfield(cfg, 'map'); cfg.map = 't';end
+if ~isfield(cfg, 'map'); cfg.map = 'b';end
 if ~isfield(cfg, 'rois'); cfg.rois = {'wV1.nii', 'wV2.nii',...
         'wLOC.nii', 'wPPA.nii',...
         'wTOS.nii', 'wRSC.nii'};

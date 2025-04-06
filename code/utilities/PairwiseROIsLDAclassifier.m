@@ -2,6 +2,8 @@ function res = PairwiseROIsLDAclassifier(cfg)
 
 % evaluate input
 if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
+if ~isfield(cfg, 'makeBetweenComparison'); cfg.makeBetweenComparison = false; end
+makeBetweenComparison = cfg.makeBetweenComparison;
 
 % Define classifiers
 classifier = @cosmo_classify_lda;
@@ -21,7 +23,7 @@ for iSub = 1:length(cfg.subNums)
 
     for j=1:nmasks
 
-        % get current mask 
+        % get current mask
         mask_label=cfg.rois{j};
 
         disp(['Using mask ', mask_label]);
@@ -46,6 +48,14 @@ for iSub = 1:length(cfg.subNums)
             for stim2 = 1:nTrials
                 if ~(stim2 > stim1)
                     continue
+                end
+
+                % check whether its a between stimulus comparison
+                if ~makeBetweenComparison
+                    if (stim2 >= nTrials/2 && stim1 < nTrials/2)
+                        rdm(stim2, stim1) = NaN;
+                        continue
+                    end
                 end
 
                 % Subset data for the two stimuli
@@ -74,7 +84,7 @@ for iSub = 1:length(cfg.subNums)
         subID2 = strrep(subID, '-', '');
 
         res.(subID2).(mask_label_short).rdm = rdm;
-        res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm));
+        res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm), 'omitnan');
     end
 end
 
@@ -107,7 +117,7 @@ end
 
 %% bar plot
 % Compute mean and standard deviation for each ROI
-mean_data = mean(all_data, 1);
+mean_data = mean(all_data, 1, 'omitnan');
 std_data = std(all_data, 0, 1);
 
 % Create bar plot
@@ -156,7 +166,7 @@ for i_roi = 1:num_rois
     % get RDM for ROI
     roiRDM = mean_all_rdm_data(:, :, i_roi);
     allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
-    
+
     % plot RDM
     imagesc(roiRDM, [0.40, 0.60])
     colorbar;
@@ -165,9 +175,9 @@ end
 
 % get inter-roi correlation
 nexttile
-corrRois = corr(allRoiRDMs, 'type', 'Spearman');
+corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
 
-imagesc(corrRois, [-0.5, 0.5])
+imagesc(corrRois, [-0.7, 0.7])
 colorbar;
 title('inter-ROI correlation');
 
@@ -201,41 +211,43 @@ for i_roi = 1:num_rois
         diff_per_sub(i_roi, i_sub) = mean(withinCate) - mean(betweenCate);
     end
     % take the mean
-    mean_diff(i_roi) = mean(diff_per_sub(i_roi, :));
+    mean_diff(i_roi) = mean(diff_per_sub(i_roi, :), 'omitnan');
     std_diff(i_roi) = std(diff_per_sub(i_roi, :));
 end
 
-% plot within - between difference
-figure;
-hold on;
+if makeBetweenComparison
+    % plot within - between difference
+    figure;
+    hold on;
 
-% Bar plot with error bars
-bar_handle = bar(mean_diff, 'FaceColor', 'flat');
-errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+    % Bar plot with error bars
+    bar_handle = bar(mean_diff, 'FaceColor', 'flat');
+    errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
 
-% Add horizontal line at chance level
-yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+    % Add horizontal line at chance level
+    yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
 
-% Add jittered individual points
-rng(0); % For reproducible jitter
-jitter_amount = 0.1; % Adjust jitter spread
-for i_roi = 1:num_rois
-    x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-    scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-    for i_sub = 1:num_subjects
-        text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
+    % Add jittered individual points
+    rng(0); % For reproducible jitter
+    jitter_amount = 0.1; % Adjust jitter spread
+    for i_roi = 1:num_rois
+        x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+        scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+        for i_sub = 1:num_subjects
+            text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
+        end
     end
+
+    % Customize plot
+    xticks(1:num_rois);
+    xticklabels(masks);
+    xlabel('ROI');
+    ylabel('Pariwise decoding diff');
+    ylim([min(min(diff_per_sub))-0.005, max(max(diff_per_sub))+0.005])
+    title('Within - Between category pairwise correaltion');
+
+    hold off;
 end
-
-% Customize plot
-xticks(1:num_rois);
-xticklabels(masks);
-xlabel('ROI');
-ylabel('Pariwise decoding diff');
-ylim([min(min(diff_per_sub))-0.005, max(max(diff_per_sub))+0.005])
-title('Within - Between category pairwise correaltion');
-
-hold off;
 
 %% is-rdm
 
@@ -260,6 +272,5 @@ for i_roi = 1:num_rois
     [~, ~, ~] = make_RDM(RDMmat, cfg);
     title(masks{i_roi});
 end
-
 
 end

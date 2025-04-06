@@ -1,5 +1,7 @@
 function res = SimpleRDM(cfg)
 
+if ~isfield(cfg, 'makeBetweenComparison'); cfg.makeBetweenComparison = false; end
+
 % get number of ROI masks
 nmasks=numel(cfg.rois);
 
@@ -68,10 +70,10 @@ for iSub = 1:length(cfg.subNums)
                 ds_stim = cosmo_slice(ds, ds.sa.targets == s1);
 
                 % take mean
-                meanBeta(:, s1) = mean(ds_stim.samples)';
+                meanBeta(:, s1) = mean(ds_stim.samples, 'omitnan')';
 
             end
-            rdm_corr = corr(meanBeta, 'type', 'Spearman');
+            rdm_corr = corr(meanBeta, 'type', 'Spearman', 'rows', 'pairwise');
 
 
         else
@@ -83,14 +85,21 @@ for iSub = 1:length(cfg.subNums)
 
         % get within and between category correlation
         rdm_corr(eye(cfg.nTrials, cfg.nTrials) == 1) = 0;
-        withinCate = [squareform(rdm_corr(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
-            squareform(rdm_corr(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
-        betweenCate = reshape(rdm_corr(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
+        if cfg.makeBetweenComparison
+            withinCate = [squareform(rdm_corr(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
+                squareform(rdm_corr(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
+            betweenCate = reshape(rdm_corr(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
+        else
+            rdm_corr(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2) = NaN;
+            rdm_corr = squareform(squareform(rdm_corr));
+        end
 
         % store in structure
         res.(cfg.map).(subID2).(mask_label_short).rdm_corr = rdm_corr;
-        res.(cfg.map).(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr));
-        res.(cfg.map).(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
+        res.(cfg.map).(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr), 'omitnan');
+        if cfg.makeBetweenComparison
+            res.(cfg.map).(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
+        end
 
     end
 end
@@ -126,49 +135,52 @@ for i_sub = 1:num_subjects
     subID = subjects{i_sub};
     for i_roi = 1:num_rois
         mask_label = masks{i_roi};
-        all_data(i_sub, i_roi) = res.(cfg.map).(subID).(mask_label).corr_cate_diff;
+        if cfg.makeBetweenComparison
+            all_data(i_sub, i_roi) = res.(cfg.map).(subID).(mask_label).corr_cate_diff;
+        end
         all_rdms(i_sub, i_roi, :, :) = res.(cfg.map).(subID).(mask_label).rdm_corr;
     end
 end
 
 % Compute mean and standard deviation for each ROI
-mean_data = mean(all_data, 1);
+mean_data = mean(all_data, 1, 'omitnan');
 std_data = std(all_data, 0, 1);
-mean_rdm = squeeze(mean(all_rdms, 1));
+mean_rdm = squeeze(mean(all_rdms, 1, 'omitnan'));
 
 %% Create bar plot with comparison of within and between category
-% correlation
-figure;
-hold on;
+if cfg.makeBetweenComparison
+    % correlation
+    figure;
+    hold on;
 
-% Bar plot with error bars
-bar_handle = bar(mean_data, 'FaceColor', 'flat');
-errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+    % Bar plot with error bars
+    bar_handle = bar(mean_data, 'FaceColor', 'flat');
+    errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
 
-% Add horizontal line at chance level
-yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+    % Add horizontal line at chance level
+    yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
 
-% Add jittered individual points
-rng(0); % For reproducible jitter
-jitter_amount = 0.1; % Adjust jitter spread
-for i_roi = 1:num_rois
-    x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-    scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-    for i_sub = 1:num_subjects
-        text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+    % Add jittered individual points
+    rng(0); % For reproducible jitter
+    jitter_amount = 0.1; % Adjust jitter spread
+    for i_roi = 1:num_rois
+        x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+        scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+        for i_sub = 1:num_subjects
+            text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+        end
     end
+
+    % Customize plot
+    xticks(1:num_rois);
+    xticklabels(masks);
+    xlabel('ROI');
+    ylabel('Correlation diff');
+    ylim([min(min(all_data))-0.05, max(max(all_data))+0.05])
+    title('Within - Between category pairwise correaltion');
+
+    hold off;
 end
-
-% Customize plot
-xticks(1:num_rois);
-xticklabels(masks);
-xlabel('ROI');
-ylabel('Correlation diff');
-ylim([min(min(all_data))-0.05, max(max(all_data))+0.05])
-title('Within - Between category pairwise correaltion');
-
-hold off;
-
 %% make tiled figure with mean rsm of each ROI
 figure;
 title('Mean pairwise correlation');
@@ -189,9 +201,9 @@ end
 
 % get inter-roi correlation
 nexttile
-corrRois = corr(allRoiRDMs, 'type', 'Spearman');
+corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
 
-imagesc(corrRois, [-0.5, 0.5])
+imagesc(corrRois, [-0.7, 0.7])
 colorbar;
 title('inter-ROI correlation');
 

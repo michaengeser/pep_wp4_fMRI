@@ -1,5 +1,8 @@
 function res = CrossValdidatedRDM(cfg)
 
+if ~isfield(cfg, 'makeBetweenComparison'); cfg.makeBetweenComparison = false; end
+makeBetweenComparison = cfg.makeBetweenComparison;
+
 %% get data
 dist = 'spearman';
 % get number of ROI masks
@@ -65,10 +68,17 @@ for iSub = 1:length(cfg.subNums)
         end
         nTrials = cfg.nTrials;
         parfor stim1 = 1:cfg.nTrials
-            disp(num2str(stim1))
             for stim2 = 1:nTrials
                 if ~(stim2 > stim1)
                     continue
+                end
+
+                % check whether its a between stimulus comparison
+                if ~makeBetweenComparison
+                    if (stim2 >= nTrials/2 && stim1 < nTrials/2)
+                        rdm(stim2, stim1) = NaN;
+                        continue
+                    end
                 end
 
                 % Subset data for the two stimuli
@@ -119,7 +129,7 @@ for iSub = 1:length(cfg.subNums)
                 end
 
                 % Store the correlation
-                rdm(stim2, stim1) = mean(crossValdidatedRs);
+                rdm(stim2, stim1) = mean(crossValdidatedRs, 'omitnan');
 
                 % add to all msplits rdms
                 %all_splits_rdms(stim2, stim1, :) = crossValdidatedRs;
@@ -135,7 +145,7 @@ for iSub = 1:length(cfg.subNums)
         subID2 = strrep(subID, '-', '');
 
         res.(subID2).(mask_label_short).rdm = rdm;
-        res.(subID2).(mask_label_short).mean_cor = mean(squareform(rdm));
+        res.(subID2).(mask_label_short).mean_cor = mean(squareform(rdm), 'omitnan');
     end
 end
 
@@ -162,7 +172,7 @@ for i_sub = 1:num_subjects
 end
 
 % Compute mean and standard deviation for each ROI
-mean_data = mean(all_data, 1);
+mean_data = mean(all_data, 1, 'omitnan');
 std_data = std(all_data, 0, 1);
 
 % Create bar plot
@@ -177,7 +187,6 @@ errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth',
 yline(0, '--r', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
 
 % Add jittered individual points
-rng(0); % For reproducible jitter
 jitter_amount = 0.1; % Adjust jitter spread
 for i_roi = 1:num_rois
     x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
@@ -220,7 +229,7 @@ end
 
 % get inter-roi correlation
 nexttile
-corrRois = corr(allRoiRDMs, 'type', 'Spearman');
+corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
 
 imagesc(corrRois, [-0.5, 0.5])
 colorbar;
@@ -229,54 +238,54 @@ title('inter-ROI correlation');
 
 %% Create bar plot with comparison of within and between category
 
-diff_per_sub = nan(num_rois, num_subjects);
-mean_diff = nan(1, num_rois);
-std_diff = mean_diff;
-for i_roi = 1:num_rois
-    for i_sub = 1:num_subjects
-        % get within and between category correlation
-        roiRDM = all_rdm_data(:, :, i_sub, i_roi);
-        withinCate = [squareform(roiRDM(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
-            squareform(roiRDM(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
-        betweenCate = reshape(roiRDM(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
-        diff_per_sub(i_roi, i_sub) = mean(withinCate) - mean(betweenCate);
-    end
-    % take the mean
-    mean_diff(i_roi) = mean(diff_per_sub(i_roi, :));
-    std_diff(i_roi) = std(diff_per_sub(i_roi, :));
-end
-
-% plot within - between category difference
-figure;
-hold on;
-
-% Bar plot with error bars
-bar_handle = bar(mean_diff, 'FaceColor', 'flat');
-errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
-
-% Add horizontal line at chance level
-yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
-
-% Add jittered individual points
-rng(0); % For reproducible jitter
-jitter_amount = 0.1; % Adjust jitter spread
-for i_roi = 1:num_rois
-    x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-    scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-    for i_sub = 1:num_subjects
-        text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
-    end
-end
-
-% Customize plot
-xticks(1:num_rois);
-xticklabels(masks);
-xlabel('ROI');
-ylabel('Pariwise dissimilarity diff');
-ylim([min(min(diff_per_sub))-0.0005, max(max(diff_per_sub))+0.0005])
-title('Within - Between category pairwise crossvalidated dissimilarity');
-
-hold off;
+% diff_per_sub = nan(num_rois, num_subjects);
+% mean_diff = nan(1, num_rois);
+% std_diff = mean_diff;
+% for i_roi = 1:num_rois
+%     for i_sub = 1:num_subjects
+%         % get within and between category correlation
+%         roiRDM = all_rdm_data(:, :, i_sub, i_roi);
+%         withinCate = [squareform(roiRDM(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
+%             squareform(roiRDM(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
+%         betweenCate = reshape(roiRDM(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
+%         diff_per_sub(i_roi, i_sub) = mean(withinCate) - mean(betweenCate);
+%     end
+%     % take the mean
+%     mean_diff(i_roi) = mean(diff_per_sub(i_roi, :));
+%     std_diff(i_roi) = std(diff_per_sub(i_roi, :));
+% end
+% 
+% % plot within - between category difference
+% figure;
+% hold on;
+% 
+% % Bar plot with error bars
+% bar_handle = bar(mean_diff, 'FaceColor', 'flat');
+% errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+% 
+% % Add horizontal line at chance level
+% yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+% 
+% % Add jittered individual points
+% rng(0); % For reproducible jitter
+% jitter_amount = 0.1; % Adjust jitter spread
+% for i_roi = 1:num_rois
+%     x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+%     scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+%     for i_sub = 1:num_subjects
+%         text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
+%     end
+% end
+% 
+% % Customize plot
+% xticks(1:num_rois);
+% xticklabels(masks);
+% xlabel('ROI');
+% ylabel('Pariwise dissimilarity diff');
+% ylim([min(min(diff_per_sub))-0.0005, max(max(diff_per_sub))+0.0005])
+% title('Within - Between category pairwise crossvalidated dissimilarity');
+% 
+% hold off;
 
 %% is-rdm
 
