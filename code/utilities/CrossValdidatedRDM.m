@@ -149,6 +149,10 @@ for iSub = 1:length(cfg.subNums)
     end
 end
 
+if ~isempty(gcp('nocreate'))
+    delete(gcp('nocreate'));
+end
+
 %% ploting
 
 % Get list of subjects and ROIs
