@@ -11,6 +11,12 @@ classifier = @cosmo_classify_lda;
 % get number of ROI masks
 nmasks=numel(cfg.rois);
 
+% get existing pairwise decoding results
+fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
+    'results_RDM_of_pairwise_decoding_on_b-map.mat');
+load(fileName)
+
+
 % loop through subjects
 for iSub = 1:length(cfg.subNums)
 
@@ -26,7 +32,17 @@ for iSub = 1:length(cfg.subNums)
         % get current mask
         mask_label=cfg.rois{j};
 
-        disp(['Using mask ', mask_label]);
+        % check if is part of result structure already
+        subID2 = strrep(subID, '-', '');
+        mask_label_short = split(mask_label, '.');
+        mask_label_short = mask_label_short{1};
+        if isfield(res, subID2)
+            if isfield(res.(subID2), mask_label_short)
+                disp(['RDM for ', mask_label_short, ' already exists']);
+                continue
+            end 
+        end
+        disp(['Using mask ', mask_label_short]);
         disp(char(datetime))
 
         % get datasetn in Cosmo format
@@ -79,14 +95,17 @@ for iSub = 1:length(cfg.subNums)
         rdm = squareform(squareform(rdm));
 
         % Save the RDM
-        mask_label_short = split(mask_label, '.');
-        mask_label_short = mask_label_short{1};
-        subID2 = strrep(subID, '-', '');
-
         res.(subID2).(mask_label_short).rdm = rdm;
         res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm), 'omitnan');
     end
 end
+
+% save results
+outputFolder = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM');
+if ~exist(outputFolder, 'dir')
+    mkdir(outputFolder);
+end
+save(fileName, 'res')
 
 if ~isempty(gcp('nocreate'))
     delete(gcp('nocreate'));
@@ -269,8 +288,12 @@ for i_roi = 1:num_rois
     cfg.plotting = true;
     cfg.new_figure = false;
     cfg.dissimilarity = false;
-    [~, ~, ~] = make_RDM(RDMmat, cfg);
-    title(masks{i_roi});
+    cfg.MinColorValue = -0.5; 
+    cfg.MaxColorValue = 0.5; 
+    [~, mat_out, ~] = make_RDM(RDMmat, cfg);
+    mat_out(eye(size(mat_out)) == 1) = 0;
+    medianISC = median(squareform(mat_out), 'omitnan');
+    title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
 end
 
 end

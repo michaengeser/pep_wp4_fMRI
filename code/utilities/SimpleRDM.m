@@ -13,15 +13,29 @@ for iSub = 1:length(cfg.subNums)
     disp(['Starting simple RDM for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
         cfg.map, '-map']);
 
+    % get existing pairwise decoding results
+    fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
+        'results_RDM_of_mean_correaltion_on_b-map.mat');
+    if exist(fileName,'file')
+        load(fileName)
+    end
+
     % loop through ROIs
     for j=1:nmasks
 
+        % check if is part of result structure already
+        subID2 = strrep(subID, '-', '');
         mask_label=cfg.rois{j};
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
-
-        disp(['Using mask ',  mask_label]);
+        if isfield(res, subID2)
+            if isfield(res.(subID2), mask_label_short)
+                disp(['RDM for ', mask_label_short, ' already exists']);
+                continue
+            end 
+        end
+        disp(['Using mask ', mask_label_short]);
         disp(char(datetime))
 
         if strcmp(cfg.map, 't')
@@ -234,8 +248,12 @@ for i_roi = 1:num_rois
     cfg.plotting = true;
     cfg.new_figure = false;
     cfg.dissimilarity = false;
-    [~, ~, ~] = make_RDM(RDMmat, cfg);
-    title(masks{i_roi});
+    cfg.MinColorValue = -0.5; 
+    cfg.MaxColorValue = 0.5; 
+    [~, mat_out, ~] = make_RDM(RDMmat, cfg);
+    mat_out(eye(size(mat_out)) == 1) = 0;
+    medianISC = median(squareform(mat_out), 'omitnan');
+    title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
 end
 
 end
