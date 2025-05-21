@@ -26,9 +26,15 @@ for iSub = 1:length(cfg.subNums)
         mkdir(fullfile(mainPath, 'derivatives', subID));
     end
 
-    % make make output fodler doesn't exist yet
+    % check if poutput exists already 
     outputdir = fullfile(mainPath, 'derivatives', subID, 'GLMsingleEstimates');
-    if ~exist(outputdir, 'dir')
+    if exist(outputdir, 'dir')
+        outputFile = fullfile(outputdir, 'GLMsingle_betas.nii');
+        if exist(outputFile, 'file')
+            disp(['Data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
+            continue
+        end 
+    else
         mkdir(outputdir);
     end
 

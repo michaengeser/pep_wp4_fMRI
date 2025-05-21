@@ -10,9 +10,20 @@ spm_jobman('initcfg');
 for iSub = 1:length(cfg.subNums)
 
     % subject ID
-
     subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
     subIDx = sprintf('sub-%0.3dxxxx', cfg.subNums(iSub));
+
+    % check if preprocessed files exit already
+    outputDir = fullfile(cfg.outputPath, subID, 'func');
+    if exist(outputDir, 'dir')
+        lastVol = fullfile(outputDir, sprintf('wr%sxxxx_task-scenes_run-%d_bold_%0.5d.nii', subID, cfg.nRuns, cfg.nVols));
+        if exist(lastVol, 'file')
+            disp(['Preprocessed data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
+            continue
+        end 
+    else
+        mkdir(outputDir);
+    end
 
     % define path to T1
     anatomy = fullfile(cfg.sourcedataPath, subID, 'anat', sprintf('%s_T1w.nii', subIDx));
@@ -38,12 +49,6 @@ for iSub = 1:length(cfg.subNums)
             warning(['File ', sprintf('%s_task-scenes_run-%d_bold.nii', subIDx, iRun-1),...
                 ' is missing'])
         end
-    end
-
-    % get output directory
-    outputDir = fullfile(cfg.outputPath, subID, 'func');
-    if ~exist(outputDir, 'dir')
-        mkdir(outputDir);
     end
 
     %% Define pre-processing steps
