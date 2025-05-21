@@ -1,9 +1,17 @@
 function res = SimpleRDM(cfg)
 
 if ~isfield(cfg, 'makeBetweenComparison'); cfg.makeBetweenComparison = false; end
+if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 
 % get number of ROI masks
 nmasks=numel(cfg.rois);
+
+% get existing pairwise decoding results
+fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
+    'results_RDM_of_mean_correaltion_on_b-map.mat');
+if exist(fileName,'file')
+    load(fileName)
+end
 
 % loop through subjects
 for iSub = 1:length(cfg.subNums)
@@ -13,12 +21,6 @@ for iSub = 1:length(cfg.subNums)
     disp(['Starting simple RDM for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
         cfg.map, '-map']);
 
-    % get existing pairwise decoding results
-    fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
-        'results_RDM_of_mean_correaltion_on_b-map.mat');
-    if exist(fileName,'file')
-        load(fileName)
-    end
 
     % loop through ROIs
     for j=1:nmasks
@@ -82,10 +84,8 @@ for iSub = 1:length(cfg.subNums)
             meanBeta = [];
             for s1 = 1:cfg.nTrials
 
-                % Subset data for the two stimuli
+                % take mean of that stimulus
                 ds_stim = cosmo_slice(ds, ds.sa.targets == s1);
-
-                % take mean
                 meanBeta(:, s1) = mean(ds_stim.samples, 'omitnan')';
 
             end
@@ -111,10 +111,10 @@ for iSub = 1:length(cfg.subNums)
         end
 
         % store in structure
-        res.(cfg.map).(subID2).(mask_label_short).rdm_corr = rdm_corr;
-        res.(cfg.map).(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr), 'omitnan');
+        res.(subID2).(mask_label_short).rdm = rdm_corr;
+        res.(subID2).(mask_label_short).mean_cor = mean(squareform(rdm_corr), 'omitnan');
         if cfg.makeBetweenComparison
-            res.(cfg.map).(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
+            res.(subID2).(mask_label_short).corr_cate_diff =  mean(withinCate) - mean(betweenCate);
         end
 
     end
@@ -135,127 +135,129 @@ save(fullfile(outputFolder, outputName), 'res')
 
 
 %% ploting
+if cfg.plotting
 
-% Get list of subjects and ROIs
-subjects = fieldnames(res.(cfg.map));
-masks = fieldnames(res.(cfg.map).(subjects{1}));
+    % Get list of subjects and ROIs
+    subjects = fieldnames(res);
+    masks = fieldnames(res.(subjects{1}));
 
-% Initialize data storage
-num_subjects = numel(subjects);
-num_rois = numel(masks);
-all_data = nan(num_subjects, num_rois);
-all_rdms = nan(num_subjects, num_rois, cfg.nTrials, cfg.nTrials);
+    % Initialize data storage
+    num_subjects = numel(subjects);
+    num_rois = numel(masks);
+    all_data = nan(num_subjects, num_rois);
+    all_rdms = nan(num_subjects, num_rois, cfg.nTrials, cfg.nTrials);
 
-% Collect data
-for i_sub = 1:num_subjects
-    subID = subjects{i_sub};
-    for i_roi = 1:num_rois
-        mask_label = masks{i_roi};
-        if cfg.makeBetweenComparison
-            all_data(i_sub, i_roi) = res.(cfg.map).(subID).(mask_label).corr_cate_diff;
+    % Collect data
+    for i_sub = 1:num_subjects
+        subID = subjects{i_sub};
+        for i_roi = 1:num_rois
+            mask_label = masks{i_roi};
+            if cfg.makeBetweenComparison
+                all_data(i_sub, i_roi) = res.(subID).(mask_label).corr_cate_diff;
+            end
+            all_rdms(i_sub, i_roi, :, :) = res.(subID).(mask_label).rdm_corr;
         end
-        all_rdms(i_sub, i_roi, :, :) = res.(cfg.map).(subID).(mask_label).rdm_corr;
     end
-end
 
-% Compute mean and standard deviation for each ROI
-mean_data = mean(all_data, 1, 'omitnan');
-std_data = std(all_data, 0, 1);
-mean_rdm = squeeze(mean(all_rdms, 1, 'omitnan'));
+    % Compute mean and standard deviation for each ROI
+    mean_data = mean(all_data, 1, 'omitnan');
+    std_data = std(all_data, 0, 1);
+    mean_rdm = squeeze(mean(all_rdms, 1, 'omitnan'));
 
-%% Create bar plot with comparison of within and between category
-if cfg.makeBetweenComparison
-    % correlation
+    %% Create bar plot with comparison of within and between category
+    if cfg.makeBetweenComparison
+        % correlation
+        figure;
+        hold on;
+
+        % Bar plot with error bars
+        bar_handle = bar(mean_data, 'FaceColor', 'flat');
+        errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+
+        % Add horizontal line at chance level
+        yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+
+        % Add jittered individual points
+        rng(0); % For reproducible jitter
+        jitter_amount = 0.1; % Adjust jitter spread
+        for i_roi = 1:num_rois
+            x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+            scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+            for i_sub = 1:num_subjects
+                text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+            end
+        end
+
+        % Customize plot
+        xticks(1:num_rois);
+        xticklabels(masks);
+        xlabel('ROI');
+        ylabel('Correlation diff');
+        ylim([min(min(all_data))-0.05, max(max(all_data))+0.05])
+        title('Within - Between category pairwise correaltion');
+
+        hold off;
+    end
+    %% make tiled figure with mean rsm of each ROI
     figure;
-    hold on;
+    title('Mean pairwise correlation');
+    allRoiRDMs = nan(cfg.nTrials^2, num_rois);
 
-    % Bar plot with error bars
-    bar_handle = bar(mean_data, 'FaceColor', 'flat');
-    errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
-
-    % Add horizontal line at chance level
-    yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
-
-    % Add jittered individual points
-    rng(0); % For reproducible jitter
-    jitter_amount = 0.1; % Adjust jitter spread
     for i_roi = 1:num_rois
-        x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-        scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-        for i_sub = 1:num_subjects
-            text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
-        end
+        nexttile
+
+        % get RDM for ROI
+        roiRDM = squeeze(mean_rdm(i_roi, :, :));
+        allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
+
+        % plot RDM
+        imagesc(roiRDM, [-0.1, 0.1])
+        colorbar;
+        title(masks{i_roi});
     end
 
-    % Customize plot
+    % get inter-roi correlation
+    nexttile
+    corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
+
+    imagesc(corrRois, [-0.7, 0.7])
+    colorbar;
+    title('inter-ROI correlation');
+
+    % add ROI labels
     xticks(1:num_rois);
     xticklabels(masks);
-    xlabel('ROI');
-    ylabel('Correlation diff');
-    ylim([min(min(all_data))-0.05, max(max(all_data))+0.05])
-    title('Within - Between category pairwise correaltion');
+    yticks(1:num_rois);
+    yticklabels(masks);
 
-    hold off;
-end
-%% make tiled figure with mean rsm of each ROI
-figure;
-title('Mean pairwise correlation');
-allRoiRDMs = nan(cfg.nTrials^2, num_rois);
+    %% is-rdm
 
-for i_roi = 1:num_rois
-    nexttile
+    figure;
+    title('IS RDMs across the whole RDM');
+    for i_roi = 1:num_rois
+        nexttile
 
-    % get RDM for ROI
-    roiRDM = squeeze(mean_rdm(i_roi, :, :));
-    allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
+        % make a matrix with vectorized RDMs
+        for i_sub = 1:num_subjects
+            rdm = squeeze(all_rdms(i_sub, i_roi, :, :));
+            rdm(eye(size(rdm)) == 1) = 0;
+            RDMmat(:, i_sub) = squareform(rdm);
+        end
 
-    % plot RDM
-    imagesc(roiRDM, [-0.1, 0.1])
-    colorbar;
-    title(masks{i_roi});
-end
-
-% get inter-roi correlation
-nexttile
-corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
-
-imagesc(corrRois, [-0.7, 0.7])
-colorbar;
-title('inter-ROI correlation');
-
-% add ROI labels
-xticks(1:num_rois);
-xticklabels(masks);
-yticks(1:num_rois);
-yticklabels(masks);
-
-%% is-rdm
-
-figure;
-title('IS RDMs across the whole RDM');
-for i_roi = 1:num_rois
-    nexttile
-
-    % make a matrix with vectorized RDMs
-    for i_sub = 1:num_subjects
-        rdm = squeeze(all_rdms(i_sub, i_roi, :, :));
-        rdm(eye(size(rdm)) == 1) = 0;
-        RDMmat(:, i_sub) = squareform(rdm);
+        % make and plot IS-RDM
+        cfg.correlation_type = 'spearman';
+        cfg.labels = cfg.subNums;
+        cfg.cell_label_style = 'coef';
+        cfg.plotting = true;
+        cfg.new_figure = false;
+        cfg.dissimilarity = false;
+        cfg.MinColorValue = -0.5;
+        cfg.MaxColorValue = 0.5;
+        [~, mat_out, ~] = make_RDM(RDMmat, cfg);
+        mat_out(eye(size(mat_out)) == 1) = 0;
+        medianISC = median(squareform(mat_out), 'omitnan');
+        title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
     end
 
-    % make and plot IS-RDM
-    cfg.correlation_type = 'spearman';
-    cfg.labels = cfg.subNums;
-    cfg.cell_label_style = 'coef';
-    cfg.plotting = true;
-    cfg.new_figure = false;
-    cfg.dissimilarity = false;
-    cfg.MinColorValue = -0.5; 
-    cfg.MaxColorValue = 0.5; 
-    [~, mat_out, ~] = make_RDM(RDMmat, cfg);
-    mat_out(eye(size(mat_out)) == 1) = 0;
-    medianISC = median(squareform(mat_out), 'omitnan');
-    title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
 end
-
 end
