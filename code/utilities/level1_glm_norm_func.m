@@ -32,13 +32,18 @@ for iSub = 1:length(cfg.subNums)
     end
 
     %% Estimate model for localizer
-    % make localizer sub-sub-directory if it doesn't exist yet
-    if ~exist(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'), 'dir')
-        mkdir(fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm'));
+    % make a new localizer sub-sub-directory
+    locOutputDir = fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm');
+    if ~exist(locOutputDir, 'dir')
+        mkdir(locOutputDir);
+    else
+        rmdir(locOutputDir, 's');
+        pause(1); % Small delay before retry
+        mkdir(locOutputDir);
     end
 
     % model specification
-    matlabbatch{1}.spm.stats.fmri_spec.dir = {fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm')};
+    matlabbatch{1}.spm.stats.fmri_spec.dir = {locOutputDir};
     matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
     matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.85;
     matlabbatch{1}.spm.stats.fmri_spec.timing.fmri_t = 16;
@@ -103,10 +108,13 @@ for iSub = 1:length(cfg.subNums)
             break; % Exit loop if successful
         catch ME
             if attempt == maxRetries
-                error('Failed after %d attempts: %s', maxRetries, ME.message);
+                warning('Failed on %s after %d attempts: %s', subID, maxRetries, ME.message);
             else
                 disp(['Retrying: Attempt ', num2str(attempt + 1)]);
+                cd(fullfile(pwd, '..'));
+                rmdir(locOutputDir, 's');
                 pause(1); % Small delay before retry
+                mkdir(locOutputDir);
             end
         end
     end

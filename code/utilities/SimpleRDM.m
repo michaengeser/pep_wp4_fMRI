@@ -29,11 +29,13 @@ for iSub = 1:length(cfg.subNums)
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
-        if isfield(res, subID2)
-            if isfield(res.(subID2), mask_label_short)
-                disp(['RDM for ', mask_label_short, ' already exists']);
-                continue
-            end 
+        if exist('res', 'var')
+            if isfield(res, subID2)
+                if isfield(res.(subID2), mask_label_short)
+                    disp(['RDM for ', mask_label_short, ' already exists']);
+                    continue
+                end
+            end
         end
         disp(['Using mask ', mask_label_short]);
         disp(char(datetime))
