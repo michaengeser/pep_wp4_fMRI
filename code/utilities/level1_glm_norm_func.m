@@ -34,13 +34,13 @@ for iSub = 1:length(cfg.subNums)
     %% Estimate model for localizer
     % make a new localizer sub-sub-directory
     locOutputDir = fullfile(mainPath, 'derivatives', subID, 'loc_glm1_norm');
-    skippLoc = false;
+    skipLoc = false;
     if ~exist(locOutputDir, 'dir')
         mkdir(locOutputDir);
     else
         contrastFile = fullfile(locOutputDir, 'con_0003.nii');
         if exist(contrastFile, 'file')
-            skippLoc = true;
+            skipLoc = true;
             disp(['Data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
         else
             rmdir(locOutputDir, 's');
@@ -49,7 +49,7 @@ for iSub = 1:length(cfg.subNums)
         end
     end
 
-    if ~skippLoc
+    if ~skipLoc
 
         % model specification
         matlabbatch{1}.spm.stats.fmri_spec.dir = {locOutputDir};
@@ -139,13 +139,13 @@ for iSub = 1:length(cfg.subNums)
 
     % make experimental-run sub-sub-directory if it doesn't exist yet
     outputDir = fullfile(mainPath, 'derivatives', subID, folderName, filesep);
-    skippGLM = true;
+    skipGLM = true;
     if ~exist(outputDir, 'dir')
         mkdir(outputDir);
     else
         contrastFile = fullfile(outputDir, 'con_0001.nii');
         if exist(contrastFile, 'file')
-            skippGLM = true;
+            skipGLM = true;
             disp(['Data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
         else
             rmdir(outputDir, 's');
@@ -154,7 +154,7 @@ for iSub = 1:length(cfg.subNums)
         end
     end
 
-    if ~skippGLM
+    if ~skipGLM
         % for each run, get each scan's `.nii` file
         for run = 1:cfg.nRuns
 

@@ -10,7 +10,7 @@ nmasks=numel(cfg.rois);
 fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
     'results_RDM_of_mean_correaltion_on_b-map.mat');
 if exist(fileName,'file')
-    load(fileName)
+    oldRes = load(fileName);
 end
 
 % loop through subjects
@@ -31,10 +31,11 @@ for iSub = 1:length(cfg.subNums)
         mask_fn=fullfile(pwd, '..', 'MNI_ROIs', [char(mask_label)]);
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
-        if exist('res', 'var')
-            if isfield(res, subID2)
-                if isfield(res.(subID2), mask_label_short)
+        if exist('oldRes', 'var')
+            if isfield(oldRes.res, subID2)
+                if isfield(oldRes.res.(subID2), mask_label_short)
                     disp(['RDM for ', mask_label_short, ' already exists']);
+                    res.(subID2).(mask_label_short) = oldRes.res.(subID2).(mask_label_short);
                     continue
                 end
             end
