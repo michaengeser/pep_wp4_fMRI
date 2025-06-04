@@ -10,14 +10,12 @@ path = os.path.join(
     os.path.abspath(os.path.join(os.getcwd(), '..', '..')),  
     'derivatives', sub_id, 'func'
 )
-runs = 12  # 1 localizer, 10 experimental runs, 1 resting state
+runs = 13  # 1 localizer, 12 experimental runs
 
 # load each file and plot motion parameters (translation and rotation in X/Y/Z)
 for run in range(runs):
     if run == 0:  # localizer
         filename = f'rp_{sub_idx}_task-localizer_bold_00001.txt'
-    elif run == runs - 1:  # resting state 
-        filename = f'rp_{sub_idx}_task-rest_bold_00001.txt'
     else:  # experimental runs
         filename = f'rp_{sub_idx}_task-scenes_run-{run}_bold_00001.txt'
 
