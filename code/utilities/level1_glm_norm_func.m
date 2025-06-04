@@ -38,7 +38,7 @@ for iSub = 1:length(cfg.subNums)
     if ~exist(locOutputDir, 'dir')
         mkdir(locOutputDir);
     else
-        contrastFile = fullfile(locOutputDir, 'con_0003.nii');
+        contrastFile = fullfile(locOutputDir, 'con_0004.nii');
         if exist(contrastFile, 'file')
             skipLoc = true;
             disp(['Data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
@@ -106,6 +106,9 @@ for iSub = 1:length(cfg.subNums)
         matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'objects > scramble';
         matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = [0, 0, 1, -1];
         matlabbatch{3}.spm.stats.con.consess{3}.tcon.sessrep = 'none';
+        matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'intact > scramble';
+        matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = [1/3, 1/3, 1/3, -1];
+        matlabbatch{3}.spm.stats.con.consess{4}.tcon.sessrep = 'none';
         matlabbatch{3}.spm.stats.con.delete = 0;
 
         % go!

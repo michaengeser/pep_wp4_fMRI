@@ -1,13 +1,13 @@
 function funcROIs(cfg)
 
 %% Configuration
-if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
+if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC', 'LPFC'}; end
 if ~isfield(cfg, 'n_voxels'); cfg.n_voxels = 200; end
 
 % Define subject IDs
 main_path = fullfile(pwd, '..', 'derivatives'); % Base directory for derivatives
 contrast_folder = 'loc_glm1_norm'; % Subfolder containing contrasts
-contrast_files = {'con_0001.nii', 'con_0003.nii'}; % Scene > Objects, Objects > Scramble
+contrast_files = {'con_0001.nii', 'con_0003.nii', 'con_0004.nii'}; % Scene > Objects, Objects > Scramble, , Intact > Scramble
 ROI_dir = fullfile(pwd, '..', 'MNI_ROIs'); % Directory where anatomical ROI are
 output_dir = fullfile(ROI_dir, 'func_ROIs'); % Directory to save functional ROIs
 
@@ -57,6 +57,8 @@ for s = 1:numel(cfg.subNums)
             contrast_map = single(contrast_data{1}); % Scene > Objects
         elseif ismember(cfg.func_roi_names{r}, {'LOC'})
             contrast_map = single(contrast_data{2}); % Objects > Scramble
+        elseif ismember(cfg.func_roi_names{r}, {'LPFC'})
+            contrast_map = single(contrast_data{3}); % Intact > Scramble
         else
             continue;
         end

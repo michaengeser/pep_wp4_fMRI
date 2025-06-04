@@ -2,7 +2,7 @@ clc
 clear
 
 %% create a functional image for the space to reslice to
-matlabbatch{1}.spm.spatial.coreg.write.ref = {fullfile(pwd, '..', 'derivatives', 'sub-001', 'func', 'wrsub-001xxxx_task-localizer_bold_00018.nii')};
+matlabbatch{1}.spm.spatial.coreg.write.ref = {fullfile(pwd, '..', 'derivatives', 'sub-101', 'func', 'wrsub-101xxxx_task-localizer_bold_00018.nii')};
 
 %% bring MNI mask into voxel space
 matlabbatch{1}.spm.spatial.coreg.write.source = {
@@ -32,11 +32,11 @@ clear matlabbatch
 
 
 %% create a functional image for the space to reslice to
-matlabbatch{1}.spm.spatial.coreg.write.ref = {fullfile(pwd, '..', 'derivatives', 'sub-001', 'func', 'wrsub-001xxxx_task-localizer_bold_00018.nii')};
+matlabbatch{1}.spm.spatial.coreg.write.ref = {fullfile(pwd, '..', 'derivatives', 'sub-101', 'func', 'wrsub-101xxxx_task-localizer_bold_00018.nii')};
 
 %% bring MNI mask into voxel space
 matlabbatch{1}.spm.spatial.coreg.write.source = {
-    fullfile(pwd, '..', 'MNI_ROIs', 'auditoryCortex.nii,1')
+    fullfile(pwd, '..', 'MNI_ROIs', 'LPFC.nii,1')
     };
 matlabbatch{1}.spm.spatial.coreg.write.roptions.interp = 4; %%% MAYBE CHANGE TO 0
 matlabbatch{1}.spm.spatial.coreg.write.roptions.wrap = [0 0 0];
