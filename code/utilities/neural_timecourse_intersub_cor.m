@@ -5,11 +5,12 @@ warning('off');
 % evaluate input
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
-if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
 if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
-if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
 if ~isfield(cfg, 'detrend'); cfg.detrend = true; end
+if ~isfield(cfg, 'dissimilarity'); cfg.dissimilarity = true; end
+if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = false; end
 
 % convert to local configurations
 if cfg.plotting; plotting = true; else plotting = false; end
@@ -26,6 +27,13 @@ for category = cfg.categories
     % clear structure
     d.([category,'_RDM']).timecourseRDM = struct;
 
+    % filter for category runs
+    if strcmp(category, 'bathroom')
+        runSample = cfg.runSample((mod(cfg.runSample,2) == 1));
+    else
+        runSample = cfg.runSample((mod(cfg.runSample,2) == 0));
+    end
+
     % loop through ROIs
     for iRoi = 1:numel(cfg.rois)
         roi = char(cfg.rois{iRoi});
@@ -35,9 +43,9 @@ for category = cfg.categories
         sub_table_concat = [];
 
         % loop through run
-        runsCorrelationMatrix = nan(cfg.n, cfg.n, cfg.nRuns);
-        for iRun = 1:cfg.nRuns
-            currentRun = cfg.runSample(iRun);
+        runsCorrelationMatrix = nan(cfg.n, cfg.n, length(runSample));
+        for iRun = 1:length(runSample)
+            currentRun = runSample(iRun);
 
             % loop through subjects
             sub_table = [];
@@ -47,7 +55,11 @@ for category = cfg.categories
                 subID = sprintf('sub-%03d',  cfg.subNums(iSub));
 
                 % get timecourse
-                timecourseDir = fullfile(pwd, '..', 'derivatives', subID, 'timecourses');
+                if cfg.cutTargets
+                    timecourseDir = fullfile(cfg.outputPath, subID, 'timecourses');
+                else
+                    timecourseDir = fullfile(cfg.outputPath, subID, 'timecourses_with_targets');
+                end
 
                 if cfg.smoothing
                     fileName = ['smoothed_mean_timecourse_', category, '_', ...
@@ -104,7 +116,7 @@ for category = cfg.categories
             d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).RDM = runsCorrelationMatrix(:, :, iRun);
 
             % concatanate tables across runs
-            if iRun == 1
+            if isempty(sub_table_concat)
                 sub_table_concat = sub_table;
             else
                 sub_table_concat = [sub_table_concat; sub_table];
@@ -136,32 +148,39 @@ for category = cfg.categories
 
         % Create a new figure
         figure;
-        tiledlayout(numel(cfg.rois), cfg.nRuns, 'TileSpacing', 'Compact', 'Padding', 'Compact');
+        tiledlayout(numel(cfg.rois), length(runSample), 'TileSpacing', 'Compact', 'Padding', 'Compact');
 
         % loop through rois and runs
-        medianMat = nan(cfg.nRuns, numel(cfg.rois));
+        medianMat = nan(length(runSample), numel(cfg.rois));
 
         for iRoi = 1:numel(cfg.rois)
-            for iRun = 1:cfg.nRuns
+            for iRun = 1:length(runSample)
 
                 % plot RDM for each subject and run
                 nexttile;
                 currentRDM = d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(iRun).RDM;
-                imagesc(currentRDM, [-1,1])
-                colormap(cfg.colormaps.white_zero)
+                if cfg.dissimilarity
+                    imagesc(currentRDM, [0,2])
+                else
+                    imagesc(currentRDM, [-1,1])
+                    colormap(cfg.colormaps.white_zero2)
+                end
                 xticklabels([]);
                 yticklabels([]);
 
                 % get median for each RDM
                 currentRDM(eye(height(currentRDM)) == 1) = 0;
-                medianMat(iRun, iRoi) = median(squareform(currentRDM), 'omitnan');
+                medianValue = median(squareform(currentRDM), 'omitnan');
+                if cfg.dissimilarity
+                    medianMat(iRun, iRoi) = 1 - medianValue;
+                end
             end
         end
 
         % add labels
         % Define row and column labels
         rowLabels = cfg.rois;
-        colLabels = arrayfun(@num2str, 1:cfg.nRuns, 'UniformOutput', false);
+        colLabels = arrayfun(@num2str, 1:length(runSample), 'UniformOutput', false);
 
         % Add row labels (rois)
         for row = 1:numel(rowLabels)

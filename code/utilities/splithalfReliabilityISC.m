@@ -1,14 +1,12 @@
 function d = splithalfReliabilityISC(d, cfg)
 
-
-
 % evaluate input
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
-if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 
 % get combination to split the 10 runs into 2 halfs
-splits = nchoosek(1: cfg.nRuns, cfg.nRuns/2);
+splits = nchoosek(1: cfg.nRuns/2, cfg.nRuns/4);
 splits = splits(1:height(splits)/2, :);
 
 % loop through categories
@@ -36,7 +34,7 @@ for category = cfg.categories
                 mean1stHalf = squareform(mean1stHalf);
 
                 % get second half
-                otherRuns = setdiff(1:cfg.nRuns, splits(iSplit,:));
+                otherRuns = setdiff(1:cfg.nRuns/2, splits(iSplit,:));
                 currentRDM = {d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(otherRuns).RDM};
                 currentRDM = cell2mat(currentRDM);
                 currentRDM = reshape(currentRDM, cfg.n, cfg.n, []);
