@@ -96,12 +96,20 @@ for subNum = subNums
     targetTable = bigTable(~isnan(bigTable.accuracy) & bigTable.subject == subNum,:);
     subjecTable = bigTable(bigTable.subject == subNum,:);
 
+    % make binomial test against chance
+    x = sum(targetTable.accuracy);           
+    n = length(targetTable.accuracy);           
+    pNull = 0.5;      
+    pVal = 1 - binocdf(x - 1, n, p_null);  % subtract 1 because binocdf is P(X ≤ x)
+
+
     newTable = table;
     newTable.subNum = num2cell(subNum);
     newTable.numCorrect = sum(targetTable.accuracy == 1);
     newTable.numIncorrect = sum(targetTable.accuracy == 0);
     newTable.meanRT = mean(targetTable.responseTime - targetTable.trialEnd);
     newTable.meanAccuracy = mean(targetTable.accuracy);
+    newTable.pVal = pVal;
 
     if isempty(accuracy)
         accuracy = newTable;
@@ -118,13 +126,13 @@ end
 % add mean and SD
 newRow = cell2table({'mean', ...
     mean(accuracy.numCorrect), mean(accuracy.numIncorrect),...
-    mean(accuracy.meanRT), mean(accuracy.meanAccuracy)},...
+    mean(accuracy.meanRT), mean(accuracy.meanAccuracy), mean(accuracy.pVal)},...
     'VariableNames', accuracy.Properties.VariableNames);
 accuracy = [accuracy; newRow];
 
 newRow = cell2table({'sd', ...
     std(accuracy.numCorrect(1:length(subNums))), std(accuracy.numIncorrect(1:length(subNums))),...
-    std(accuracy.meanRT(1:length(subNums))), std(accuracy.meanAccuracy(1:length(subNums)))},...
+    std(accuracy.meanRT(1:length(subNums))), std(accuracy.meanAccuracy(1:length(subNums))), std(accuracy.pVal(1:length(subNums)))},...
      'VariableNames', accuracy.Properties.VariableNames);
 accuracy = [accuracy; newRow];
 
