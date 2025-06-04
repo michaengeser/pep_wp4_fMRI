@@ -4,7 +4,11 @@ function ds_out = loadCosmoDataset(cfg, subID, mask_label)
 if ~isfield(cfg, 'pca'); cfg.pca = true; end
 
 % get mask directory
-funcROIname = [mask_label(2:4), '_funcROI.nii'];
+if contains(mask_label, 'LPFC')
+    funcROIname = [mask_label(2:5), '_funcROI.nii'];
+else
+    funcROIname = [mask_label(2:4), '_funcROI.nii'];
+end
 funcROIdir = fullfile(pwd, '..', 'MNI_ROIs', 'func_ROIs', subID, funcROIname);
 
 % if functional defined ROI available take that

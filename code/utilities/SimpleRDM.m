@@ -156,7 +156,7 @@ if cfg.plotting
             if cfg.makeBetweenComparison
                 all_data(i_sub, i_roi) = res.(subID).(mask_label).corr_cate_diff;
             end
-            all_rdms(i_sub, i_roi, :, :) = res.(subID).(mask_label).rdm_corr;
+            all_rdms(i_sub, i_roi, :, :) = res.(subID).(mask_label).rdm;
         end
     end
 

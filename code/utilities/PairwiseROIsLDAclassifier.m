@@ -1,4 +1,4 @@
-function res = PairwiseROIsLDAclassifier(cfg)
+function [resNew, cfg] = PairwiseROIsLDAclassifier(cfg)
 
 % evaluate input
 if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
@@ -16,10 +16,11 @@ nmasks=numel(cfg.rois);
 fileName = fullfile(pwd, '..', 'derivatives', 'group_level', 'RDM',...
     'results_RDM_of_pairwise_decoding_on_b-map.mat');
 if exist(fileName, 'file')
-    oldRes = load(fileName);
+    load(fileName);
 end
 
 % loop through subjects
+cfg.belowChanceSubs = [];
 for iSub = 1:length(cfg.subNums)
 
     subID = sprintf('sub-%0.3d', cfg.subNums(iSub));
@@ -28,7 +29,7 @@ for iSub = 1:length(cfg.subNums)
     disp(['Starting pairwise ROI decoding for subject ',  num2str(cfg.subNums(iSub)), ' on ',...
         cfg.map, '-map']);
 
-
+    aboveChanceROIs = zeros(1, nmasks);
     for j=1:nmasks
 
         % get current mask
@@ -38,11 +39,12 @@ for iSub = 1:length(cfg.subNums)
         subID2 = strrep(subID, '-', '');
         mask_label_short = split(mask_label, '.');
         mask_label_short = mask_label_short{1};
-        if exist('oldRes', 'var')
-            if isfield(oldRes.res, subID2)
-                if isfield(oldRes.res.(subID2), mask_label_short)
+        if exist('res', 'var')
+            if isfield(res, subID2)
+                if isfield(res.(subID2), mask_label_short)
                     disp(['RDM for ', mask_label_short, ' already exists']);
-                    res.(subID2).(mask_label_short) = oldRes.res.(subID2).(mask_label_short);
+                    resNew.(subID2).(mask_label_short) = res.(subID2).(mask_label_short);
+                    aboveChanceROIs(j) = resNew.(subID2).(mask_label_short).mean_accuracy > 0.5;
                     continue
                 end
             end
@@ -100,8 +102,23 @@ for iSub = 1:length(cfg.subNums)
         rdm = squareform(squareform(rdm));
 
         % Save the RDM
+        resNew.(subID2).(mask_label_short).rdm = rdm;
+        resNew.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm), 'omitnan');
         res.(subID2).(mask_label_short).rdm = rdm;
         res.(subID2).(mask_label_short).mean_accuracy = mean(squareform(rdm), 'omitnan');
+
+        % check if heigher than chance
+        aboveChanceROIs(j) = mean(squareform(rdm), 'omitnan') > 0.5;
+    end
+
+    % check if any ROI has above chance level decoding 
+    if sum(aboveChanceROIs) == 0
+        warning([subID, ' has no ROI with above chance level decoding'])
+        if isempty(cfg.belowChanceSubs)
+            cfg.belowChanceSubs{1} = cfg.subNums(iSub);
+        else
+            cfg.belowChanceSubs{end} = cfg.subNums(iSub);
+        end
     end
 end
 
@@ -120,8 +137,8 @@ end
 if cfg.plotting
 
     % Get list of subjects and ROIs
-    subjects = fieldnames(res);
-    masks = fieldnames(res.(subjects{1}));
+    subjects = fieldnames(resNew);
+    masks = fieldnames(resNew.(subjects{1}));
 
     % Initialize data storage
     num_subjects = numel(subjects);
@@ -134,8 +151,8 @@ if cfg.plotting
         subID = subjects{i_sub};
         for i_roi = 1:num_rois
             mask_label = masks{i_roi};
-            all_data(i_sub, i_roi) = res.(subID).(mask_label).mean_accuracy;
-            all_rdm_data(:, :, i_sub, i_roi) = res.(subID).(mask_label).rdm;
+            all_data(i_sub, i_roi) = resNew.(subID).(mask_label).mean_accuracy;
+            all_rdm_data(:, :, i_sub, i_roi) = resNew.(subID).(mask_label).rdm;
         end
     end
 

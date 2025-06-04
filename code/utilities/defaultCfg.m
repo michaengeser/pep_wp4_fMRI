@@ -12,6 +12,8 @@ if ~isfield(cfg, 'nTargets'); cfg.nTargets = 0;end
 
 % frmi parameter
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
+if ~isfield(cfg, 'stimDur'); cfg.stimDur = 0.25; end
+if ~isfield(cfg, 'iti'); cfg.iti = 2; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 if ~isfield(cfg, 'map'); cfg.map = 'b';end
@@ -33,9 +35,17 @@ if ~isfield(cfg, 'saving'); cfg.saving = true; end
 cfg.sourcedataPath = fullfile(pwd, '..','sourcedata');
 cfg.outputPath = fullfile(pwd, '..','derivatives');
 cfg.locPath = fullfile(pwd, '..', 'localizer');
-cfg.behPath = fullfile(cfg.sourcedataPath, 'beh');
-cfg.fmriPath = fullfile(cfg.sourcedataPath, 'fmri/bids');
 cfg.spmPath = (fullfile(pwd, '..', '..', '..', 'MATLAB', 'spm12', 'tpm'));
+
+
+% other standard configurations
+if ~isfield(cfg, 'FontName'); cfg.FontName = 'Helvetica'; end
+if ~isfield(cfg, 'FontSize'); cfg.FontSize = 15; end
+
+% load colormap
+load('utilities/colormaps.mat');
+cfg.colormaps = colormaps;
+
 
 
 end
