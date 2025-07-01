@@ -88,7 +88,7 @@ ds_out=cosmo_remove_useless_data(ds_per_run);
 
 % reduce number of features using PCA
 if cfg.pca
-    [ds_out, pca_params] = cosmo_map_pca(ds_out, 'max_feature_count', 11000, 'pca_explained_ratio', 0.99);
+    [ds_out, pca_params] = cosmo_map_pca(ds_out, 'max_feature_count', 11000, 'pca_explained_ratio', 0.95);
     ds_out.sa = ds_per_run.sa;
 end
 
