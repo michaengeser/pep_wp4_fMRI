@@ -1,0 +1,3 @@
+subject	run	trial	texture	category	image	trialOnset	itiOnset	trialEnd	triggerDate	triggerTimeStamp	Onsets	responseKey	responseTime	accuracy
+131	1	1	13	bathroom	sun_aavhrsfjbserjtht.tif	11003.730640	11003.988963	11005.974956	16-Jul-2025 11:06:29	10999.516971	4.213669	none	NaN	NaN
+131	1	2	49	bathroom	sun_asfwthctfqerjvxr.tif	11006.005599	11006.263950	11008.249450	16-Jul-2025 11:06:29	10999.516971	6.488628	none	NaN	NaN
