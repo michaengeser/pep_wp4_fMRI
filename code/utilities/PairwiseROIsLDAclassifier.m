@@ -3,6 +3,7 @@ function [resNew, cfg] = PairwiseROIsLDAclassifier(cfg)
 % evaluate input
 if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'PPA', 'TOS', 'RSC', 'LOC'}; end
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
+if ~isfield(cfg, 'plot_subNum'); cfg.plot_subNum = false; end
 if ~isfield(cfg, 'makeBetweenComparison'); cfg.makeBetweenComparison = false; end
 makeBetweenComparison = cfg.makeBetweenComparison;
 
@@ -159,7 +160,14 @@ if cfg.plotting
     %% bar plot
     % Compute mean and standard deviation for each ROI
     mean_data = mean(all_data, 1, 'omitnan');
-    std_data = std(all_data, 0, 1);
+    sem_data = std(all_data, 0, 1)/sqrt(cfg.n);
+
+    % stats
+    chance_level = 1/2;
+    [~, pv] = ttest(all_data, chance_level, 'tail', 'right');
+
+    % False Discovery Rate (FDR) correction
+    [~, ~, ~, adj_pv] = fdr_bh(pv);
 
     % Create bar plot
     figure;
@@ -167,7 +175,7 @@ if cfg.plotting
 
     % Bar plot with error bars
     bar_handle = bar(mean_data, 'FaceColor', 'flat');
-    errorbar(1:num_rois, mean_data, std_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+    errorbar(1:num_rois, mean_data, sem_data, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
 
     % Add horizontal line at chance level
     yline(0.5, '--r', 'Chance Level', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
@@ -176,10 +184,15 @@ if cfg.plotting
     jitter_amount = 0.1; % Adjust jitter spread
     for i_roi = 1:num_rois
         x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-        scatter(x_jitter, all_data(:, i_roi), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-        for i_sub = 1:num_subjects
-            text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+        scatter(x_jitter, all_data(:, i_roi), 2, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+        if cfg.plot_subNum
+            for i_sub = 1:num_subjects
+                text(x_jitter(i_sub) + 0.04, all_data(i_sub, i_roi), subjects{i_sub}, 'FontSize', 8);
+            end
         end
+
+        % add asterisks
+        text(i_roi-0.1, max(all_data(:, i_roi)) + 0.01, pval2asterisks(adj_pv(i_roi)), 'FontSize', 15, 'FontWeight', 'bold')
     end
 
     % Customize plot
@@ -187,39 +200,39 @@ if cfg.plotting
     xticklabels(masks);
     xlabel('ROI');
     ylabel('Accuracy');
-    ylim([0.45,0.55])
+    ylim([0.45,0.57])
     title('Mean Pairwise Decoding Results Across ROIs');
 
     hold off;
 
-    %% rdm
-
-    % take mean across subjects
-    mean_all_rdm_data = squeeze(mean(all_rdm_data, 3));
-
-    figure;
-    title('Mean pairwise decoding accuracy');
-
-    for i_roi = 1:num_rois
-        nexttile
-
-        % get RDM for ROI
-        roiRDM = mean_all_rdm_data(:, :, i_roi);
-        allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
-
-        % plot RDM
-        imagesc(roiRDM, [0.40, 0.60])
-        colorbar;
-        title(masks{i_roi});
-    end
-
-    % get inter-roi correlation
-    nexttile
-    corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
-
-    imagesc(corrRois, [-0.7, 0.7])
-    colorbar;
-    title('inter-ROI correlation');
+     %% rdm
+% 
+%     % take mean across subjects
+%     mean_all_rdm_data = squeeze(mean(all_rdm_data, 3));
+% 
+%     figure;
+%     title('Mean pairwise decoding accuracy');
+% 
+%     for i_roi = 1:num_rois
+%         nexttile
+% 
+%         % get RDM for ROI
+%         roiRDM = mean_all_rdm_data(:, :, i_roi);
+%         allRoiRDMs(:, i_roi) = reshape(roiRDM, [], 1);
+% 
+%         % plot RDM
+%         imagesc(roiRDM, [0.40, 0.60])
+%         colorbar;
+%         title(masks{i_roi});
+%     end
+% 
+%     % get inter-roi correlation
+%     nexttile
+%     corrRois = corr(allRoiRDMs, 'type', 'Spearman', 'rows', 'pairwise');
+% 
+%     imagesc(corrRois, [-0.7, 0.7])
+%     colorbar;
+%     title('inter-ROI correlation');
 
 
     % % get inter-roi correlation
@@ -236,85 +249,85 @@ if cfg.plotting
     % yticks(1:num_rois);
     % yticklabels(masks);
 
-    %% Create bar plot with comparison of within and between category
-
-    diff_per_sub = nan(num_rois, num_subjects);
-    mean_diff = nan(1, num_rois);
-    std_diff = mean_diff;
-    for i_roi = 1:num_rois
-        for i_sub = 1:num_subjects
-            % get within and between category correlation
-            roiRDM = all_rdm_data(:, :, i_sub, i_roi);
-            withinCate = [squareform(roiRDM(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
-                squareform(roiRDM(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
-            betweenCate = reshape(roiRDM(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
-            diff_per_sub(i_roi, i_sub) = mean(withinCate) - mean(betweenCate);
-        end
-        % take the mean
-        mean_diff(i_roi) = mean(diff_per_sub(i_roi, :), 'omitnan');
-        std_diff(i_roi) = std(diff_per_sub(i_roi, :));
-    end
-
-    if makeBetweenComparison
-        % plot within - between difference
-        figure;
-        hold on;
-
-        % Bar plot with error bars
-        bar_handle = bar(mean_diff, 'FaceColor', 'flat');
-        errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
-
-        % Add horizontal line at chance level
-        yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
-
-        % Add jittered individual points
-        rng(0); % For reproducible jitter
-        jitter_amount = 0.1; % Adjust jitter spread
-        for i_roi = 1:num_rois
-            x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
-            scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
-            for i_sub = 1:num_subjects
-                text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
-            end
-        end
-
-        % Customize plot
-        xticks(1:num_rois);
-        xticklabels(masks);
-        xlabel('ROI');
-        ylabel('Pariwise decoding diff');
-        ylim([min(min(diff_per_sub))-0.005, max(max(diff_per_sub))+0.005])
-        title('Within - Between category pairwise correaltion');
-
-        hold off;
-    end
-
-    %% is-rdm
-
-    figure;
-    title('IS RDMs across the whole RDM');
-
-    for i_roi = 1:num_rois
-        nexttile
-
-        % make a matrix with vectorized RDMs
-        for i_sub = 1:num_subjects
-            RDMmat(:, i_sub) = squareform(all_rdm_data(:, :, i_sub, i_roi));
-        end
-
-        % make and plot IS-RDM
-        cfg.correlation_type = 'spearman';
-        cfg.labels = cfg.subNums;
-        cfg.cell_label_style = 'coef';
-        cfg.plotting = true;
-        cfg.new_figure = false;
-        cfg.dissimilarity = false;
-        cfg.MinColorValue = -0.5;
-        cfg.MaxColorValue = 0.5;
-        [~, mat_out, ~] = make_RDM(RDMmat, cfg);
-        mat_out(eye(size(mat_out)) == 1) = 0;
-        medianISC = median(squareform(mat_out), 'omitnan');
-        title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
-    end
+     %% Create bar plot with comparison of within and between category
+% 
+%     diff_per_sub = nan(num_rois, num_subjects);
+%     mean_diff = nan(1, num_rois);
+%     std_diff = mean_diff;
+%     for i_roi = 1:num_rois
+%         for i_sub = 1:num_subjects
+%             % get within and between category correlation
+%             roiRDM = all_rdm_data(:, :, i_sub, i_roi);
+%             withinCate = [squareform(roiRDM(1:cfg.nTrials/2, 1:cfg.nTrials/2)), ...
+%                 squareform(roiRDM(cfg.nTrials/2 + 1:end, cfg.nTrials/2 + 1:end))];
+%             betweenCate = reshape(roiRDM(cfg.nTrials/2 + 1:end, 1:cfg.nTrials/2), 1, []);
+%             diff_per_sub(i_roi, i_sub) = mean(withinCate) - mean(betweenCate);
+%         end
+%         % take the mean
+%         mean_diff(i_roi) = mean(diff_per_sub(i_roi, :), 'omitnan');
+%         std_diff(i_roi) = std(diff_per_sub(i_roi, :));
+%     end
+% 
+%     if makeBetweenComparison
+%         % plot within - between difference
+%         figure;
+%         hold on;
+% 
+%         % Bar plot with error bars
+%         bar_handle = bar(mean_diff, 'FaceColor', 'flat');
+%         errorbar(1:num_rois, mean_diff, std_diff, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+% 
+%         % Add horizontal line at chance level
+%         yline(0, '--r', 'No Category difference', 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'right');
+% 
+%         % Add jittered individual points
+%         rng(0); % For reproducible jitter
+%         jitter_amount = 0.1; % Adjust jitter spread
+%         for i_roi = 1:num_rois
+%             x_jitter = i_roi + (rand(num_subjects, 1) - 0.5) * jitter_amount;
+%             scatter(x_jitter, diff_per_sub(i_roi, :), 30, 'filled', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'b');
+%             for i_sub = 1:num_subjects
+%                 text(x_jitter(i_sub) + 0.04, diff_per_sub(i_roi, i_sub), subjects{i_sub}, 'FontSize', 8);
+%             end
+%         end
+% 
+%         % Customize plot
+%         xticks(1:num_rois);
+%         xticklabels(masks);
+%         xlabel('ROI');
+%         ylabel('Pariwise decoding diff');
+%         ylim([min(min(diff_per_sub))-0.005, max(max(diff_per_sub))+0.005])
+%         title('Within - Between category pairwise correaltion');
+% 
+%         hold off;
+%     end
+% 
+     %% is-rdm
+% 
+%     figure;
+%     title('IS RDMs across the whole RDM');
+% 
+%     for i_roi = 1:num_rois
+%         nexttile
+% 
+%         % make a matrix with vectorized RDMs
+%         for i_sub = 1:num_subjects
+%             RDMmat(:, i_sub) = squareform(all_rdm_data(:, :, i_sub, i_roi));
+%         end
+% 
+%         % make and plot IS-RDM
+%         cfg.correlation_type = 'spearman';
+%         cfg.labels = cfg.subNums;
+%         cfg.cell_label_style = 'coef';
+%         cfg.plotting = true;
+%         cfg.new_figure = false;
+%         cfg.dissimilarity = false;
+%         cfg.MinColorValue = -0.5;
+%         cfg.MaxColorValue = 0.5;
+%         [~, mat_out, ~] = make_RDM(RDMmat, cfg);
+%         mat_out(eye(size(mat_out)) == 1) = 0;
+%         medianISC = median(squareform(mat_out), 'omitnan');
+%         title([masks{i_roi}, ' (median: ', num2str(round(medianISC, 4)), ')']);
+%     end
 end
 end
