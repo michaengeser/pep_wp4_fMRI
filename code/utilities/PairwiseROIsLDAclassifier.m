@@ -46,7 +46,7 @@ for iSub = 1:length(cfg.subNums)
                     disp(['RDM for ', mask_label_short, ' already exists']);
                     resNew.(subID2).(mask_label_short) = res.(subID2).(mask_label_short);
                     aboveChanceROIs(j) = resNew.(subID2).(mask_label_short).mean_accuracy > 0.5;
-                    continue
+                    %continue
                 end
             end
         end
@@ -65,7 +65,7 @@ for iSub = 1:length(cfg.subNums)
         opt.max_feature_count = 5000;
 
         if isempty(gcp('nocreate'))
-            parpool(8);
+            parpool(12);
         end
         nTrials = cfg.nTrials;
         parfor stim1 = 1:nTrials
@@ -130,9 +130,9 @@ if ~exist(outputFolder, 'dir')
 end
 save(fileName, 'res')
 
-if ~isempty(gcp('nocreate'))
-    delete(gcp('nocreate'));
-end
+% if ~isempty(gcp('nocreate'))
+%     delete(gcp('nocreate'));
+% end
 
 %% ploting
 if cfg.plotting

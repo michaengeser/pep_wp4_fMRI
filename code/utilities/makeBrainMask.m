@@ -7,7 +7,7 @@ for iSub = 1:cfg.n
 
     % get subject pmask
     subID = sprintf('sub-%03d',  cfg.subNums(iSub));
-    subject_mask_path = fullfile(pwd, '..', 'derivatives', subID, 'exp_glm1_norm_220', 'mask.nii');
+    subject_mask_path = fullfile(pwd, '..', 'derivatives', subID, 'loc_glm1_norm', 'mask.nii');
     try
         nii = load_untouch_nii(subject_mask_path);
     catch
@@ -35,7 +35,6 @@ if ~exist(save_path, 'dir')
     mkdir(save_path);
 end
 save_untouch_nii(nii, fullfile(save_path, 'group_intersection_mask.nii'));
-
 
 % Apply threshold
 voxel_threshold = round(cfg.threshold * cfg.n);
