@@ -46,7 +46,7 @@ for iSub = 1:length(cfg.subNums)
                     disp(['RDM for ', mask_label_short, ' already exists']);
                     resNew.(subID2).(mask_label_short) = res.(subID2).(mask_label_short);
                     aboveChanceROIs(j) = resNew.(subID2).(mask_label_short).mean_accuracy > 0.5;
-                    %continue
+                    continue
                 end
             end
         end
