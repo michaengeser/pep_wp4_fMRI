@@ -11,7 +11,5 @@ for iRun = 1:cfg.nRuns
         names{counter, 1} = fullfile(folderName, fileName);
         disp(fullfile(folderName, fileName))
 
-
     end
-
 end

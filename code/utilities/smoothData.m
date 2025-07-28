@@ -1,8 +1,8 @@
 function smoothData(cfg)
 
-if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
-if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 4; end
-if ~isfield(cfg, 'nVols'); cfg.nVols = 152;end
+if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
+if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 6; end
+if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 
 
 %% Initialize SPM

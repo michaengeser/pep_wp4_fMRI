@@ -83,7 +83,7 @@ for category = cfg.categories
             vec_RDM1 = reshapedMeanXyzc(iVoxel, :);
 
             % partial correlation
-            [rVec(iVoxel), pVec(iVoxel)] = partialcorr(vec_RDM1', vec_RDM2', vec_RDM3',...
+            [rV0ec(iVoxel), pVec(iVoxel)] = partialcorr(vec_RDM1', vec_RDM2', vec_RDM3',...
                 'Tail', 'right', 'Type', 'Pearson');
 
         end
