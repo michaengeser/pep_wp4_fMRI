@@ -212,6 +212,49 @@ if cfg.permutation_test
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
         'wholeBrainPvalsAverage.nii'));
 
+    % get p values FDR-corrected
+    pMap_bat(isnan(bat_map)) = nan;
+    [~, ~, ~, pMap_bat_fdr] = fdr_bh(pMap_bat);
+    nii.img = single(reshape(pMap_bat_fdr, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
+        'wholeBrainPvalsFDR.nii'));
+
+    pMap_kit(isnan(kit_map)) = nan;
+    [~, ~, ~, pMap_kit_fdr] = fdr_bh(pMap_kit);
+    nii.img = single(reshape(pMap_kit_fdr, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
+        'wholeBrainPvalsFDR.nii'));
+
+    pMap_avg(isnan(avg_map)) = nan;
+    [~, ~, ~, pMap_avg_fdr] = fdr_bh(pMap_avg);
+    nii.img = single(reshape(pMap_avg_fdr, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainPvalsAverageFDR.nii'));
+
+    % tresholded average map based on fdr correction
+    treshold_map = nan(size(avg_map));
+    treshold_map(pMap_avg_fdr<0.05) = avg_map(pMap_avg_fdr<0.05);
+    nii.img = single(reshape(treshold_map, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainAverageTresholded.nii'));
+
+    % treshold on p < 0.001 and 30 voxel cluster
+    treshold_p_3d = double(reshape((pMap_avg<0.001), size(brainMask.img)));
+    [labels, num] = spm_bwlabel(treshold_p_3d, 18);
+
+    treshold_p_1d = zeros(size(avg_map));
+    for c = 1:num
+        voxels_in_cluster = find(labels == c);
+        if numel(voxels_in_cluster) >= 30
+            treshold_p_1d(voxels_in_cluster) = 1;
+        end
+    end
+
+    treshold_p_1d(treshold_p_1d == 1) = avg_map(treshold_p_1d == 1);
+    nii.img = single(reshape(treshold_p_1d, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainAverageTresholded_p001_cluster30.nii'));
+
 
     % store max values in d
     d.maxR_bat = maxR_bat;
