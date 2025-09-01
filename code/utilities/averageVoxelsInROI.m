@@ -8,8 +8,8 @@ if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
 if ~isfield(cfg, 'nTargets'); cfg.nTargets = 15; end
 if ~isfield(cfg, 'halfTrials'); cfg.halfTrials =  cfg.nTrials / 2;end
-if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 0;end
-if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 4;end
+if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 3;end
+if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 3;end
 if ~isfield(cfg, 'targetDelay'); cfg.targetDelay = 3;end % in secs
 if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = true;end % in secs
 if ~isfield(cfg, 'smoothing'); cfg.smoothing = false;end
@@ -151,60 +151,29 @@ for iSub = 1:length(subs)
         targetTrials = targetStruct(iRun).trialNum;
 
         % define vector which values to cut out
-        nonTargetWindow = ones(1, cfg.nVols);
-        for iTr = 1:length(targetTrials)
-            targetImg = trialIDs(targetTrials(iTr), 3) + cfg.targetDelay + cfg.stimDur + cfg.iti; % cut from the end of the trial
-            targetImg = round(targetImg / cfg.tr) + 1; % convert to TR 
-            if targetTrials(iTr)  == cfg.nTrials % if target was last image
-                nextImg = cfg.nVols; % cut until the end
-            else
-                nextImg = trialIDs(targetTrials(iTr) + 1, 3) + cfg.targetDelay;
-                nextImg = round(nextImg / cfg.tr) + 1; % convert to TR
+        includedTRs = ones(1, cfg.nVols);
+        if cfg.cutTargets
+            for iTr = 1:length(targetTrials)
+                targetImg = trialIDs(targetTrials(iTr), 3) + cfg.targetDelay + cfg.stimDur + cfg.iti; % cut from the end of the trial
+                targetImg = round(targetImg / cfg.tr) + 1; % convert to TR
+                if targetTrials(iTr)  == cfg.nTrials % if target was last image
+                    nextImg = cfg.nVols; % cut until the end
+                else
+                    nextImg = trialIDs(targetTrials(iTr) + 1, 3) + cfg.targetDelay;
+                    nextImg = round(nextImg / cfg.tr) + 1; % convert to TR
+                end
+                includedTRs(targetImg:nextImg) = 0;
             end
-            nonTargetWindow(targetImg:nextImg) = 0;
-        end 
+        end
 
-% 
-%         % get first and last TR of each category
-%         if trialIDs(1,1) < cfg.halfTrials
-%             firstBathroomTR = trialIDs(1, 4) - cfg.TRstartBuffer;
-%             lastBathroomTR = trialIDs(cfg.halfTrials, 4)...
-%                 + cfg.TRendBuffer;
-%             firstKitchenTR = trialIDs(cfg.halfTrials + 1, 4)...
-%                 - cfg.TRstartBuffer;
-%             lastKitchenTR = trialIDs(end, 4) + cfg.TRendBuffer;
-%         else
-%             firstKitchenTR = trialIDs(1,4) - cfg.TRstartBuffer;
-%             lastKitchenTR = trialIDs(cfg.halfTrials, 4)...
-%                 + cfg.TRendBuffer;
-%             firstBathroomTR = trialIDs(cfg.halfTrials + 1, 4)...
-%                 - cfg.TRstartBuffer;
-%             lastBathroomTR = trialIDs(end, 4) + cfg.TRendBuffer;
-%         end
+        % cut first and last TRs
+        includedTRs(1:cfg.TRstartBuffer) = 0;
+        includedTRs(end-cfg.TRendBuffer:end) = 0;
 
         % get data
         v = load_untouch_nii(funcFile);
         runData = single(v.img);
-        if cfg.cutTargets
-            data{iRun} = runData(:, :, :, logical(nonTargetWindow));
-        else
-            data{iRun} = runData;
-        end
-
-%         % make sure both timecourses have the same length
-%         timecourseLength = max([lastBathroomTR - firstBathroomTR, ...
-%             lastKitchenTR - firstKitchenTR]);
-% 
-%         % split data
-%         bathroomData{iRun} = runData(:, :, :, ...
-%             firstBathroomTR : firstBathroomTR + timecourseLength);
-%         kitchenData{iRun} = runData(:, :, :, ...
-%             firstKitchenTR : firstKitchenTR + timecourseLength);
-% 
-%         % check size of timecourse
-%         disp(['Run: ', num2str(iRun)])
-%         disp(['Size bathroom: ', num2str(size(bathroomData{iRun}))])
-%         disp(['Size kitchen: ', num2str(size(kitchenData{iRun}))])
+        data{iRun} = runData(:, :, :, logical(includedTRs));
 
         %% average across voxels for each mask
         for j=1:nmasks
