@@ -16,8 +16,8 @@ for iSub = 1:length(cfg.subNums)
     % check if preprocessed files exit already
     outputDir = fullfile(cfg.outputPath, subID, 'func');
     if exist(outputDir, 'dir')
-        lastVol = fullfile(outputDir, sprintf('wr%sxxxx_task-scenes_run-%d_bold_%0.5d.nii', subID, cfg.nRuns, cfg.nVols));
-        if exist(lastVol, 'file')
+        motionResgressors = fullfile(outputDir, sprintf('rp_%sxxxx_task-scenes_run-%d_bold_%0.5d.txt', subID, cfg.nRuns, 1));
+        if exist(motionResgressors, 'file')
             disp(['Preprocessed data for subject ', num2str(cfg.subNums(iSub)), ' exists already'])
             continue
         end 

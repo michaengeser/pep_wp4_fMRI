@@ -23,7 +23,9 @@ if ~isfield(cfg, 'xaxis_labels'); cfg.xaxis_labels = true;end
 cfg.plot_rdm = false;
 if ~isfield(cfg, 'plot_type'); cfg.plot_type = 'bar';end
 if ~isfield(cfg, 'dnns'); cfg.dnns = {cfg.dnn};end
-if ~isfield(cfg, 'ylim'); cfg.ylim = [-0.3, 0.5];end
+if ~isfield(cfg, 'ylim'); cfg.ylim = [-0.2, 0.4];end
+if ~isfield(cfg, 'task_plotting'); cfg.plott_gap = 0;end
+if ~isfield(cfg, 'plotting_predictors'); cfg.plotting_predictors = 1:numel(cfg.predictor_RDMs);end
 % if permutations with sign flips are used, corrleation type needs to be
 % spearman
 if strcmp(cfg.permutation_type, 'sign_flip_ref')
@@ -63,6 +65,8 @@ end
 % random samplings)
 if cfg.permutation_test
     % generate permutated subjects list
+    rng('default')
+    rng(0)
     random_seqs = cell(numel(cfg.RDM_to_partial_out), cfg.n_permutations);
     for i = 1:cfg.n_permutations
         if ismember(cfg.permutation_type, {'row_col_shuffle_ref',...
@@ -95,8 +99,8 @@ if cfg.bootstrapping
 end
 % loop through rois
 for roi_i = 1:numel(cfg.rois_of_interest)
-    voi = char(cfg.rois_of_interest(roi_i));
-    cfg.currentVoi = voi;
+    roi = char(cfg.rois_of_interest(roi_i));
+    cfg.currentVoi = roi;
     % loop through categories
     for cate_num = 1:numel(cfg.categories)
         category = char(cfg.categories{cate_num});
@@ -104,12 +108,12 @@ for roi_i = 1:numel(cfg.rois_of_interest)
         % get roi RDM names
         all_ref_names = {d.([category,'_RDM']).(cfg.ISC_type).name};
         % get voi RDM
-        ref_idx = find(strcmp(all_ref_names, voi));
+        ref_idx = find(strcmp(all_ref_names, roi));
         if ~isempty(ref_idx)
             ref_RDM = d.([category,'_RDM']).(cfg.ISC_type)(ref_idx);
         else
             tem_preditor_RDMs = cfg.predictor_RDMs; % store predictors temporally
-            cfg.predictor_RDMs = {voi};
+            cfg.predictor_RDMs = {roi};
             RDMs = d.([category,'_RDM']).(cfg.ISC_type)(1); % fill with some RDM as placeholder
             labels = {RDMs.name};
             [ref_RDM, cfg.labels] = evaluate_predictor_RDMs(d, RDMs, labels, cfg, category);
@@ -139,7 +143,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
         res_table.r_val = r_mat(2:end, 1);
 
         % store in data struct
-        d.compare_roi_to_predictor.(voi).(category) = res_table;
+        d.compare_roi_to_predictor.(roi).(category) = res_table;
         % make random permutations
         if cfg.permutation_test
             permutation_RDMs = RDMs;
@@ -196,10 +200,10 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 end
                 if mod(perm/cfg.n_permutations, 0.1) == 0
                     disp([num2str((perm/cfg.n_permutations)*100),...
-                        '% of permutations of ', voi, ' ', category, ' is done'])
+                        '% of permutations of ', roi, ' ', category, ' is done'])
                 end
             end
-            d.compare_roi_to_predictor.permutation_test.(voi).(category) = perm_r_mat;
+            d.compare_roi_to_predictor.permutation_test.(roi).(category) = perm_r_mat;
         end
         % make bootstrapping
         if cfg.bootstrapping
@@ -239,28 +243,28 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 bootstrapped_r_mat(1:end, iter) = r_mat(2:end, 1);
                 if mod(iter/cfg.n_bootstrapp_iterations, 0.1) == 0
                     disp([num2str((iter/cfg.n_bootstrapp_iterations)*100),...
-                        '% of bootstrapping of ', voi, ' ', category, ' is done'])
+                        '% of bootstrapping of ', roi, ' ', category, ' is done'])
                 end
             end
-            d.compare_roi_to_predictor.bootstrapping.(voi).(category) = bootstrapped_r_mat;
+            d.compare_roi_to_predictor.bootstrapping.(roi).(category) = bootstrapped_r_mat;
         end
         % runtime control
-        disp(['Compare inter-subject RDM of ', voi, ' with partial correaltion of predictor RDMs - ', category])
+        disp(['Compare inter-subject RDM of ', roi, ' with partial correaltion of predictor RDMs - ', category])
 
         % store in data struct
-        d.compare_task_to_predictor.(voi).(category) = res_table;
+        d.compare_task_to_predictor.(roi).(category) = res_table;
     end
     % average categories
-    res_table.r_val_cate1 = d.compare_roi_to_predictor.(voi).(cfg.categories{1}).r_val;
-    res_table.r_val_cate2 = d.compare_roi_to_predictor.(voi).(cfg.categories{2}).r_val;
-    res_table.r_val = (d.compare_roi_to_predictor.(voi).(cfg.categories{1}).r_val +...
-        d.compare_roi_to_predictor.(voi).(cfg.categories{2}).r_val)/2;
-    d.compare_roi_to_predictor.(voi).category_average = res_table;
+    res_table.r_val_cate1 = d.compare_roi_to_predictor.(roi).(cfg.categories{1}).r_val;
+    res_table.r_val_cate2 = d.compare_roi_to_predictor.(roi).(cfg.categories{2}).r_val;
+    res_table.r_val = (d.compare_roi_to_predictor.(roi).(cfg.categories{1}).r_val +...
+        d.compare_roi_to_predictor.(roi).(cfg.categories{2}).r_val)/2;
+    d.compare_roi_to_predictor.(roi).category_average = res_table;
     % get confidence intervals
     if cfg.bootstrapping
         % average categories
-        boot_r_vals_cate1 = d.compare_roi_to_predictor.bootstrapping.(voi).(cfg.categories{1});
-        boot_r_vals_cate2 = d.compare_roi_to_predictor.bootstrapping.(voi).(cfg.categories{2});
+        boot_r_vals_cate1 = d.compare_roi_to_predictor.bootstrapping.(roi).(cfg.categories{1});
+        boot_r_vals_cate2 = d.compare_roi_to_predictor.bootstrapping.(roi).(cfg.categories{2});
         bootstrapping_r_vals = (boot_r_vals_cate1 + boot_r_vals_cate2)/2;
         % get confidence intervals and store in result table
         cis = prctile(bootstrapping_r_vals', [5, 95]);
@@ -269,14 +273,20 @@ for roi_i = 1:numel(cfg.rois_of_interest)
         res_table.boot_median = median(bootstrapping_r_vals')';
     elseif cfg.permutation_test
         % get p values of random permutation
-        perm_r_mat = (d.compare_roi_to_predictor.permutation_test.(voi).(cfg.categories{1}) +...
-            d.compare_roi_to_predictor.permutation_test.(voi).(cfg.categories{2}))/2;
-        d.compare_roi_to_predictor.permutation_test.(voi).category_average = perm_r_mat;
+        perm_r_mat = (d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{1}) +...
+            d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{2}))/2;
+        d.compare_roi_to_predictor.permutation_test.(roi).category_average = perm_r_mat;
     end
     % plotting
     if cfg.plotting
+
+        % filter predictors to plot
+        if numel(cfg.plotting_predictors) ~= numel(cfg.predictor_RDMs)
+            res_table = res_table(cfg.plotting_predictors, :);
+        end
+
         % loop through res_table and add according variables
-        disp(['p and mean r values for ', voi])
+        disp(['p and mean r values for ', roi])
         clr = cool(numel(RDMs));
         for row = 1:height(res_table)
             % colors
@@ -303,10 +313,10 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 res_table.p_val(row) = p_value;
                 % get p values for categories
                 res_table.p_val_cate1(row) = ...
-                    sum(d.compare_roi_to_predictor.permutation_test.(voi).(cfg.categories{1})(row,:)...
+                    sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{1})(row,:)...
                     >= res_table.r_val_cate1(row)) / cfg.n_permutations;
                 res_table.p_val_cate2(row) = ...
-                    sum(d.compare_roi_to_predictor.permutation_test.(voi).(cfg.categories{2})(row,:)...
+                    sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{2})(row,:)...
                     >= res_table.r_val_cate2(row)) / cfg.n_permutations;
                 res_table.ci_upper(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 5);
                 res_table.ci_lower(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 95);
@@ -329,7 +339,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             end
 
             % store in data struct
-            d.compare_task_to_predictor.(voi).category_average = res_table;
+            d.compare_task_to_predictor.(roi).category_average = res_table;
         end
         % order row based on r values
         if cfg.order_predictors
@@ -383,7 +393,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                     % add bootstrapping median if available
                     if ismember('boot_median', res_table.Properties.VariableNames)
                         text(current_x_pos, res_table.boot_median(xiPos),...
-                            '-', 'HorizontalAlignment', 'center', 'FontSize', 12);
+                            '-', 'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
                     end
                 elseif strcmp(cfg.plot_type, 'violin')
                     % plot oberseved mean r
@@ -401,14 +411,14 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                     cate_mark2 = 'L';
                 end
                 text(current_x_pos-0.2, res_table.r_val_cate1(xiPos), cate_mark1,...
-                    'HorizontalAlignment', 'center', 'FontSize', 5);
+                    'HorizontalAlignment', 'center', 'FontSize', 5, 'FontWeight', 'bold');
                 text(current_x_pos-0.2, res_table.r_val_cate2(xiPos), cate_mark2,...
-                    'HorizontalAlignment', 'center', 'FontSize', 5);
+                    'HorizontalAlignment', 'center', 'FontSize', 5, 'FontWeight', 'bold');
             end
         end
     end
     % make cap between reference RDMs
-    previous_x_pos = current_x_pos + 1;
+    previous_x_pos = current_x_pos + cfg.plott_gap;
 end
 
 if cfg.plotting
@@ -416,8 +426,8 @@ if cfg.plotting
     % collect p values
     all_p_vals = nan(height(res_table), numel(cfg.rois_of_interest));
     for roi_i = 1:numel(cfg.rois_of_interest)
-        voi = char(cfg.rois_of_interest(roi_i));
-        all_p_vals(:, roi_i) = d.compare_task_to_predictor.(voi).category_average.p_val;
+        roi = char(cfg.rois_of_interest(roi_i));
+        all_p_vals(:, roi_i) = d.compare_task_to_predictor.(roi).category_average.p_val;
     end
 
     % get asterisks
@@ -431,10 +441,12 @@ if cfg.plotting
         disp([newline, newline])
         disp(char(res_table.name(i_pred)))
         for roi_i = 1:numel(cfg.rois_of_interest)
-            voi = char(cfg.rois_of_interest(roi_i));
-            d.compare_task_to_predictor.(voi).category_average.p_val(i_pred) = fdr_pval(roi_i);
-            disp(['FDR corrected p value for ', voi, ': ', num2str(fdr_pval(roi_i)),...
+            roi = char(cfg.rois_of_interest(roi_i));
+            d.compare_task_to_predictor.(roi).category_average.p_val(i_pred) = fdr_pval(roi_i);
+            disp(['FDR corrected p value for ', roi, ': ', num2str(fdr_pval(roi_i)),...
                 ' ', char(all_asterisks(i_pred, roi_i))])
+            disp(['R value for ', roi, ': ', ...
+                num2str(d.compare_task_to_predictor.(roi).category_average.r_val)])
         end
     end
 
@@ -449,7 +461,7 @@ if cfg.plotting
 
         % get y position based on error bars
         y_pos = errorHandles(i_bar).YPositiveDelta + errorHandles(i_bar).YData + 0.08;
-        text(i_bar, y_pos, ast_vec{count}, 'HorizontalAlignment', 'center', 'FontSize', 12);
+        text(i_bar, y_pos, ast_vec{count}, 'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
     end
 
     % get aesthetics
@@ -465,13 +477,15 @@ if cfg.plotting
     else
         ylim([-0.1, max(res_table.r_val) + 0.1])
     end
-    xlim([-1, previous_x_pos])
+    xlim([0, previous_x_pos+1])
     set(gca, 'LineWidth', 1, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
     ax = gca;
     ax.Box = 'off';
     % get labels
     if cfg.xaxis_labels
-        xticks(ceil(length(cfg.predictor_RDMs)/2):length(cfg.predictor_RDMs)+1:(length(cfg.predictor_RDMs)+2)*length(cfg.rois_of_interest));
+        xticks(ceil(length(cfg.plotting_predictors)/2):...
+            length(cfg.plotting_predictors)+cfg.plott_gap:...
+            (length(cfg.plotting_predictors)+2)*length(cfg.rois_of_interest));
         xticklabels(cfg.rois_of_interest);
         xtickangle(45);
     else
