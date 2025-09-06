@@ -14,6 +14,9 @@ for category = cfg.categories
     category = char(category);
     Category = strcat(upper(category(1)),lower(category(2:end))); % capitalize first letter
 
+    % run time control
+    disp(['Evaluate ', category])
+
     % loop through ROIs
     allRoiCorr = nan(1, numel(cfg.rois));
     for iRoi = 1:numel(cfg.rois)
@@ -21,64 +24,128 @@ for category = cfg.categories
         mask_label_short = split(roi, '.');
         mask_label_short = mask_label_short{1};
 
+        % run time control
+        disp(['   - ', mask_label_short])
+
         % looop through splits
-            allSplitCorr = nan(1, height(splits));
-            for iSplit = 1:height(splits)
+        cfg.is_permutation_test = false;
+        allSplitCorr = nan(1, height(splits));
+        allSplitCorr = iterateSplits(allSplitCorr, splits, iRoi, category, d, cfg);
 
-                % get first half
-                currentRDM = {d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(splits(iSplit,:)).RDM};
-                currentRDM = cell2mat(currentRDM);
-                currentRDM = reshape(currentRDM, cfg.n, cfg.n, []);
-                mean1stHalf = mean(currentRDM, 3, 'omitnan');
-                mean1stHalf(eye(cfg.n) == 1) = 0;
-                mean1stHalf = squareform(mean1stHalf);
+        % take mean across splits
+        allRoiCorr(iRoi) = mean(allSplitCorr, 'omitnan');
+        d.splitHalfISC.(Category).(mask_label_short).allSplitCorr = allSplitCorr;
 
-                % get second half
-                otherRuns = setdiff(1:cfg.nRuns/2, splits(iSplit,:));
-                currentRDM = {d.([category,'_RDM']).timecourseRDM(iRoi).runwiseRDM(otherRuns).RDM};
-                currentRDM = cell2mat(currentRDM);
-                currentRDM = reshape(currentRDM, cfg.n, cfg.n, []);
-                mean2ndHalf = mean(currentRDM, 3, 'omitnan');
-                mean2ndHalf(eye(cfg.n) == 1) = 0;
-                mean2ndHalf = squareform(mean2ndHalf);
+        % run permutation test
+        if cfg.permutation_test
+            rng('default')
+            rng(1)
 
-                % get correaltiom
-                r = corr([mean1stHalf', mean2ndHalf'], 'Type', 'Spearman');
-                allSplitCorr(iSplit) = r(1,2);
+            for perm = 1:cfg.n_permutations
 
-            end 
+                % get randiom sequence and performe correaltion
+                cfg.random_seq = randperm(cfg.n);
+                cfg.is_permutation_test = true;
+                allSplitCorr = nan(1, height(splits));
+                allSplitCorr = iterateSplits(allSplitCorr, splits, iRoi, category, d, cfg);
+                perm_r_vals(perm) = mean(allSplitCorr, 'omitnan');
+            end
+        end
 
-            % take mean across splits
-            allRoiCorr(iRoi) = mean(allSplitCorr, 'omitnan');
-            d.splitHalfISC.(Category).(mask_label_short).allSplitCorr = allSplitCorr;
+        permRes(iRoi).(category)= perm_r_vals;
 
     end % roi loop
 
     % write to struct
-    d.splitHalfISC.(Category).(mask_label_short).meanCorr = allRoiCorr;
-
+    d.splitHalfISC.(Category).meanCorr = allRoiCorr;
 
     %% plotting
 
-    if cfg.plotting
-
-        % bar plot
-        figure;
-        bar(allRoiCorr)
-        ylabel('Split Half Correlation')
-        xlabel('ROI')
-        xticklabels(cfg.rois)
-
-        if (min(allRoiCorr) - 0.01) > 0
-            yMin = 0;
-        else
-            yMin = min(allRoiCorr);
-        end 
-
-        ylim([yMin, max(allRoiCorr) + 0.01])
-        title(['Split-half Reliability of ISC across Runs - ', category])
-    end 
+%     if cfg.plotting
+% 
+%         % bar plot
+%         figure;
+%         bar(allRoiCorr)
+%         ylabel('Split Half Correlation')
+%         xlabel('ROI')
+%         xticklabels(cfg.rois)
+% 
+%         if (min(allRoiCorr) - 0.01) > 0
+%             yMin = 0;
+%         else
+%             yMin = min(allRoiCorr);
+%         end 
+% 
+%         ylim([yMin, max(allRoiCorr) + 0.01])
+%         title(['Split-half Reliability of ISC across Runs - ', category])
+%     end
 end % category loop
 
+
+if cfg.plotting
+
+% get mean over categories
+        mean_cor = (d.splitHalfISC.Bathroom.meanCorr + d.splitHalfISC.Kitchen.meanCorr)/2;
+
+        if cfg.permutation_test
+            % get p values and confidence intervals from permutaiotn
+            mean_perm_cors = nan(numel(cfg.rois), cfg.n_permutations);
+            mean_perm_p = nan(1, numel(cfg.rois));
+            mean_perm_ci_upper = mean_perm_p;
+            mean_perm_ci_lower = mean_perm_p;
+            for iRoi = 1:numel(cfg.rois)
+                mean_perm_cors(iRoi, :) = (permRes(iRoi).bathroom +...
+                    permRes(iRoi).kitchen)/2;
+                mean_perm_p(iRoi) = sum(mean_perm_cors(iRoi, :) >= mean_cor(iRoi))/ cfg.n_permutations;
+                mean_perm_ci_upper(iRoi) = mean_cor(iRoi) - prctile(mean_perm_cors(iRoi, :), 5);
+                mean_perm_ci_lower(iRoi) = mean_cor(iRoi) - prctile(mean_perm_cors(iRoi, :), 95);
+            end
+
+            % get asterisks
+            asterisks = pval2asterisks(mean_perm_p, 'fdr');
+        end
+
+    % bar plot
+    figure;
+    hold on
+    clrs = bone(numel(cfg.rois)+4);
+    clrs = clrs(5:end, :);
+    clrs(:, 1:2) = clrs(:, 1:2).*clrs(:, 1:2);
+    for iRoi = 1:numel(cfg.rois)
+        bar(iRoi, mean_cor(iRoi), 'FaceColor', clrs(iRoi, :))
+    end
+
+    % add significance
+    if cfg.permutation_test
+        for iRoi = 1:numel(cfg.rois)
+            errorbar(iRoi, mean_cor(iRoi), ...
+                mean_cor(iRoi) - mean_perm_ci_lower(iRoi), ...
+                mean_perm_ci_upper(iRoi) - mean_cor(iRoi),...
+                'k', 'LineWidth', 1);  % Error bars
+
+            text(iRoi, mean_perm_ci_upper(iRoi) + 0.03, asterisks{iRoi},...
+                'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
+        end
+    end
+
+    % aesthetics
+    ylabel(['Pearson correaltion', newline])
+    xlabel('ROI')
+    xticks(1:numel(cfg.rois))
+    xticklabels(cfg.rois)
+    xtickangle(45);
+    set(gca, 'LineWidth', 1, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
+    ax = gca;
+    ax.Box = 'off';
+
+    if (min(allRoiCorr) - 0.01) > 0
+        yMin = 0;
+    else
+        yMin = min(allRoiCorr);
+    end
+
+    ylim([yMin, max(mean_perm_ci_upper) + 0.1])
+    title('Split-half Reliability of ISC across Runs')
+end
 
 end
