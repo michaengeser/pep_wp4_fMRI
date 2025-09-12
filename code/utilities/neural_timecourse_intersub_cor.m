@@ -82,7 +82,7 @@ for category = cfg.categories
 
             end
 
-            % get goub average
+            % get groub average
             if cfg.regressOutMean
                 % get mean
                 groupMean = mean(sub_table, 2, 'omitnan');
