@@ -13,6 +13,7 @@ if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 3;end
 if ~isfield(cfg, 'targetDelay'); cfg.targetDelay = 3;end % in secs
 if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = true;end % in secs
 if ~isfield(cfg, 'smoothing'); cfg.smoothing = false;end
+if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 12; end
 if ~isfield(cfg, 'saveWholeBrain'); cfg.saveWholeBrain = false;end
 if ~isfield(cfg, 'rois'); cfg.rois = {'wV1.nii', 'wV2.nii',...
         'wLOC.nii', 'wPPA.nii',...
@@ -71,9 +72,15 @@ for iSub = 1:length(subs)
 
         % get functional files
         if cfg.smoothing
-            funcFile = fullfile(cfg.outputPath, subID, 'func', ...
-                sprintf('swr%s%s_task-scenes_run-%s_bold.nii',...
-                subID, 'xxxx', num2str(iRun)));
+            if cfg.smoothKernel == 12
+                funcFile = fullfile(cfg.outputPath, subID, 'func', ...
+                    sprintf('s12wr%s%s_task-scenes_run-%s_bold.nii',...
+                    subID, 'xxxx', num2str(iRun)));
+            else
+                funcFile = fullfile(cfg.outputPath, subID, 'func', ...
+                    sprintf('swr%s%s_task-scenes_run-%s_bold.nii',...
+                    subID, 'xxxx', num2str(iRun)));
+            end
         else
             funcFile = fullfile(cfg.outputPath, subID, 'func', ...
                 sprintf('wr%s%s_task-scenes_run-%s_bold.nii',...
@@ -146,7 +153,7 @@ for iSub = 1:length(subs)
         trialIDs = sortrows(trialIDs, 3);
         trialIDs(:, 4) = round(trialIDs(:, 3) / cfg.tr) + 1;
 
-        % get target positions 
+        % get target positions
         load(fullfile(pwd, 'utilities', 'targets.mat'), 'targetStruct')
         targetTrials = targetStruct(iRun).trialNum;
 
@@ -185,9 +192,18 @@ for iSub = 1:length(subs)
             mask_label_short = mask_label_short(2:end);
 
             if cfg.smoothing
-                fileName = ['smoothed_mean_timecourse_', currentCat, ...
-                    '_', mask_label_short, ...
-                    '_run_', num2str(iRun), '.mat'];
+                if cfg.smoothKernel == 12
+                    fileName = ['smoothed12_mean_timecourse_', currentCat, ...
+                        '_', mask_label_short, ...
+                        '_run_', num2str(iRun), '.mat'];
+                else
+                    fileName = ['smoothed_mean_timecourse_', currentCat, ...
+                        '_', mask_label_short, ...
+                        '_run_', num2str(iRun), '.mat'];
+
+                end
+
+               
             else
                 fileName = ['mean_timecourse_', currentCat, ...
                     '_', mask_label_short, ...
@@ -239,7 +255,7 @@ for iSub = 1:length(subs)
 
             % save whole brain data
             fileName = ['whole_brain_timecourse_', currentCat, ...
-                    '_run_', num2str(iRun), '.mat'];
+                '_run_', num2str(iRun), '.mat'];
 
             % check if file exists already and skip if the case
             if cfg.skipIfExists

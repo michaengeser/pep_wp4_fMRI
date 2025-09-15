@@ -24,7 +24,7 @@ for iRun = 1:cfg.nRuns
 
         counter = counter +1;
         folderName = fullfile(pwd, 'derivatives', subID, 'func');
-        fileName = ['swr', subID, 'xxxx_task-scenes_run-', num2str(iRun),'_bold.nii'];
+        fileName = ['s12wr', subID, 'xxxx_task-scenes_run-', num2str(iRun),'_bold.nii'];
 
         %%
         names{counter, 1} = fullfile(folderName, fileName);

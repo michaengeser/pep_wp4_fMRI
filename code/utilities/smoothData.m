@@ -1,7 +1,7 @@
 function smoothData(cfg)
 
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
-if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 6; end
+if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 12; end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 
 
@@ -37,7 +37,7 @@ for iSub = 1:numel(cfg.subNums)
     matlabbatch{1}.spm.spatial.smooth.fwhm = [cfg.smoothKernel, cfg.smoothKernel, cfg.smoothKernel];
     matlabbatch{1}.spm.spatial.smooth.dtype = 0;
     matlabbatch{1}.spm.spatial.smooth.im = 0;
-    matlabbatch{1}.spm.spatial.smooth.prefix = 's';
+    matlabbatch{1}.spm.spatial.smooth.prefix = ['s', num2str(cfg.smoothKernel)];
 
     % go!
     % repeat 3 times when crashing
