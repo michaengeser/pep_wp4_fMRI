@@ -2,17 +2,20 @@ function d = wholeBrainTimecourseISC(d, cfg)
 % evaluate input
 if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
-if ~isfield(cfg, 'nRuns'); cfg.nRuns = 10; end
+if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
 if ~isfield(cfg, 'brainMask'); cfg.brainMask = 'group_mask_thresholded'; end
-if ~isfield(cfg, 'predictor_RDMs'); cfg.predictor_RDMs = {'typical_late', 'control_late'}; end
+if ~isfield(cfg, 'predictor_RDMs'); cfg.predictor_RDMs = {'typical_late', 'control_late', 'photos_late'}; end
 if ~isfield(cfg, 'RDM_to_partial_out'); cfg.RDM_to_partial_out = cfg.predictor_RDMs; end
 if ~isfield(cfg, 'correlation_type'); cfg.correlation_type = 'pearson';end
-if ~isfield(cfg, 'permutation_test'); cfg.permutation_test = false;end
+if ~isfield(cfg, 'permutation_test'); cfg.permutation_test = true;end
 if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 10000;end
 if ~isfield(cfg, 'permutation_type'); cfg.permutation_type = 'row_col_shuffle_ref';end
 if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pearson';end
 if ~isfield(cfg, 'dnns'); cfg.dnns = {cfg.dnn};end
+if ~isfield(cfg, 'p_thresh'); cfg.p_thresh = 0.001;end
+
+
 % generate permutated subjects list
 rng('default'); rng(1) % ensure reproducible outcome
 cfg.random_seqs = cell(1, cfg.n_permutations);
@@ -23,11 +26,6 @@ for i = 1:cfg.n_permutations
     cfg.random_RDM_vecs{i} = squareform(RDM_shuffle);
 end
 partial_correlation_type = cfg.partial_correlation_type;
-
-% make for both categories parallel
-warning('load both categories and evaluate at the same time so average can be computed on the fly')
-
-
 cfg.RDM_to_partial_out = cfg.predictor_RDMs;
 
 % convert to local configurations
@@ -42,6 +40,7 @@ if ~exist(brainMaskPath, 'file')
     makeBrainMask(cfg)
 end
 brainMask = load_untouch_nii(brainMaskPath);
+brainMaskImg = brainMask.img;
 
 
 % load brain mask
@@ -74,8 +73,8 @@ for category = cfg.categories
 end
 
 % prepare variables for parallel computing
-isc_values_bat = reshapedxyzc.bathroom;
-isc_values_kit = reshapedxyzc.kitchen;
+isc_values_bat = reshapedxyzc.bathroom';
+isc_values_kit = reshapedxyzc.kitchen';
 
 %% init predictor RDMs and get residuals of predictors
 % (so we can run simple correlations in the loop below)
@@ -108,16 +107,19 @@ y_resid = regress(kit_preds(:, 1), [kit_preds(:, 2:end), ones(size(kit_preds(:, 
 y_hat = [kit_preds(:, 2:end), ones(size(kit_preds(:, 2:end),1),1)] * y_resid;
 kit_resid = kit_preds(:, 1) - y_hat;
 
-% if isempty(gcp('nocreate'))
-%     parpool(10);
-% end
-for iVoxel = 1:size(isc_values_bat, 1)
+if isempty(gcp('nocreate'))
+    parpool(10);
+end
+notNaNvec = true(size(isc_values_bat, 2), 1);
+parfor iVoxel = 1:size(isc_values_bat, 2)
 
     % make nan if mean ISC = 0 for this voxel
-    if mean(isc_values_bat(iVoxel, :)) == 0 || ...
-            mean(isc_values_kit(iVoxel, :)) == 0
-        isc_values_bat(iVoxel, :) = nan;
-        isc_values_kit(iVoxel, :) = nan;
+    if mean(isc_values_bat(:, iVoxel)) == 0 || ...
+            mean(isc_values_kit(:, iVoxel)) == 0 || ...
+            brainMaskImg(iVoxel) ~= 1
+        isc_values_bat(:, iVoxel) = nan;
+        isc_values_kit(:, iVoxel) = nan;
+        notNaNvec(iVoxel) = false;
     end
 end
 
@@ -129,13 +131,15 @@ nii.hdr.dime.datatype = 16;
 nii.hdr.dime.bitpix = 32;
 
 % bathroom
-bat_map = corr(isc_values_bat', bat_resid, 'Tail', 'right', 'Type', partial_correlation_type);
+bat_map = nan(size(isc_values_bat, 2), 1);
+bat_map(notNaNvec) = corr(isc_values_bat(:, notNaNvec), bat_resid, 'Tail', 'right', 'Type', partial_correlation_type);
 nii.img = single(reshape(bat_map, size(brainMask.img)));
 save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
     'wholeBrainCorMap.nii'));
 
 % kitchen
-kit_map = corr(isc_values_kit', kit_resid, 'Tail', 'right', 'Type', partial_correlation_type);
+kit_map = nan(size(isc_values_kit, 2), 1);
+kit_map(notNaNvec) = corr(isc_values_kit(:, notNaNvec), kit_resid, 'Tail', 'right', 'Type', partial_correlation_type);
 nii.img = single(reshape(kit_map, size(brainMask.img)));
 save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'kitchen',...
     'wholeBrainCorMap.nii'));
@@ -149,121 +153,142 @@ save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
 
 %% permutation test
 if cfg.permutation_test
-    % preallocate
-    nHeigher_bat = zeros(length(bat_map), 1);
-    nHeigher_bat(isnan(bat_map)) = nan;
-    nHeigher_kit = zeros(length(kit_map), 1);
-    nHeigher_kit(isnan(kit_map)) = nan;
-    maxR_bat = zeros(cfg.nPermutations, 1);
-    maxR_kit = zeros(cfg.nPermutations, 1);
-    nHeigher_avg = nHeigher_bat;
-    maxR_avg = maxR_bat;
-    random_RDM_vecs = cfg.random_RDM_vecs;
 
-    for perm = 1:cfg.n_permutations
+    % prepare values for parallel processing
+    random_RDM_vecs = cfg.random_RDM_vecs;
+    n_permutations = cfg.n_permutations;
+    isc_values_bat_parfor = isc_values_bat(:, notNaNvec);
+    isc_values_kit_parfor = isc_values_bat(:, notNaNvec);
+    all_perm_avg_r = single(nan(size(isc_values_kit_parfor, 2), n_permutations));
+
+    parfor perm = 1:n_permutations
 
         % bathroom
-        perm_bat_map = corr(isc_values_bat(:, random_RDM_vecs{perm})', bat_resid,...
-            'Tail', 'right', 'Type', partial_correlation_type);
-
-        % test if heigher than actual correlation value
-        heigherR = (perm_bat_map >= bat_map);
-        nHeigher_bat = nHeigher_bat + heigherR;
-
-        % store max value
-        maxR_bat(perm) = max(perm_bat_map);
-
+        perm_bat_map = corr(isc_values_bat_parfor(random_RDM_vecs{perm}, :),...
+            bat_resid, 'Tail', 'right', 'Type', partial_correlation_type);
 
         % kitchen
-        perm_kit_map = corr(isc_values_kit(:, random_RDM_vecs{perm})', kit_resid,...
-            'Tail', 'right', 'Type', partial_correlation_type);
-
-        % test if heigher than actual correlation value
-        heigherR = (perm_kit_map >= kit_map);
-        nHeigher_kit = nHeigher_kit + heigherR;
-
-        % store max value
-        maxR_kit(perm) = max(perm_kit_map);
+        perm_kit_map = corr(isc_values_kit_parfor(random_RDM_vecs{perm}, :),...
+            kit_resid, 'Tail', 'right', 'Type', partial_correlation_type);
 
         % average
-        perm_avg_map = (perm_bat_map + perm_kit_map)/2;
+        all_perm_avg_r(:, perm) = (perm_bat_map + perm_kit_map)/2;
 
-        % test if heigher than actual correlation value
-        heigherR = (perm_avg_map >= avg_map);
-        nHeigher_avg = nHeigher_avg + heigherR;
 
-        % store max value
-        maxR_avg(perm) = max(perm_avg_map);
+        % progress report
+        if mod(perm, 1000) == 0
+            disp([char(datetime), ' - ', num2str(perm/n_permutations*100), '% of permutations'])
+        end
+
     end
 
+    % get treshold for significance
+    thr_vals = nan(size(avg_map));
+    thr_vals(notNaNvec) = quantile(all_perm_avg_r, 1-cfg.p_thresh, 2);
+    above_thr = avg_map > thr_vals;
+
     % get p values
-    pMap_bat = nHeigher_bat/cfg.nPermutations;
-    nii.img = single(reshape(pMap_bat, size(brainMask.img)));
-    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
-        'wholeBrainPvals.nii'));
+    p_vals = nan(size(avg_map));
+    p_vals(notNaNvec) = mean(avg_map(notNaNvec) <= all_perm_avg_r, 2);
+    p_vals(isnan(avg_map)) = nan;
 
-    pMap_kit = nHeigher_kit/cfg.nPermutations;
-    nii.img = single(reshape(pMap_kit, size(brainMask.img)));
-    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
-        'wholeBrainPvals.nii'));
-
-    pMap_avg = nHeigher_avg/cfg.nPermutations;
-    nii.img = single(reshape(pMap_avg, size(brainMask.img)));
+    % write nifti of pvals
+    nii.img = single(reshape(p_vals, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
         'wholeBrainPvalsAverage.nii'));
 
-    % get p values FDR-corrected
-    pMap_bat(isnan(bat_map)) = nan;
-    [~, ~, ~, pMap_bat_fdr] = fdr_bh(pMap_bat);
-    nii.img = single(reshape(pMap_bat_fdr, size(brainMask.img)));
-    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
-        'wholeBrainPvalsFDR.nii'));
-
-    pMap_kit(isnan(kit_map)) = nan;
-    [~, ~, ~, pMap_kit_fdr] = fdr_bh(pMap_kit);
-    nii.img = single(reshape(pMap_kit_fdr, size(brainMask.img)));
-    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', 'bathroom',...
-        'wholeBrainPvalsFDR.nii'));
-
-    pMap_avg(isnan(avg_map)) = nan;
-    [~, ~, ~, pMap_avg_fdr] = fdr_bh(pMap_avg);
-    nii.img = single(reshape(pMap_avg_fdr, size(brainMask.img)));
+    % get p values FDR-corrected and write nifti
+    p_vals_fdr = nan(size(p_vals));
+    [~, ~, ~, p_vals_fdr(~isnan(p_vals))] = fdr_bh(p_vals(~isnan(p_vals)));
+    nii.img = single(reshape(p_vals_fdr, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
         'wholeBrainPvalsAverageFDR.nii'));
 
     % tresholded average map based on fdr correction
     treshold_map = nan(size(avg_map));
-    treshold_map(pMap_avg_fdr<0.05) = avg_map(pMap_avg_fdr<0.05);
+    treshold_map(p_vals_fdr<0.05) = avg_map(p_vals_fdr<0.05);
     nii.img = single(reshape(treshold_map, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
-        'wholeBrainAverageTresholded.nii'));
+        'wholeBrainAverageTresholdedFDR.nii'));
 
-    % treshold on p < 0.001 and 30 voxel cluster
-    treshold_p_3d = double(reshape((pMap_avg<0.001), size(brainMask.img)));
-    [labels, num] = spm_bwlabel(treshold_p_3d, 18);
 
-    treshold_p_1d = zeros(size(avg_map));
+    %% make cluster-based tests
+
+    % get treshold for significance
+    thr_vals = nan(size(avg_map));
+    thr_vals(notNaNvec) = quantile(all_perm_avg_r, 1-cfg.p_thresh, 2);
+    above_thr = avg_map > thr_vals;
+
+    [labels, num] = spm_bwlabel(double(above_thr));
+    obs_cluster_mass = zeros(1, num);
+    num_voxels_in_cluster = zeros(1, num);
+    voxels_in_cluster = {};
+
     for c = 1:num
-        voxels_in_cluster = find(labels == c);
-        if numel(voxels_in_cluster) >= 30
-            treshold_p_1d(voxels_in_cluster) = 1;
+        voxels_in_cluster{c} = find(labels == c);
+        num_voxels_in_cluster(c) = numel(voxels_in_cluster{c});
+        obs_cluster_mass(c) = sum(avg_map(voxels_in_cluster{c}));
+    end
+
+
+    % Build null distribution of maximum cluster statistic
+    maxClusterSize = zeros(n_permutations, 1);
+    maxClusterMass = zeros(n_permutations, 1);
+
+    for p=1:n_permutations
+        perm_map = nan(size(avg_map));
+        perm_map(notNaNvec) = all_perm_avg_r(:, p);
+        perm_mask = perm_map > thr_vals;  % threshold exactly same way
+
+        % if there is clusters over treshold store their stats
+        if max(perm_mask) == 1
+            [labels, num] = spm_bwlabel(double(perm_mask));
+            obs_cluster_mass_perm = zeros(1, num);
+            num_voxels_in_perm_cluster = zeros(1, num);
+            for c = 1:num
+                voxels_in_perm_cluster = find(labels == c);
+                num_voxels_in_perm_cluster(c) = numel(voxels_in_perm_cluster);
+                obs_cluster_mass_perm(c) = sum(perm_map(voxels_in_perm_cluster));
+            end
+            maxClusterSize(p) = max(num_voxels_in_perm_cluster);
+            maxClusterMass(p) = max(obs_cluster_mass_perm);
+        else
+            maxClusterSize(p) = 0;
+            maxClusterMass(p) = 0;
         end
     end
 
-    treshold_p_1d(treshold_p_1d == 1) = avg_map(treshold_p_1d == 1);
-    nii.img = single(reshape(treshold_p_1d, size(brainMask.img)));
+    % cluster p-values (extent-based)
+    cluster_pvals_extent = arrayfun(@(s) mean(maxClusterSize >= s), num_voxels_in_cluster);
+    sig_clusters_extent = find(cluster_pvals_extent < 0.05);
+    cluster_trh = prctile(maxClusterSize, 95);
+    disp(['Treshold cluster extent: ', num2str(cluster_trh)])
+
+    % treshold observed correaltions based on clusters (extent)
+    treshold_map = zeros(size(avg_map));
+    for c = 1:numel(sig_clusters_extent)
+        voxels_in_cluster = find(labels == c);
+        treshold_map(voxels_in_cluster) = avg_map(voxels_in_cluster);
+    end
+    nii.img = single(reshape(treshold_map, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
-        'wholeBrainAverageTresholded_p001_cluster30.nii'));
+        'wholeBrainAverageTresholdedClusterExtent.nii'));
 
+    % cluster p-values (mass-based)
+    cluster_pvals_mass = arrayfun(@(m) mean(maxClusterMass >= m), obs_cluster_mass);
+    sig_clusters_mass = find(cluster_pvals_mass < 0.05);
+    cluster_trh = prctile(maxClusterMass, 95);
+    disp(['Treshold cluster mass: ', num2str(cluster_trh)])
 
-    % store max values in d
-    d.maxR_bat = maxR_bat;
-    disp(['Bathroom: Treshold form max r vals: ', num2str(prctile(maxR_bat, 95))])
-    d.maxR_kit = maxR_kit;
-    disp(['Kitchen: Treshold form max r vals: ', num2str(prctile(maxR_kit, 95))])
-    d.maxR_avg = maxR_avg;
-    disp(['Category average: Treshold form max r vals: ', num2str(prctile(maxR_avg, 95))])
-
+    % treshold observed correaltions based on clusters (extent)
+    treshold_map = zeros(size(avg_map));
+    for c = 1:numel(sig_clusters_mass)
+        voxels_in_cluster = find(labels == c);
+        treshold_map(voxels_in_cluster) = avg_map(voxels_in_cluster);
+    end
+    nii.img = single(reshape(treshold_map, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainAverageTresholdedClusterMass.nii'));
 
 end
 
