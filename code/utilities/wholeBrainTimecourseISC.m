@@ -35,12 +35,22 @@ cfg.plotting = false;
 cfg.saving = false;
 
 % get brain mask
-brainMaskPath = fullfile(pwd, '..', 'derivatives', 'group_level', [cfg.brainMask, '.nii']);
-if ~exist(brainMaskPath, 'file')
-    makeBrainMask(cfg)
+if contains(cfg.brainMask, 'group_mask')
+    brainMaskPath = fullfile(pwd, '..', 'derivatives', 'group_level', [cfg.brainMask, '.nii']);
+    if ~exist(brainMaskPath, 'file')
+        makeBrainMask(cfg)
+    end
+    brainMask = load_untouch_nii(brainMaskPath);
+    brainMaskImg = brainMask.img;
+elseif strcmp(cfg.brainMask, 'cortexHPC')
+    brainMaskPath = fullfile(pwd, '..', 'MNI_ROIs', 'wHPC_atlas.nii');
+    if ~exist(brainMaskPath, 'file')
+        makeBrainMask(cfg)
+    end
+    brainMask = load_untouch_nii(brainMaskPath);
+    brainMaskImg = 0 < brainMask.img;
+
 end
-brainMask = load_untouch_nii(brainMaskPath);
-brainMaskImg = brainMask.img;
 
 
 % load brain mask
@@ -51,7 +61,7 @@ for category = cfg.categories
 
     % ISC path
     % ISC path
-    ISCpath = fullfile(pwd, '..', 'ISCtoolbox', category, 'results', 'memMaps.mat');
+    ISCpath = fullfile('D:','pep_wp4_fMRI', 'ISCtoolbox', category, 'results', 'memMaps.mat');
     load(ISCpath)
 
     % init 5D matrix (x, y, z, c = vectorized ISC mat, r = run)
@@ -129,6 +139,9 @@ end
 nii = brainMask;
 nii.hdr.dime.datatype = 16;
 nii.hdr.dime.bitpix = 32;
+% reset scaling
+nii.hdr.dime.scl_slope = 1;
+nii.hdr.dime.scl_inter = 0;
 
 % bathroom
 bat_map = nan(size(isc_values_bat, 2), 1);
@@ -151,6 +164,15 @@ save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
     'wholeBrainCorMapAverage.nii'));
 
 
+% test
+test_map = nan(size(isc_values_kit, 2), 1);
+test_map(notNaNvec) = test;
+nii.img = notNaNvec;
+save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox',...
+    'notNaNvec.nii'));
+
+
+
 %% permutation test
 if cfg.permutation_test
 
@@ -166,10 +188,12 @@ if cfg.permutation_test
         % bathroom
         perm_bat_map = corr(isc_values_bat_parfor(random_RDM_vecs{perm}, :),...
             bat_resid, 'Tail', 'right', 'Type', partial_correlation_type);
+        perm_bat_map(isnan(perm_bat_map)) = 0;
 
         % kitchen
         perm_kit_map = corr(isc_values_kit_parfor(random_RDM_vecs{perm}, :),...
             kit_resid, 'Tail', 'right', 'Type', partial_correlation_type);
+        perm_kit_map(isnan(perm_kit_map)) = 0;
 
         % average
         all_perm_avg_r(:, perm) = (perm_bat_map + perm_kit_map)/2;
@@ -189,7 +213,7 @@ if cfg.permutation_test
 
     % get p values
     p_vals = nan(size(avg_map));
-    p_vals(notNaNvec) = mean(avg_map(notNaNvec) <= all_perm_avg_r, 2);
+    p_vals(notNaNvec) = mean(avg_map(notNaNvec) <= all_perm_avg_r, 2, 'omitnan');
     p_vals(isnan(avg_map)) = nan;
 
     % write nifti of pvals
@@ -210,6 +234,13 @@ if cfg.permutation_test
     nii.img = single(reshape(treshold_map, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
         'wholeBrainAverageTresholdedFDR.nii'));
+
+    % tresholded average map based on uncorrected p values
+    treshold_map = nan(size(avg_map));
+    treshold_map(p_vals<0.001) = avg_map(p_vals<0.001);
+    nii.img = single(reshape(treshold_map, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainAverageTresholdedp001.nii'));
 
 
     %% make cluster-based tests
@@ -289,6 +320,11 @@ if cfg.permutation_test
     nii.img = single(reshape(treshold_map, size(brainMask.img)));
     save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
         'wholeBrainAverageTresholdedClusterMass.nii'));
+
+    nii.img = single(reshape(thr_vals, size(brainMask.img)));
+    save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
+        'wholeBrainAverageTresholdedTestThrVal.nii'));
+
 
 end
 
