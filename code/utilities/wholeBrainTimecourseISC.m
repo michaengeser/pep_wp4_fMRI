@@ -4,7 +4,7 @@ if ~isfield(cfg, 'plotting'); cfg.plotting = true; end
 if ~isfield(cfg, 'saving'); cfg.saving = false; end
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
-if ~isfield(cfg, 'brainMask'); cfg.brainMask = 'group_mask_thresholded'; end
+if ~isfield(cfg, 'brainMask'); cfg.brainMask = 'group_mask_common'; end
 if ~isfield(cfg, 'predictor_RDMs'); cfg.predictor_RDMs = {'typical_late', 'control_late', 'photos_late'}; end
 if ~isfield(cfg, 'RDM_to_partial_out'); cfg.RDM_to_partial_out = cfg.predictor_RDMs; end
 if ~isfield(cfg, 'correlation_type'); cfg.correlation_type = 'pearson';end
@@ -44,9 +44,6 @@ if contains(cfg.brainMask, 'group_mask')
     brainMaskImg = brainMask.img;
 elseif strcmp(cfg.brainMask, 'cortexHPC')
     brainMaskPath = fullfile(pwd, '..', 'MNI_ROIs', 'wHPC_atlas.nii');
-    if ~exist(brainMaskPath, 'file')
-        makeBrainMask(cfg)
-    end
     brainMask = load_untouch_nii(brainMaskPath);
     brainMaskImg = 0 < brainMask.img;
 
@@ -61,7 +58,7 @@ for category = cfg.categories
 
     % ISC path
     % ISC path
-    ISCpath = fullfile('D:','pep_wp4_fMRI', 'ISCtoolbox', category, 'results', 'memMaps.mat');
+    ISCpath = fullfile(pwd,'..', 'ISCtoolbox', category, 'results', 'memMaps.mat');
     load(ISCpath)
 
     % init 5D matrix (x, y, z, c = vectorized ISC mat, r = run)
@@ -118,7 +115,7 @@ y_hat = [kit_preds(:, 2:end), ones(size(kit_preds(:, 2:end),1),1)] * y_resid;
 kit_resid = kit_preds(:, 1) - y_hat;
 
 if isempty(gcp('nocreate'))
-    parpool(10);
+    parpool(5);
 end
 notNaNvec = true(size(isc_values_bat, 2), 1);
 parfor iVoxel = 1:size(isc_values_bat, 2)
@@ -164,15 +161,6 @@ save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox', ...
     'wholeBrainCorMapAverage.nii'));
 
 
-% test
-test_map = nan(size(isc_values_kit, 2), 1);
-test_map(notNaNvec) = test;
-nii.img = notNaNvec;
-save_untouch_nii(nii, fullfile(pwd, '..', 'ISCtoolbox',...
-    'notNaNvec.nii'));
-
-
-
 %% permutation test
 if cfg.permutation_test
 
@@ -180,7 +168,7 @@ if cfg.permutation_test
     random_RDM_vecs = cfg.random_RDM_vecs;
     n_permutations = cfg.n_permutations;
     isc_values_bat_parfor = isc_values_bat(:, notNaNvec);
-    isc_values_kit_parfor = isc_values_bat(:, notNaNvec);
+    isc_values_kit_parfor = isc_values_kit(:, notNaNvec);
     all_perm_avg_r = single(nan(size(isc_values_kit_parfor, 2), n_permutations));
 
     parfor perm = 1:n_permutations

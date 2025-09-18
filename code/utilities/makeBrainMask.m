@@ -46,6 +46,13 @@ group_tresholded_mask = uint8(mask_sum >= voxel_threshold);
 nii.img = group_tresholded_mask;
 save_untouch_nii(nii, fullfile(save_path, 'group_mask_thresholded.nii'));
 
+% Create final mask
+group_mask_common = uint8(mask_sum >= 1);
+
+% Save final mask
+nii.img = group_mask_common;
+save_untouch_nii(nii, fullfile(save_path, 'group_mask_common.nii'));
+
 
 disp('Group whole-brain mask saved as group_mask.nii');
 
