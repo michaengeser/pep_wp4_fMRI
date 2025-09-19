@@ -39,7 +39,7 @@ cfg.spmPath = (fullfile(pwd, '..', '..', '..', 'MATLAB', 'spm12', 'tpm'));
 
 % other standard configurations
 if ~isfield(cfg, 'FontName'); cfg.FontName = 'Helvetica'; end
-if ~isfield(cfg, 'FontSize'); cfg.FontSize = 15; end
+if ~isfield(cfg, 'FontSize'); cfg.FontSize = 20; end
 
 % load colormap
 load('utilities/colormaps.mat');

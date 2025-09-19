@@ -14,7 +14,7 @@ if ~isfield(cfg, 'permutation_type'); cfg.permutation_type = 'row_col_shuffle_re
 if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pearson';end
 if ~isfield(cfg, 'dnns'); cfg.dnns = {cfg.dnn};end
 if ~isfield(cfg, 'p_thresh'); cfg.p_thresh = 0.001;end
-
+if ~isfield(cfg, 'smoothKernel'); cfg.smoothKernel = 6;end
 
 % generate permutated subjects list
 rng('default'); rng(1) % ensure reproducible outcome
@@ -58,7 +58,11 @@ for category = cfg.categories
 
     % ISC path
     % ISC path
-    ISCpath = fullfile(pwd,'..', 'ISCtoolbox', category, 'results', 'memMaps.mat');
+    if cfg.smoothKernel == 12
+        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', [category, '_s12'], 'results', 'memMaps.mat');
+    elseif cfg.smoothKernel == 6
+        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', category, 'results', 'memMaps.mat');
+    end
     load(ISCpath)
 
     % init 5D matrix (x, y, z, c = vectorized ISC mat, r = run)
@@ -115,7 +119,7 @@ y_hat = [kit_preds(:, 2:end), ones(size(kit_preds(:, 2:end),1),1)] * y_resid;
 kit_resid = kit_preds(:, 1) - y_hat;
 
 if isempty(gcp('nocreate'))
-    parpool(5);
+    parpool(8);
 end
 notNaNvec = true(size(isc_values_bat, 2), 1);
 parfor iVoxel = 1:size(isc_values_bat, 2)
@@ -237,8 +241,9 @@ if cfg.permutation_test
     thr_vals = nan(size(avg_map));
     thr_vals(notNaNvec) = quantile(all_perm_avg_r, 1-cfg.p_thresh, 2);
     above_thr = avg_map > thr_vals;
+    above_thr3D = reshape(above_thr, size(brainMask.img));
 
-    [labels, num] = spm_bwlabel(double(above_thr));
+    [labels, num] = spm_bwlabel(double(above_thr3D));
     obs_cluster_mass = zeros(1, num);
     num_voxels_in_cluster = zeros(1, num);
     voxels_in_cluster = {};
@@ -248,7 +253,6 @@ if cfg.permutation_test
         num_voxels_in_cluster(c) = numel(voxels_in_cluster{c});
         obs_cluster_mass(c) = sum(avg_map(voxels_in_cluster{c}));
     end
-
 
     % Build null distribution of maximum cluster statistic
     maxClusterSize = zeros(n_permutations, 1);
@@ -261,7 +265,8 @@ if cfg.permutation_test
 
         % if there is clusters over treshold store their stats
         if max(perm_mask) == 1
-            [labels, num] = spm_bwlabel(double(perm_mask));
+            perm_mask3D = reshape(perm_mask, size(brainMask.img));
+            [labels, num] = spm_bwlabel(double(perm_mask3D));
             obs_cluster_mass_perm = zeros(1, num);
             num_voxels_in_perm_cluster = zeros(1, num);
             for c = 1:num
@@ -271,9 +276,6 @@ if cfg.permutation_test
             end
             maxClusterSize(p) = max(num_voxels_in_perm_cluster);
             maxClusterMass(p) = max(obs_cluster_mass_perm);
-        else
-            maxClusterSize(p) = 0;
-            maxClusterMass(p) = 0;
         end
     end
 
