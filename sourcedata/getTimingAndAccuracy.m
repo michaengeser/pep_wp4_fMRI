@@ -9,8 +9,23 @@ tsvFiles = dir(fullfile(folderPath, '**', '*.tsv'));  % '**' searches in subfold
 % Initialize a cell array to store the data from all .tsv files
 allTables = {};
 
+cfg.subNums = [101:117, 119:124, 126:130, 132, 133]; % 118, 125, and 131 did not finish the experiment
+cfg = defaultCfg(cfg);
+
 % Loop through each .tsv file
+count = 0;
 for i = 1:length(tsvFiles)
+
+
+    if contains(tsvFiles(i).name, 'run-0') ||...
+            contains(tsvFiles(i).name, 'sub-118') ||...
+            contains(tsvFiles(i).name, 'sub-125') ||...
+            contains(tsvFiles(i).name, 'sub-131')
+        continue
+    end
+    count = count + 1;
+
+
     % Get the full path to the .tsv file
     tsvFilePath = fullfile(tsvFiles(i).folder, tsvFiles(i).name);
     
@@ -29,13 +44,14 @@ for i = 1:length(tsvFiles)
         runDur = t.trialEnd(end) - t.triggerTimeStamp(end) + 10;
 
         t.runDur = repmat(seconds(runDur), height(t), 1);
-        allTables{i} = t; %#ok<SAGROW>
+        allTables{count} = t; %#ok<SAGROW>
 
     end
 end
 
 % Concatenate all tables into one big table
 bigTable = vertcat(allTables{:});  % Vertically concatenate all tables
+bigTable = bigTable(bigTable.subject ~= 131, :);
 
 %% Get Timing 
 bigTable.real_stim_dur = bigTable.itiOnset - bigTable.trialOnset;
@@ -100,7 +116,7 @@ for subNum = subNums
     x = sum(targetTable.accuracy);           
     n = length(targetTable.accuracy);           
     pNull = 0.5;      
-    pVal = 1 - binocdf(x - 1, n, p_null);  % subtract 1 because binocdf is P(X ≤ x)
+    pVal = 1 - binocdf(x - 1, n, pNull);  % subtract 1 because binocdf is P(X ≤ x)
 
 
     newTable = table;
