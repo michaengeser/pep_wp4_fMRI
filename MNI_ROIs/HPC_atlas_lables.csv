@@ -1,0 +1,181 @@
+,roi,num.roi,hemi,community,community.short
+1,V1,1,bilateral,primary visual cortex,V1
+2,MST,2,bilateral,MT+ complex and neighbors,MT+
+3,V6,3,bilateral,dorsal stream visual cortex,d vis.
+4,V2,4,bilateral,early visual cortex,early vis.
+5,V3,5,bilateral,early visual cortex,early vis.
+6,V4,6,bilateral,early visual cortex,early vis.
+7,V8,7,bilateral,ventral stream visual cortex,v vis.
+8,4,8,bilateral,somatosensory and motor cortex,M1 and S1
+9,3b,9,bilateral,somatosensory and motor cortex,M1 and S1
+10,FEF,10,bilateral,premotor cortex,PM
+11,PEF,11,bilateral,premotor cortex,PM
+12,55b,12,bilateral,premotor cortex,PM
+13,V3A,13,bilateral,dorsal stream visual cortex,d vis.
+14,RSC,14,bilateral,posterior cingulate cortex,pCC
+15,POS2,15,bilateral,posterior cingulate cortex,pCC
+16,V7,16,bilateral,dorsal stream visual cortex,d vis.
+17,IPS1,17,bilateral,dorsal stream visual cortex,d vis.
+18,FFC,18,bilateral,ventral stream visual cortex,v vis.
+19,V3B,19,bilateral,dorsal stream visual cortex,d vis.
+20,LO1,20,bilateral,MT+ complex and neighbors,MT+
+21,LO2,21,bilateral,MT+ complex and neighbors,MT+
+22,PIT,22,bilateral,ventral stream visual cortex,v vis.
+23,MT,23,bilateral,MT+ complex and neighbors,MT+
+24,A1,24,bilateral,early auditory cortex,early aud.
+25,PSL,25,bilateral,tempo-parieto-occipital junction,TPOJ
+26,SFL,26,bilateral,dorsolateral prefrontal cortex,dlPFC
+27,PCV,27,bilateral,posterior cingulate cortex,pCC
+28,STV,28,bilateral,tempo-parieto-occipital junction,TPOJ
+29,7Pm,29,bilateral,superior parietal cortex,sP
+30,7m,30,bilateral,posterior cingulate cortex,pCC
+31,POS1,31,bilateral,posterior cingulate cortex,pCC
+32,23d,32,bilateral,posterior cingulate cortex,pCC
+33,v23ab,33,bilateral,posterior cingulate cortex,pCC
+34,d23ab,34,bilateral,posterior cingulate cortex,pCC
+35,31pv,35,bilateral,posterior cingulate cortex,pCC
+36,5m,36,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+37,5mv,37,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+38,23c,38,bilateral,posterior cingulate cortex,pCC
+39,5L,39,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+40,24dd,40,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+41,24dv,41,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+42,7AL,42,bilateral,superior parietal cortex,sP
+43,SCEF,43,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+44,6ma,44,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+45,7Am,45,bilateral,superior parietal cortex,sP
+46,7PL,46,bilateral,superior parietal cortex,sP
+47,7PC,47,bilateral,superior parietal cortex,sP
+48,LIPv,48,bilateral,superior parietal cortex,sP
+49,VIP,49,bilateral,superior parietal cortex,sP
+50,MIP,50,bilateral,superior parietal cortex,sP
+51,1,51,bilateral,somatosensory and motor cortex,M1 and S1
+52,2,52,bilateral,somatosensory and motor cortex,M1 and S1
+53,3a,53,bilateral,somatosensory and motor cortex,M1 and S1
+54,6d,54,bilateral,premotor cortex,PM
+55,6mp,55,bilateral,paracentral lobular and mid cingulate cortex,PL and mid cing.
+56,6v,56,bilateral,premotor cortex,PM
+57,p24pr,57,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+58,33pr,58,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+59,a24pr,59,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+60,p32pr,60,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+61,a24,61,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+62,d32,62,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+63,8BM,63,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+64,p32,64,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+65,10r,65,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+66,47m,66,bilateral,orbital and polar frontal cortex,oFC and pFC
+67,8Av,67,bilateral,dorsolateral prefrontal cortex,dlPFC
+68,8Ad,68,bilateral,dorsolateral prefrontal cortex,dlPFC
+69,9m,69,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+70,8BL,70,bilateral,dorsolateral prefrontal cortex,dlPFC
+71,9p,71,bilateral,dorsolateral prefrontal cortex,dlPFC
+72,10d,72,bilateral,orbital and polar frontal cortex,oFC and pFC
+73,8C,73,bilateral,dorsolateral prefrontal cortex,dlPFC
+74,44,74,bilateral,inferior frontal cortex,iFC
+75,45,75,bilateral,inferior frontal cortex,iFC
+76,47l,76,bilateral,inferior frontal cortex,iFC
+77,a47r,77,bilateral,orbital and polar frontal cortex,oFC and pFC
+78,6r,78,bilateral,premotor cortex,PM
+79,IFJa,79,bilateral,inferior frontal cortex,iFC
+80,IFJp,80,bilateral,inferior frontal cortex,iFC
+81,IFSp,81,bilateral,inferior frontal cortex,iFC
+82,IFSa,82,bilateral,inferior frontal cortex,iFC
+83,p9-46v,83,bilateral,dorsolateral prefrontal cortex,dlPFC
+84,46,84,bilateral,dorsolateral prefrontal cortex,dlPFC
+85,a9-46v,85,bilateral,dorsolateral prefrontal cortex,dlPFC
+86,9-46d,86,bilateral,dorsolateral prefrontal cortex,dlPFC
+87,9a,87,bilateral,dorsolateral prefrontal cortex,dlPFC
+88,10v,88,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+89,a10p,89,bilateral,orbital and polar frontal cortex,oFC and pFC
+90,10pp,90,bilateral,orbital and polar frontal cortex,oFC and pFC
+91,11l,91,bilateral,orbital and polar frontal cortex,oFC and pFC
+92,13l,92,bilateral,orbital and polar frontal cortex,oFC and pFC
+93,OFC,93,bilateral,orbital and polar frontal cortex,oFC and pFC
+94,47s,94,bilateral,orbital and polar frontal cortex,oFC and pFC
+95,LIPd,95,bilateral,superior parietal cortex,sP
+96,6a,96,bilateral,premotor cortex,PM
+97,i6-8,97,bilateral,dorsolateral prefrontal cortex,dlPFC
+98,s6-8,98,bilateral,dorsolateral prefrontal cortex,dlPFC
+99,43,99,bilateral,posterior opercular cortex,pOperc
+100,OP4,100,bilateral,posterior opercular cortex,pOperc
+101,OP1,101,bilateral,posterior opercular cortex,pOperc
+102,OP2-3,102,bilateral,posterior opercular cortex,pOperc
+103,52,103,bilateral,insular and frontal opercular cortex,insular and FO
+104,RI,104,bilateral,early auditory cortex,early aud.
+105,PFcm,105,bilateral,posterior opercular cortex,pOperc
+106,PoI2,106,bilateral,insular and frontal opercular cortex,insular and FO
+107,TA2,107,bilateral,auditory association cortex,aud. assoc.
+108,FOP4,108,bilateral,insular and frontal opercular cortex,insular and FO
+109,MI,109,bilateral,insular and frontal opercular cortex,insular and FO
+110,Pir,110,bilateral,insular and frontal opercular cortex,insular and FO
+111,AVI,111,bilateral,insular and frontal opercular cortex,insular and FO
+112,AAIC,112,bilateral,insular and frontal opercular cortex,insular and FO
+113,FOP1,113,bilateral,posterior opercular cortex,pOperc
+114,FOP3,114,bilateral,insular and frontal opercular cortex,insular and FO
+115,FOP2,115,bilateral,insular and frontal opercular cortex,insular and FO
+116,PFt,116,bilateral,inferior parietal cortex,iP
+117,AIP,117,bilateral,superior parietal cortex,sP
+118,EC,118,bilateral,medial temporal cortex,mT
+119,PreS,119,bilateral,medial temporal cortex,mT
+120,H,120,bilateral,medial temporal cortex,mT
+121,ProS,121,bilateral,posterior cingulate cortex,pCC
+122,PeEc,122,bilateral,medial temporal cortex,mT
+123,STGa,123,bilateral,auditory association cortex,aud. assoc.
+124,PBelt,124,bilateral,early auditory cortex,early aud.
+125,A5,125,bilateral,auditory association cortex,aud. assoc.
+126,PHA1,126,bilateral,medial temporal cortex,mT
+127,PHA3,127,bilateral,medial temporal cortex,mT
+128,STSda,128,bilateral,auditory association cortex,aud. assoc.
+129,STSdp,129,bilateral,auditory association cortex,aud. assoc.
+130,STSvp,130,bilateral,auditory association cortex,aud. assoc.
+131,TGd,131,bilateral,lateral temporal cortex,lT
+132,TE1a,132,bilateral,lateral temporal cortex,lT
+133,TE1p,133,bilateral,lateral temporal cortex,lT
+134,TE2a,134,bilateral,lateral temporal cortex,lT
+135,TF,135,bilateral,lateral temporal cortex,lT
+136,TE2p,136,bilateral,lateral temporal cortex,lT
+137,PHT,137,bilateral,lateral temporal cortex,lT
+138,PH,138,bilateral,MT+ complex and neighbors,MT+
+139,TPOJ1,139,bilateral,tempo-parieto-occipital junction,TPOJ
+140,TPOJ2,140,bilateral,tempo-parieto-occipital junction,TPOJ
+141,TPOJ3,141,bilateral,tempo-parieto-occipital junction,TPOJ
+142,DVT,142,bilateral,posterior cingulate cortex,pCC
+143,PGp,143,bilateral,inferior parietal cortex,iP
+144,IP2,144,bilateral,inferior parietal cortex,iP
+145,IP1,145,bilateral,inferior parietal cortex,iP
+146,IP0,146,bilateral,inferior parietal cortex,iP
+147,PFop,147,bilateral,inferior parietal cortex,iP
+148,PF,148,bilateral,inferior parietal cortex,iP
+149,PFm,149,bilateral,inferior parietal cortex,iP
+150,PGi,150,bilateral,inferior parietal cortex,iP
+151,PGs,151,bilateral,inferior parietal cortex,iP
+152,V6A,152,bilateral,dorsal stream visual cortex,d vis.
+153,VMV1,153,bilateral,ventral stream visual cortex,v vis.
+154,VMV3,154,bilateral,ventral stream visual cortex,v vis.
+155,PHA2,155,bilateral,medial temporal cortex,mT
+156,V4t,156,bilateral,MT+ complex and neighbors,MT+
+157,FST,157,bilateral,MT+ complex and neighbors,MT+
+158,V3CD,158,bilateral,MT+ complex and neighbors,MT+
+159,LO3,159,bilateral,MT+ complex and neighbors,MT+
+160,VMV2,160,bilateral,ventral stream visual cortex,v vis.
+161,31pd,161,bilateral,posterior cingulate cortex,pCC
+162,31a,162,bilateral,posterior cingulate cortex,pCC
+163,VVC,163,bilateral,ventral stream visual cortex,v vis.
+164,25,164,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+165,s32,165,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+166,pOFC,166,bilateral,orbital and polar frontal cortex,oFC and pFC
+167,PoI1,167,bilateral,insular and frontal opercular cortex,insular and FO
+168,Ig,168,bilateral,insular and frontal opercular cortex,insular and FO
+169,FOP5,169,bilateral,insular and frontal opercular cortex,insular and FO
+170,p10p,170,bilateral,orbital and polar frontal cortex,oFC and pFC
+171,p47r,171,bilateral,inferior frontal cortex,iFC
+172,TGv,172,bilateral,lateral temporal cortex,lT
+173,MBelt,173,bilateral,early auditory cortex,early aud.
+174,LBelt,174,bilateral,early auditory cortex,early aud.
+175,A4,175,bilateral,auditory association cortex,aud. assoc.
+176,STSva,176,bilateral,auditory association cortex,aud. assoc.
+177,TE1m,177,bilateral,lateral temporal cortex,lT
+178,PI,178,bilateral,insular and frontal opercular cortex,insular and FO
+179,a32pr,179,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC
+180,p24,180,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC

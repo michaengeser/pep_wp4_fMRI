@@ -1,6 +1,6 @@
 % --- CONFIGURATION ---
-backupRoot = 'D:\pep_wp4_fMRI';    % path to project backup on hard drive
-laptopRoot = 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI'; % path to project folder on laptop
+sourceRoot = 'D:\pep_wp4_fMRI';    % path to project backup on hard drive
+targetRoot = 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI'; % path to project folder on laptop
 filePattern = 'swrsub*bold.nii'; % files of interest
 
 % --- FIND FILES ---
@@ -14,10 +14,10 @@ for i = 1:numel(files)
     srcFile = fullfile(files(i).folder, files(i).name);
 
     % Determine relative path of the subfolder (relative to backupRoot)
-    relPath = erase(files(i).folder, backupRoot);
+    relPath = erase(files(i).folder, sourceRoot);
 
     % Construct the matching destination folder on the laptop
-    destFolder = fullfile(laptopRoot, relPath);
+    destFolder = fullfile(targetRoot, relPath);
 
     % Make sure destination folder exists
     if ~exist(destFolder, 'dir')

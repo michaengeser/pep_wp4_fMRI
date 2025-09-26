@@ -11,7 +11,6 @@ if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 10000;end
 if ~isfield(cfg, 'bootstrapping'); cfg.bootstrapping = false;end
 if ~isfield(cfg, 'max_bootstrapping_n'); cfg.max_bootstrapping_n = cfg.n;end
 if ~isfield(cfg, 'n_bootstrapp_iterations'); cfg.n_bootstrapp_iterations = 10000;end
-if ~isfield(cfg, 'add_legend'); cfg.add_legend = true;end
 if ~isfield(cfg, 'add_legend'); cfg.add_legend = false;end
 if ~isfield(cfg, 'show_single_cate'); cfg.show_single_cate = false;end
 if ~isfield(cfg, 'permutation_type'); cfg.permutation_type = 'row_col_shuffle_ref';end

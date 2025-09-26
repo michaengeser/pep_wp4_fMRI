@@ -10,7 +10,6 @@ if ~isfield(cfg, 'RDM_to_partial_out'); cfg.RDM_to_partial_out = cfg.predictor_R
 if ~isfield(cfg, 'correlation_type'); cfg.correlation_type = 'pearson';end
 if ~isfield(cfg, 'permutation_test'); cfg.permutation_test = true;end
 if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 10000;end
-if ~isfield(cfg, 'permutation_type'); cfg.permutation_type = 'row_col_shuffle_ref';end
 if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pearson';end
 if ~isfield(cfg, 'dnns'); cfg.dnns = {cfg.dnn};end
 if ~isfield(cfg, 'p_thresh'); cfg.p_thresh = 0.001;end
@@ -46,7 +45,10 @@ elseif strcmp(cfg.brainMask, 'cortexHPC')
     brainMaskPath = fullfile(pwd, '..', 'MNI_ROIs', 'wHPC_atlas.nii');
     brainMask = load_untouch_nii(brainMaskPath);
     brainMaskImg = 0 < brainMask.img;
-
+else 
+    brainMaskPath = fullfile(pwd, '..', 'MNI_ROIs', [cfg.brainMask, '.nii']);
+    brainMask = load_untouch_nii(brainMaskPath);
+    brainMaskImg = 0 < brainMask.img;
 end
 
 
@@ -59,9 +61,9 @@ for category = cfg.categories
     % ISC path
     % ISC path
     if cfg.smoothKernel == 12
-        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', [category, '_s12'], 'results', 'memMaps.mat');
+        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', [category, '2_s12'], 'results', 'memMaps.mat');
     elseif cfg.smoothKernel == 6
-        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', category, 'results', 'memMaps.mat');
+        ISCpath = fullfile(pwd, '..', 'ISCtoolbox', [category, ''], 'results', 'memMaps.mat');
     end
     load(ISCpath)
 
@@ -119,7 +121,7 @@ y_hat = [kit_preds(:, 2:end), ones(size(kit_preds(:, 2:end),1),1)] * y_resid;
 kit_resid = kit_preds(:, 1) - y_hat;
 
 if isempty(gcp('nocreate'))
-    parpool(8);
+    parpool(5);
 end
 notNaNvec = true(size(isc_values_bat, 2), 1);
 parfor iVoxel = 1:size(isc_values_bat, 2)
@@ -240,6 +242,7 @@ if cfg.permutation_test
     % get treshold for significance
     thr_vals = nan(size(avg_map));
     thr_vals(notNaNvec) = quantile(all_perm_avg_r, 1-cfg.p_thresh, 2);
+    thr_vals(thr_vals < 0.1) = 0.1;
     above_thr = avg_map > thr_vals;
     above_thr3D = reshape(above_thr, size(brainMask.img));
 
