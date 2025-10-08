@@ -297,7 +297,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 res_table.color_R = .63;
                 res_table.color_G = .15;
                 res_table.color_B = .63;
-            elseif strcmp(roi, 'TOC')
+            elseif strcmp(roi, 'TOS')
                 res_table.color_R = .5;
                 res_table.color_G = .2;
                 res_table.color_B = .5;

@@ -82,26 +82,26 @@ for category = cfg.categories
 
             end
 
-            % get groub average
-            if cfg.regressOutMean
-                % get mean
-                groupMean = mean(sub_table, 2, 'omitnan');
-
-                % loop through subjects and regress out mean
-                regressedTimecourses = zeros(size(sub_table)); % Initialize
-                for iSub = 1:cfg.n
-                    % Design matrix: group-average timecourse and intercept
-                    X = [groupMean, ones(height(sub_table), 1)];
-                    % Perform regression
-                    beta = X \ sub_table(:, iSub); % Compute coefficients
-                    predicted = X * beta; % Predicted values based on the group average
-                    % Residual (subject timecourse with group average regressed out)
-                    regressedTimecourses(:, iSub) = sub_table(:, iSub) - predicted;
-                end
-
-                % overwrite the subject table
-                sub_table = regressedTimecourses;
-            end
+%             % get groub average
+%             if cfg.regressOutMean
+%                 % get mean
+%                 groupMean = mean(sub_table, 2, 'omitnan');
+% 
+%                 % loop through subjects and regress out mean
+%                 regressedTimecourses = zeros(size(sub_table)); % Initialize
+%                 for iSub = 1:cfg.n
+%                     % Design matrix: group-average timecourse and intercept
+%                     X = [groupMean, ones(height(sub_table), 1)];
+%                     % Perform regression
+%                     beta = X \ sub_table(:, iSub); % Compute coefficients
+%                     predicted = X * beta; % Predicted values based on the group average
+%                     % Residual (subject timecourse with group average regressed out)
+%                     regressedTimecourses(:, iSub) = sub_table(:, iSub) - predicted;
+%                 end
+% 
+%                 % overwrite the subject table
+%                 sub_table = regressedTimecourses;
+%             end
 
 
             % make RDM
