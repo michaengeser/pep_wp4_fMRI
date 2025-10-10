@@ -7,7 +7,7 @@ if ~isfield(cfg, 'n'); error('cfg.n (n subjects) required'); end
 if ~isfield(cfg, 'subNums'); error('cfg.subNums required'); end
 if ~isfield(cfg, 'dnns'); cfg.dnns = {cfg.dnn}; end
 if ~isfield(cfg, 'predictor_RDMs'); cfg.predictor_RDMs = {'typical_late','control_late','photos_late'}; end
-if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 5000; end
+if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 10000; end
 if ~isfield(cfg, 'outputPath'); cfg.outputPath = fullfile(pwd,'results'); end
 if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pearson';end
 if ~exist(cfg.outputPath,'dir'); mkdir(cfg.outputPath); end
@@ -88,10 +88,8 @@ fprintf('Running permutations (%d)...\n', nPerm);
 perm_values = zeros(nPerm, nParcels, 'single');
 
 parfor perm_i = 1:nPerm
-    idx = random_RDM_vecs{perm_i};
-
-    V_bat = Sbat.meanISC(idx, :); % permuted ISC
-    V_kit = Skit.meanISC(idx, :);
+    V_bat = Sbat.meanISC(random_RDM_vecs{perm_i}, :); % permuted ISC
+    V_kit = Skit.meanISC(random_RDM_vecs{perm_i}, :);
 
     r_bat_perm = nan(1,nParcels);
     r_kit_perm = nan(1,nParcels);
@@ -108,8 +106,8 @@ end
 
 % ---------------- p-values ----------------
 fprintf('Computing empirical p-values...\n');
-p_uncorr = nan(1,nParcels);
-p_norm = p_uncorr;
+p_uncorr_perm = nan(1,nParcels);
+p_norm = p_uncorr_perm;
 for p=1:nParcels
     obs = r_avg(p);
     null = perm_values(:,p);
@@ -125,7 +123,7 @@ for p=1:nParcels
     else
         % fallback if no variance in null
         warning('No variance in null')
-        p_norm(p) = NaN;
+        p_norm(p) = nan;
     end
 end
 
@@ -165,12 +163,15 @@ mask = ismember(labels.roi, parcel_names);
 lpfc_rois = labels.num_roi(mask);
 
 % index LPFC
+lpfc_rs = r_avg(lpfc_rois);
 p_uncorr_lpfc = p_uncorr(lpfc_rois);
 [~,~,~,p_fdr_lpfc] = fdr_bh(p_uncorr_lpfc);
 
 % significant parcels 
 sigParcels = lpfc_rois((p_fdr_lpfc < 0.05));
 sigParcelsLabels = labels(sigParcels, :);
+sigParcelsLabels.p = p_fdr_lpfc((p_fdr_lpfc < 0.05))';
+sigParcelsLabels.r = lpfc_rs((p_fdr_lpfc < 0.05))';
 disp(newline)
 disp('Significant parcels in lateeral prefrontal cortex')
 disp(newline)
@@ -188,12 +189,15 @@ visual_rois = [...
     137,138,152,153,154,156,157,158,159,160,163];
 
 % index visual cortex
+vis_rs = r_avg(visual_rois);
 p_uncorr_vis = p_uncorr(visual_rois);
 [~,~,~,p_fdr_vis] = fdr_bh(p_uncorr_vis);
 
 % significant parcels 
 sigParcels = visual_rois((p_fdr_vis < 0.05));
 sigParcelsLabels = labels(sigParcels, :);
+sigParcelsLabels.p = p_fdr_vis((p_fdr_vis < 0.05))';
+sigParcelsLabels.r = vis_rs((p_fdr_vis < 0.05))';
 disp(newline)
 disp('Significant parcels in visual cortex')
 disp(newline)

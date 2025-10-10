@@ -2,7 +2,7 @@ function averageVoxelsInROI(cfg)
 
 % evaluate input
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
-if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = true; end
+if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = false; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85;end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188;end
 if ~isfield(cfg, 'nTrials'); cfg.nTrials = 100;end
@@ -175,7 +175,7 @@ for iSub = 1:length(subs)
 
         % cut first and last TRs
         includedTRs(1:cfg.TRstartBuffer) = 0;
-        includedTRs(end-cfg.TRendBuffer:end) = 0;
+        includedTRs(end-cfg.TRendBuffer+1:end) = 0;
 
         % get data
         v = load_untouch_nii(funcFile);
