@@ -12,8 +12,9 @@ if ~isfield(cfg, 'outputPath'); cfg.outputPath = fullfile(pwd,'results'); end
 if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pearson';end
 if ~exist(cfg.outputPath,'dir'); mkdir(cfg.outputPath); end
 if ~isfield(cfg, 'permutation_tail'); cfg.permutation_tail = 'right'; end
-if ~isfield(cfg, 'save_perms'); cfg.save_perms = false; end 
-if ~isfield(cfg, 'random_RDM_vecs') 
+if ~isfield(cfg, 'save_perms'); cfg.save_perms = false; end
+if ~isfield(cfg, 'searchlightSource'); cfg.searchlightSource = 'HPC'; end
+if ~isfield(cfg, 'random_RDM_vecs')
     % generate permutated subjects list rng('default');
     rng(1) % ensure reproducible outcome
     random_seqs = cell(1, cfg.n_permutations);
@@ -57,8 +58,15 @@ b = X \ kit_preds(:,1);
 kit_resid = kit_preds(:,1) - X*b;
 
 % ---------------- Load ISC data ----------------
-fn_bat = fullfile(cfg.outputPath, 'group_level', 'ISC_HPC_bathroom.mat');
-fn_kit = fullfile(cfg.outputPath, 'group_level', 'ISC_HPC_kitchen.mat');
+
+if strcmp(cfg.searchlightSource, 'HPC')
+    fn_bat = fullfile(cfg.outputPath, 'group_level', 'ISC_HPC_bathroom.mat');
+    fn_kit = fullfile(cfg.outputPath, 'group_level', 'ISC_HPC_kitchen.mat');
+elseif strcmp(cfg.searchlightSource, 'LPFC')
+    fn_bat = fullfile(cfg.outputPath, 'group_level', 'ISC_LPFC_steps_bathroom.mat');
+    fn_kit = fullfile(cfg.outputPath, 'group_level', 'ISC_LPFC_steps_kitchen.mat');
+end
+
 Sbat = load(fn_bat,'meanISC','subPairs');
 Skit = load(fn_kit,'meanISC','subPairs');
 nParcels = size(Sbat.meanISC,2);
@@ -71,12 +79,12 @@ r_kit  = nan(1,nParcels);
 for p=1:nParcels
     v_bat = Sbat.meanISC(:,p);
     v_kit = Skit.meanISC(:,p);
-    if sum(isnan(v_bat)) > 1 || sum(isnan(v_kit)) > 1 
+    if sum(isnan(v_bat)) > 1 || sum(isnan(v_kit)) > 1
         warning(['Parcel number: ' num2str(p) ' has NaNs'])
         disp(v_bat)
         disp(newline)
         disp(v_kit)
-    end 
+    end
     r_bath(p) = corr(v_bat, bat_resid, 'row', 'pairwise', 'type', partial_correlation_type);
     r_kit(p)  = corr(v_kit, kit_resid, 'row', 'pairwise', 'type', partial_correlation_type);
 end
@@ -111,15 +119,15 @@ p_norm = p_uncorr_perm;
 for p=1:nParcels
     obs = r_avg(p);
     null = perm_values(:,p);
-    p_uncorr_perm(p) = (sum(null >= obs)+1)/(nPerm+1); % right tailed 
+    p_uncorr_perm(p) = (sum(null >= obs)+1)/(nPerm+1); % right tailed
 
-     % --- Gaussian parametric p ---
+    % --- Gaussian parametric p ---
     mu = mean(null);
     sigma = std(null);
 
     if sigma > 0
         % right-tailed probability under N(mu, sigma^2)
-        p_norm(p) = 1-normcdf(obs, mu, sigma); 
+        p_norm(p) = 1-normcdf(obs, mu, sigma);
     else
         % fallback if no variance in null
         warning('No variance in null')
@@ -147,66 +155,94 @@ fprintf('Saved results to %s\n', outfn);
 
 %% restrict analysis to parcel subsets
 
+if strcmp(cfg.searchlightSource, 'HPC')
+    % Load the atlas labels
+    labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HPC_atlas_lables.csv'));
 
-% Load the atlas labels
-labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HPC_atlas_lables.csv'));
+    % Requested parcels
+    parcel_names = {...
+        'FEF','PEF','55b','8Av','8Ad','9m','8BL','9p','10d','8C',...
+        '44','45','47l','a47r','6r','IFJa','IFJp','IFSp','IFSa',...
+        'p9-46v','46','a9-46v','9-46d','9a','10v','a10p','10pp',...
+        '6a','i6-8','s6-8','p10p','p47r'};
 
-% Requested parcels
-parcel_names = {...
-    'FEF','PEF','55b','8Av','8Ad','9m','8BL','9p','10d','8C',...
-    '44','45','47l','a47r','6r','IFJa','IFJp','IFSp','IFSa',...
-    'p9-46v','46','a9-46v','9-46d','9a','10v','a10p','10pp',...
-    '6a','i6-8','s6-8','p10p','p47r'};
+    % Match ROI numbers
+    mask = ismember(labels.roi, parcel_names);
+    lpfc_rois = labels.num_roi(mask);
 
-% Match ROI numbers
-mask = ismember(labels.roi, parcel_names);
-lpfc_rois = labels.num_roi(mask);
+    % index LPFC
+    lpfc_rs = r_avg(lpfc_rois);
+    p_uncorr_lpfc = p_uncorr(lpfc_rois);
+    [~,~,~,p_fdr_lpfc] = fdr_bh(p_uncorr_lpfc);
 
-% index LPFC
-lpfc_rs = r_avg(lpfc_rois);
-p_uncorr_lpfc = p_uncorr(lpfc_rois);
-[~,~,~,p_fdr_lpfc] = fdr_bh(p_uncorr_lpfc);
+    % significant parcels
+    sigParcels = lpfc_rois((p_fdr_lpfc < 0.05));
+    sigParcelsLabels = labels(sigParcels, :);
+    sigParcelsLabels.p = p_fdr_lpfc((p_fdr_lpfc < 0.05))';
+    sigParcelsLabels.r = lpfc_rs((p_fdr_lpfc < 0.05))';
+    disp(newline)
+    disp('Significant parcels in lateeral prefrontal cortex')
+    disp(newline)
+    disp(sigParcelsLabels)
 
-% significant parcels 
-sigParcels = lpfc_rois((p_fdr_lpfc < 0.05));
-sigParcelsLabels = labels(sigParcels, :);
-sigParcelsLabels.p = p_fdr_lpfc((p_fdr_lpfc < 0.05))';
-sigParcelsLabels.r = lpfc_rs((p_fdr_lpfc < 0.05))';
-disp(newline)
-disp('Significant parcels in lateeral prefrontal cortex')
-disp(newline)
-disp(sigParcelsLabels)
-
-results.lpfc.p_uncorr = p_uncorr_lpfc;
-results.lpfc.p_fdr = p_fdr_lpfc;
-results.lpfc.significant_parcels = sigParcels;
-results.lpfc.significant_parcels_labels = sigParcelsLabels.roi;
+    results.lpfc.p_uncorr = p_uncorr_lpfc;
+    results.lpfc.p_fdr = p_fdr_lpfc;
+    results.lpfc.significant_parcels = sigParcels;
+    results.lpfc.significant_parcels_labels = sigParcelsLabels.roi;
 
 
-% visual cortex
-visual_rois = [...
-    1,2,3,4,5,6,7,13,16,17,18,19,20,21,22,23,...
-    137,138,152,153,154,156,157,158,159,160,163];
+    % visual cortex
+    visual_rois = [...
+        1,2,3,4,5,6,7,13,16,17,18,19,20,21,22,23,...
+        137,138,152,153,154,156,157,158,159,160,163];
 
-% index visual cortex
-vis_rs = r_avg(visual_rois);
-p_uncorr_vis = p_uncorr(visual_rois);
-[~,~,~,p_fdr_vis] = fdr_bh(p_uncorr_vis);
+    % index visual cortex
+    vis_rs = r_avg(visual_rois);
+    p_uncorr_vis = p_uncorr(visual_rois);
+    [~,~,~,p_fdr_vis] = fdr_bh(p_uncorr_vis);
 
-% significant parcels 
-sigParcels = visual_rois((p_fdr_vis < 0.05));
-sigParcelsLabels = labels(sigParcels, :);
-sigParcelsLabels.p = p_fdr_vis((p_fdr_vis < 0.05))';
-sigParcelsLabels.r = vis_rs((p_fdr_vis < 0.05))';
-disp(newline)
-disp('Significant parcels in visual cortex')
-disp(newline)
-disp(sigParcelsLabels)
+    % significant parcels
+    sigParcels = visual_rois((p_fdr_vis < 0.05));
+    sigParcelsLabels = labels(sigParcels, :);
+    sigParcelsLabels.p = p_fdr_vis((p_fdr_vis < 0.05))';
+    sigParcelsLabels.r = vis_rs((p_fdr_vis < 0.05))';
+    disp(newline)
+    disp('Significant parcels in visual cortex')
+    disp(newline)
+    disp(sigParcelsLabels)
 
-results.visual.p_uncorr = p_uncorr_vis;
-results.visual.p_fdr = p_fdr_vis;
-results.visual.significant_parcels = sigParcels;
-results.visual.significant_parcels_labels = sigParcelsLabels.roi;
+    results.visual.p_uncorr = p_uncorr_vis;
+    results.visual.p_fdr = p_fdr_vis;
+    results.visual.significant_parcels = sigParcels;
+    results.visual.significant_parcels_labels = sigParcelsLabels.roi;
 
+elseif strcmp(cfg.searchlightSource, 'LPFC')
+
+    % make plotting
+    if cfg.cutTargets
+        tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses');
+    else
+        tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses_with_targets');
+    end
+    fileName = fullfile(tcDir, ...
+        sprintf('mean_timecourses_voxel_steps_LPFC_%s_run-%02d.mat','bathroom',1));
+    tmp = load(fileName,'step_sizes'); % [time × parcels]
+
+    figure
+    hold on
+    plot(1:length(tmp.step_sizes), r_avg)
+    xticks(1:length(tmp.step_sizes))
+    xticklabels(string(tmp.step_sizes))
+
+    for voxNum = 1:length(tmp.step_sizes)
+        if p_fdr(voxNum) < 0.05
+            text(voxNum, max(r_avg) + 0.02, '*', 'Color',[0,0,0])
+        end 
+    end 
+
+    ylim([0, 0.2]);
+    xlim([1,length(tmp.step_sizes)])
+
+end
 
 end

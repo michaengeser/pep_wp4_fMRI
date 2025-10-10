@@ -11,11 +11,14 @@ if ~isfield(cfg, 'outputPath'); error('Need cfg.outputPath'); end
 if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 3; end
 if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 3; end
 if ~isfield(cfg, 'dissimilarity'); cfg.dissimilarity = true; end
+if ~isfield(cfg, 'searchlightSource'); cfg.searchlightSource = 'HPC'; end
+if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
+
 
 nSubs    = cfg.n;
 subPairs = nchoosek(1:nSubs,2);
 nPairs   = size(subPairs,1);
-nParcels = 180; % HPC atlas fixed
+
 
 % loop categories
 for category = cfg.categories
@@ -29,7 +32,21 @@ for category = cfg.categories
     end
 
     % container for runwise results
-    d.HPC_ISC.(category).runwiseVecRDMs = nan(nPairs, nParcels, numel(runSample));
+    if strcmp(cfg.searchlightSource, 'HPC')
+        nParcels = 180; % HPC atlas fixed
+        d.HPC_ISC.(category).runwiseVecRDMs = nan(nPairs, nParcels, numel(runSample));
+    elseif strcmp(cfg.searchlightSource, 'LPFC')
+        if cfg.cutTargets
+            tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses');
+        else
+            tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses_with_targets');
+        end
+        fileName = fullfile(tcDir, ...
+            sprintf('mean_timecourses_voxel_steps_LPFC_%s_run-%02d.mat','bathroom',1));
+        tmp = load(fileName,'step_sizes'); % [time × parcels]
+        d.LPFC_steps.(category).runwiseVecRDMs = nan(nPairs, length(tmp.step_sizes), numel(runSample));
+    end
+
 
     % loop runs
     for iRun = 1:numel(runSample)
@@ -48,8 +65,13 @@ for category = cfg.categories
                 tcDir = fullfile(cfg.outputPath,subID,'timecourses_with_targets');
             end
 
-            fileName = fullfile(tcDir, ...
-                sprintf('mean_HPC_timecourses_%s_run-%02d.mat',category,currentRun));
+            if strcmp(cfg.searchlightSource, 'HPC')
+                fileName = fullfile(tcDir, ...
+                    sprintf('mean_HPC_timecourses_%s_run-%02d.mat',category,currentRun));
+            elseif strcmp(cfg.searchlightSource, 'LPFC')
+                fileName = fullfile(tcDir, ...
+                    sprintf('mean_timecourses_voxel_steps_LPFC_%s_run-%02d.mat',category,currentRun));
+            end
             tmp = load(fileName,'timecourses'); % [time × parcels]
             tc  = tmp.timecourses;
 
@@ -65,7 +87,7 @@ for category = cfg.categories
         end
 
         % loop parcels
-        for parc = 1:nParcels
+        for parc = 1:size(sub_table,2)
             % subject × time for this parcel
             tcMat = squeeze(sub_table(:,parc,:)); % [time × subjects]
 
@@ -86,17 +108,34 @@ for category = cfg.categories
             end
 
             % vectorize upper triangle
-            d.HPC_ISC.(category).runwiseVecRDMs(:,parc,iRun) = R(sub2ind(size(R),subPairs(:,1),subPairs(:,2)));
+
+            if strcmp(cfg.searchlightSource, 'HPC')
+                d.HPC_ISC.(category).runwiseVecRDMs(:,parc,iRun) = R(sub2ind(size(R),subPairs(:,1),subPairs(:,2)));
+            elseif strcmp(cfg.searchlightSource, 'LPFC')
+                d.LPFC_steps.(category).runwiseVecRDMs(:,parc,iRun) = R(sub2ind(size(R),subPairs(:,1),subPairs(:,2)));
+            end
+
         end
     end
 
     % save runwise ISC results
     if cfg.saving
-        outFile = fullfile(cfg.outputPath,'group_level', ...
-            sprintf('ISC_HPC_%s.mat',category));
-        meanISC = mean(d.HPC_ISC.(category).runwiseVecRDMs, 3); % [pairs × parcels × runs]
-        d.HPC_ISC.(category).mean = meanISC;
+
+        if strcmp(cfg.searchlightSource, 'HPC')
+            outFile = fullfile(cfg.outputPath,'group_level', ...
+                sprintf('ISC_HPC_%s.mat',category));
+            meanISC = mean(d.HPC_ISC.(category).runwiseVecRDMs, 3); % [pairs × parcels × runs]
+            d.HPC_ISC.(category).mean = meanISC;
+
+        elseif strcmp(cfg.searchlightSource, 'LPFC')
+            outFile = fullfile(cfg.outputPath,'group_level', ...
+                sprintf('ISC_LPFC_Steps_%s.mat',category));
+            meanISC = mean(d.LPFC_steps.(category).runwiseVecRDMs, 3); % [pairs × parcels × runs]
+            d.LPFC_steps.(category).mean = meanISC;
+
+        end
         save(outFile,'meanISC','subPairs','-v7.3');
+
     end
 end
 end
