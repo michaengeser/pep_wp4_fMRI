@@ -29,15 +29,9 @@ if cfg.scatter_in_violin == 0
 elseif cfg.scatter_in_violin == 1
     violin_type = 'half';
 end
-
 if ~isfield(cfg, 'ylim'); cfg.ylim = [-0.4, 0.4];end
 if ~isfield(cfg, 'task_plotting'); cfg.plott_gap = 0;end
 if ~isfield(cfg, 'plotting_predictors'); cfg.plotting_predictors = 1:numel(cfg.predictor_RDMs);end
-% if permutations with sign flips are used, corrleation type needs to be
-% spearman
-if strcmp(cfg.permutation_type, 'sign_flip_ref')
-    cfg.partial_correlation_type = 'spearman';
-end
 % get variable attributes
 colors = zeros(numel(cfg.RDM_to_partial_out),3);
 short_names = cell(1, numel(cfg.RDM_to_partial_out));

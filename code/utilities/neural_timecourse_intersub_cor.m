@@ -11,6 +11,7 @@ if ~isfield(cfg, 'regressOutMean'); cfg.regressOutMean = true; end
 if ~isfield(cfg, 'detrend'); cfg.detrend = true; end
 if ~isfield(cfg, 'dissimilarity'); cfg.dissimilarity = true; end
 if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = false; end
+if ~isfield(cfg, 'smoothing'); cfg.smoothing = false; end
 
 % convert to local configurations
 if cfg.plotting; plotting = true; else plotting = false; end
