@@ -2,11 +2,11 @@ function extract_parcel_timecourses(cfg)
 
 % Default settings
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
-if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = false; end
+if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = true; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85; end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188; end
 if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = false; end
-if ~isfield(cfg, 'numVoxels'); cfg.numVoxels = [200]; end % inf = all voxels
+if ~isfield(cfg, 'numVoxels'); cfg.numVoxels = [1,2,5,10,20,50,100,200,500,1000,5000,inf]; end % inf = all voxels
 if ~isfield(cfg, 'searchlightSource'); cfg.searchlightSource = 'HCP'; end
 
 subs = cfg.subNums;

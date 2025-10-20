@@ -159,6 +159,7 @@ for iVox = 1:length(cfg.numVoxels)
     results(iVox).all.r_avg      = r_avg;
     results(iVox).all.p_uncorr   = p_uncorr;
     results(iVox).all.p_fdr      = p_fdr;
+    results(iVox).nVox           = nVox;
     if cfg.save_perms, results(iVox).all.perm_values = perm_values; end
 
     allR(:, iVox) = r_avg';
@@ -175,6 +176,7 @@ for iVox = 1:length(cfg.numVoxels)
         labels.p_fdr_all = p_fdr';
         labels.uncorrected_p = p_uncorr';
         labels.uncorrected_p_norm = p_norm';
+        results(iVox).labels_all = labels;
 
         %
         %         % Requested parcels
@@ -276,7 +278,9 @@ end
 % get x ticks
 xticks(1:length(cfg.numVoxels))
 xticklabels(string(cfg.numVoxels))
-xlim([1, length(cfg.numVoxels)])
+if 1 < length(cfg.numVoxels)
+    xlim([1, length(cfg.numVoxels)])
+end
 xlabel('Number of voxels')
 
 if strcmp(cfg.searchlightSource, 'allROI')
@@ -317,11 +321,15 @@ if strcmp(cfg.searchlightSource, 'HCP')
         end
     end
 
-    % get x ticks
+    % configure axis
     xticks(1:length(cfg.numVoxels))
     xticklabels(string(cfg.numVoxels))
     xlim([1, length(cfg.numVoxels)])
     xlabel('Number of voxels')
+    xtickangle(45)
+    ylabel(['Partial correlation [r]', newline]);
+    ylim([-0.1, 0.3])
+    yline(0, 'LineWidth', 2, 'Color', 'k');
 
     % add labels
     labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
@@ -330,11 +338,63 @@ if strcmp(cfg.searchlightSource, 'HCP')
 
     title('Parcels with at least one significant test')
 
+
+    %% plot all parcel that are significant at 200 voxels
+    sig200Points = allP(:, cfg.numVoxels == 200) < 0.05;
+    sig200Parcels = find(sig200Points > 0);
+    sig200R = allR(sig200Parcels, :);
+    sig200P = allP(sig200Parcels, :);
+    sig200Plabels = labels(sig200Parcels, :);
+
+    % make new Order for plotting
+    newOrder = [3,7,8,9,5,6,4,10,11,13,1,12,2]; % hard coded 
+    sig200R = sig200R(newOrder, :);
+    sig200P = sig200P(newOrder, :);
+    sig200Plabels = sig200Plabels(newOrder, :);
+
+    structPos = find(cfg.numVoxels == 200);
+    results(structPos).sig200Parcels = sig200Parcels(newOrder);
+    results(structPos).newOrder = newOrder;
+
+    % plot results
+    figure;
+    hold on
+
+    % get colors
+    load(fullfile(pwd, 'utilities', 'parcelColors.mat'))
+
+    for i = 1:height(sig200P)
+        % plot line
+        linePlots(i) = plot(sig200R(i, :)', 'Color', parcelColors{i}, 'LineWidth',2);
+        legendLabel{i} = [sig200Plabels.community{i}, ' (', sig200Plabels.roi{i}, ')'];
+        for ii = 1:width(sig200P)
+            % add significance markers
+            if sig200P(i, ii) < 0.05
+                plot(ii, sig200R(i, ii), 'o',...
+                    'MarkerFaceColor', [parcelColors{i}], 'MarkerEdgeColor', parcelColors{i})
+            end
+        end
+    end
+
+    % get x ticks
+    xticks(1:length(cfg.numVoxels))
+    xticklabels(string(cfg.numVoxels))
+    xlim([1, length(cfg.numVoxels)])
+    xlabel('Number of voxels')
+
+    % add labels
+    labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
+    legend(linePlots, legendLabel, 'Location','eastoutside')
+
+
+    set(gca, 'LineWidth', 2, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
+    ax = gca;
+    ax.Box = 'off';
 end
 
 
 % if strcmp(cfg.searchlightSource, 'LPFC')
-% 
+%
 %     % make plotting
 %     if cfg.cutTargets
 %         tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses');
@@ -344,21 +404,21 @@ end
 %     fileName = fullfile(tcDir, ...
 %         sprintf('mean_timecourses_voxel_steps_LPFC_%s_run-%02d.mat','bathroom',1));
 %     tmp = load(fileName,'step_sizes'); % [time × parcels]
-% 
+%
 %     figure
 %     hold on
 %     plot(1:length(tmp.step_sizes), r_avg)
 %     xticks(1:length(tmp.step_sizes))
 %     xticklabels(string(tmp.step_sizes))
-% 
+%
 %     for voxNum = 1:length(tmp.step_sizes)
 %         if p_fdr(voxNum) < 0.05
 %             text(voxNum, max(r_avg) + 0.02, '*', 'Color',[0,0,0])
 %         end
 %     end
-% 
+%
 %     ylim([0, 0.2]);
 %     xlim([1,length(tmp.step_sizes)])
-% 
+%
 % end
 end
