@@ -277,28 +277,33 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             res_table = res_table(cfg.plotting_predictors, :);
         end
 
+        if ~isempty(short_names) && numel(cfg.plotting_predictors) ~= numel(short_names)
+            short_names = short_names(cfg.plotting_predictors);
+            colors = colors(cfg.plotting_predictors, :);
+        end
+
         % loop through res_table and add according variables
         if cfg.plotting_predictors == 1
             if strcmp(roi, 'V1')
-                res_table.color_R = .85;
-                res_table.color_G = .05;
-                res_table.color_B = .85;
+                res_table.color_R = .97;
+                res_table.color_G = .41;
+                res_table.color_B = .92;
             elseif strcmp(roi, 'LOC')
-                res_table.color_R = .75;
-                res_table.color_G = .1;
-                res_table.color_B = .75;
+                res_table.color_R = 1;
+                res_table.color_G = 0;
+                res_table.color_B = 1;
             elseif strcmp(roi, 'PPA')
-                res_table.color_R = .63;
-                res_table.color_G = .15;
-                res_table.color_B = .63;
+                res_table.color_R = .73;
+                res_table.color_G = .02;
+                res_table.color_B = .73;
             elseif strcmp(roi, 'TOS')
-                res_table.color_R = .5;
-                res_table.color_G = .2;
-                res_table.color_B = .5;
+                res_table.color_R = .47;
+                res_table.color_G = .03;
+                res_table.color_B = .45;
             elseif strcmp(roi, 'LPFC')
-                res_table.color_R = .4;
-                res_table.color_G = .17;
-                res_table.color_B = .4;
+                res_table.color_R = .24;
+                res_table.color_G = .04;
+                res_table.color_B = .3;
             else
                 res_table.color_R = 1;
                 res_table.color_G = 0;
@@ -373,26 +378,28 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             for xiPos = 1:height(res_table)
                 current_x_pos = previous_x_pos + xiPos;
                 if cfg.permutation_test
-                    Y = {perm_r_mat(xiPos,:)'};
+                    Y = {perm_r_mat(cfg.plotting_predictors(xiPos),:)'};
                 elseif cfg.bootstrapping
-                    Y = {bootstrapping_r_vals(xiPos,:)'};
+                    Y = {bootstrapping_r_vals(cfg.plotting_predictors(xiPos),:)'};
                 end
-            end
-            % make violin plot
-            mainHandles(current_x_pos) = daviolinplot(Y,...
-                'color',[res_table.color_R,res_table.color_G,res_table.color_B],...
-                'violin', violin_type, 'violinalpha', 0.1,...
-                'scatter',cfg.scatter_in_violin,'scatteralpha',0.1,'jitter',1,'scattercolors', 'same', 'scattersize', 5,...
-                'box', 0,...
-                'outliers',0);
-            mainHandles(current_x_pos).ds.Vertices(:, 1) = mainHandles(current_x_pos).ds.Vertices(:, 1) + current_x_pos - 1;
-            mainHandles(current_x_pos).ds.EdgeColor = [res_table.color_R,res_table.color_G,res_table.color_B];
-            mainHandles(current_x_pos).ds.EdgeAlpha = 0.5;
-            mainHandles(current_x_pos).ds.LineWidth = 2;
-            if cfg.scatter_in_violin == 1
-                mainHandles(current_x_pos).sc.XData = mainHandles(current_x_pos).sc.XData + current_x_pos - 1.05;
-                mainHandles(current_x_pos).sc.MarkerEdgeColor = [res_table.color_R,res_table.color_G,res_table.color_B];
-                mainHandles(current_x_pos).sc.MarkerEdgeAlpha = 0.2;
+
+                % make violin plot
+                currentColor = [res_table.color_R(xiPos), res_table.color_G(xiPos), res_table.color_B(xiPos)];
+                mainHandles(current_x_pos) = daviolinplot(Y,...
+                    'color', currentColor,...
+                    'violin', violin_type, 'violinalpha', 0.2,...
+                    'scatter',cfg.scatter_in_violin,'scatteralpha',0.2,'jitter',1,'scattercolors', 'same', 'scattersize', 5,...
+                    'box', 0,...
+                    'outliers',0);
+                mainHandles(current_x_pos).ds.Vertices(:, 1) = mainHandles(current_x_pos).ds.Vertices(:, 1) + current_x_pos - 1;
+                mainHandles(current_x_pos).ds.EdgeColor = currentColor;
+                mainHandles(current_x_pos).ds.EdgeAlpha = 0.5;
+                mainHandles(current_x_pos).ds.LineWidth = 2;
+                if cfg.scatter_in_violin == 1
+                    mainHandles(current_x_pos).sc.XData = mainHandles(current_x_pos).sc.XData + current_x_pos - 1.05;
+                    mainHandles(current_x_pos).sc.MarkerEdgeColor = currentColor;
+                    mainHandles(current_x_pos).sc.MarkerEdgeAlpha = 0.2;
+                end
             end
         elseif strcmp(cfg.plot_type, 'bar')
             for xiPos = 1:height(res_table)
@@ -431,7 +438,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 elseif strcmp(cfg.plot_type, 'violin')
                     % plot oberseved mean r
                     plot([current_x_pos-0.15,current_x_pos+0.15], [res_table.r_val(xiPos), res_table.r_val(xiPos)],...
-                        'Color', [res_table.color_R,res_table.color_G,res_table.color_B], 'LineWidth',3);
+                        'Color', [res_table.color_R(xiPos), res_table.color_G(xiPos), res_table.color_B(xiPos)], 'LineWidth',3);
                 end
             end
             % add marks for single category
@@ -479,7 +486,7 @@ if cfg.plotting
             disp(['FDR corrected p value for ', roi, ': ', num2str(fdr_pval(roi_i)),...
                 ' ', char(all_asterisks(i_pred, roi_i))])
             disp(['R value for ', roi, ': ', ...
-                num2str(d.compare_task_to_predictor.(roi).category_average.r_val)])
+                num2str(d.compare_task_to_predictor.(roi).category_average.r_val(i_pred))])
         end
     end
 
