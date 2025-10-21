@@ -1,0 +1,14 @@
+roi,num_roi,hemi,community,community_short,r,p_fdr_all,uncorrected_p
+8BL,70,bilateral,dorsolateral prefrontal cortex,dlPFC, 0.1,0.044,0.003
+46,84,bilateral,dorsolateral prefrontal cortex,dlPFC, 0.2, 0.03,    0
+a9-46v,85,bilateral,dorsolateral prefrontal cortex,dlPFC,0.13,0.044,0.003
+9-46d,86,bilateral,dorsolateral prefrontal cortex,dlPFC,0.19, 0.03,    0
+IFSp,81,bilateral,inferior frontal cortex,iFC,0.21, 0.03,    0
+IFSa,82,bilateral,inferior frontal cortex,iFC,0.17,0.032,0.002
+a47r,77,bilateral,orbital and polar frontal cortex,oFC and pFC,0.14,0.032,0.001
+13l,92,bilateral,orbital and polar frontal cortex,oFC and pFC,0.12,0.044,0.003
+AVI,111,bilateral,insular and frontal opercular cortex,insular and FO,0.25,0.044,0.003
+p24,180,bilateral,anterior cingulate and medial prefrontal cortex,aCC and mPFC,0.18,0.032,0.002
+RSC,14,bilateral,posterior cingulate cortex,pCC,0.19,0.032,0.001
+31pd,161,bilateral,posterior cingulate cortex,pCC,0.12,0.032,0.001
+FFC,18,bilateral,ventral stream visual cortex,v vis.,0.16,0.032,0.001
