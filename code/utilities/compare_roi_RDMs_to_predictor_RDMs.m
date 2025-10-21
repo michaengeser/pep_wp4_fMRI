@@ -8,14 +8,9 @@ if ~isfield(cfg, 'correlation_type'); cfg.correlation_type = 'pearson';end
 if ~isfield(cfg, 'plot_rdm'); cfg.plot_rdm = false;end
 if ~isfield(cfg, 'permutation_test'); cfg.permutation_test = false;end
 if ~isfield(cfg, 'n_permutations'); cfg.n_permutations = 10000;end
-if ~isfield(cfg, 'bootstrapping'); cfg.bootstrapping = false;end
-if ~isfield(cfg, 'max_bootstrapping_n'); cfg.max_bootstrapping_n = cfg.n;end
-if ~isfield(cfg, 'n_bootstrapp_iterations'); cfg.n_bootstrapp_iterations = 10000;end
 if ~isfield(cfg, 'add_legend'); cfg.add_legend = false;end
 if ~isfield(cfg, 'show_single_cate'); cfg.show_single_cate = false;end
 if ~isfield(cfg, 'permutation_type'); cfg.permutation_type = 'row_col_shuffle_ref';end
-if ~isfield(cfg, 'bootstrapp_type'); cfg.bootstrapp_type = 'removing';end
-if ~isfield(cfg, 'bootstrapp_what'); cfg.bootstrapp_what = 'subjects';end
 if ~isfield(cfg, 'order_predictors'); cfg.order_predictors = false;end
 if ~isfield(cfg, 'partial_cor'); cfg.partial_cor = true;end
 if ~isfield(cfg, 'save_name'); cfg.save_name = 'compare_roi_RDMs_to_predictor_RDMs';end
@@ -53,7 +48,7 @@ if cfg.plotting
     hold on
     previous_x_pos = 0;
 end
-% prepare random permutation and/or bootstrapping (each roi and category should have the same
+% prepare random permutation (each roi and category should have the same
 % random samplings)
 if cfg.permutation_test
     % generate permutated subjects list
@@ -74,21 +69,7 @@ if cfg.permutation_test
         end
     end
 end
-if cfg.bootstrapping
-    % generate randomly sampled subjects list (with replacement)
-    random_samples = cell(1, cfg.n_bootstrapp_iterations);
-    if strcmp(cfg.bootstrapp_what, 'subjects')
-        for i = 1:cfg.n_bootstrapp_iterations
-            % get random sequence
-            random_samples{i} = randsample(1:cfg.n, cfg.max_bootstrapping_n, true);
-        end
-    elseif strcmp(cfg.bootstrapp_what, 'runs')
-        for i = 1:cfg.n_bootstrapp_iterations
-            % get random sequence
-            random_samples{i} = randsample(1:cfg.nRuns, cfg.nRuns, true);
-        end
-    end
-end
+
 % loop through rois
 for roi_i = 1:numel(cfg.rois_of_interest)
     roi = char(cfg.rois_of_interest(roi_i));
@@ -197,49 +178,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             end
             d.compare_roi_to_predictor.permutation_test.(roi).(category) = perm_r_mat;
         end
-        % make bootstrapping
-        if cfg.bootstrapping
-            resampled_RDMs = RDMs;
-            bootstrapped_r_mat = zeros(height(r_mat)-1, cfg.n_bootstrapp_iterations);
-            cfg_boot = cfg;
-            for iter = 1:cfg.n_bootstrapp_iterations
-                % random sampling of subjects
-                if strcmp(cfg.bootstrapp_what, 'subjects')
-                    % resample RDMs
-                    for rdm = 1:numel(RDMs)
-                        % get RDM
-                        target_RDM = RDMs(rdm).RDM;
-                        if strcmp(cfg.bootstrapp_type,'w/o_removing')
-                            target_RDM(logical(eye(size(target_RDM)))) = 1;
-                        elseif strcmp(cfg.bootstrapp_type,'removing')
-                            target_RDM(logical(eye(size(target_RDM)))) = NaN;
-                        end
-                        % add resampled RDM
-                        resampled_RDMs(rdm).RDM = target_RDM(random_samples{iter},random_samples{iter});
-                    end
-                    % random sampling of runs
-                elseif strcmp(cfg.bootstrapp_what, 'runs')
-                    % repeat correlations with resampled runs
-                    cfg_boot.plotting = false;
-                    cfg_boot.saving = false;
-                    cfg_boot.runSample = random_samples{iter};
-                    cfg_boot.categories = {category};
-                    d = neural_timecourse_intersub_cor(d, cfg_boot);
-                    % get reference RDM
-                    ref_RDM = d.([category,'_RDM']).(cfg.ISC_type)(ref_idx);
-                    RDMs(1).RDM = ref_RDM.RDM;
-                    resampled_RDMs = RDMs;
-                end
-                % run partial correlation
-                [~, r_mat, ~, ~] = partial_cor_RDM(cfg, resampled_RDMs);
-                bootstrapped_r_mat(1:end, iter) = r_mat(2:end, 1);
-                if mod(iter/cfg.n_bootstrapp_iterations, 0.1) == 0
-                    disp([num2str((iter/cfg.n_bootstrapp_iterations)*100),...
-                        '% of bootstrapping of ', roi, ' ', category, ' is done'])
-                end
-            end
-            d.compare_roi_to_predictor.bootstrapping.(roi).(category) = bootstrapped_r_mat;
-        end
+
         % runtime control
         disp(['Compare inter-subject RDM of ', roi, ' with partial correaltion of predictor RDMs - ', category])
 
@@ -253,17 +192,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
         d.compare_roi_to_predictor.(roi).(cfg.categories{2}).r_val)/2;
     d.compare_roi_to_predictor.(roi).category_average = res_table;
     % get confidence intervals
-    if cfg.bootstrapping
-        % average categories
-        boot_r_vals_cate1 = d.compare_roi_to_predictor.bootstrapping.(roi).(cfg.categories{1});
-        boot_r_vals_cate2 = d.compare_roi_to_predictor.bootstrapping.(roi).(cfg.categories{2});
-        bootstrapping_r_vals = (boot_r_vals_cate1 + boot_r_vals_cate2)/2;
-        % get confidence intervals and store in result table
-        cis = prctile(bootstrapping_r_vals', [5, 95]);
-        res_table.ci_upper = cis(2,:)';
-        res_table.ci_lower = cis(1,:)';
-        res_table.boot_median = median(bootstrapping_r_vals')';
-    elseif cfg.permutation_test
+    if cfg.permutation_test
         % get p values of random permutation
         perm_r_mat = (d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{1}) +...
             d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{2}))/2;
@@ -280,6 +209,10 @@ for roi_i = 1:numel(cfg.rois_of_interest)
         if ~isempty(short_names) && numel(cfg.plotting_predictors) ~= numel(short_names)
             short_names = short_names(cfg.plotting_predictors);
             colors = colors(cfg.plotting_predictors, :);
+        end
+
+        if numel(cfg.plotting_predictors) ~= height(perm_r_mat)
+            perm_r_mat = perm_r_mat(cfg.plotting_predictors, :);
         end
 
         % loop through res_table and add according variables
@@ -332,38 +265,29 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             else
                 res_table.short_names{row} = cfg.labels{row+1};
             end
-        end
-        % p val
-        if cfg.permutation_test
-            % get p value from random permutation (one-sided test aginst
-            % permutation distribution)
-            p_value = sum(perm_r_mat(row,:) >= res_table.r_val(row)) / cfg.n_permutations;
-            res_table.p_val(row) = p_value;
-            % get p values for categories
-            res_table.p_val_cate1(row) = ...
-                sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{1})(row,:)...
-                >= res_table.r_val_cate1(row)) / cfg.n_permutations;
-            res_table.p_val_cate2(row) = ...
-                sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{2})(row,:)...
-                >= res_table.r_val_cate2(row)) / cfg.n_permutations;
-            res_table.ci_upper(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 5);
-            res_table.ci_lower(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 95);
-        elseif cfg.bootstrapping
-            % get p value from randomly sampled data (one-sided test of
-            % bootstrapping distribution against 0)
-            p_value = sum(bootstrapping_r_vals(row,:) <= 0) / cfg.n_bootstrapp_iterations;
-            res_table.p_val(row) = p_value;
-            % get p values for categories
-            res_table.p_val_cate1(row) = sum(boot_r_vals_cate1(row,:) <= 0) /...
-                cfg.n_bootstrapp_iterations;
-            res_table.p_val_cate2(row) = sum(boot_r_vals_cate2(row,:) <= 0) /...
-                cfg.n_bootstrapp_iterations;
-        else
-            % get p values from r values
-            N = nchoosek(cfg.n, 2);
-            res_table.p_val(row) = r2p(res_table.r_val(row), N);
-            res_table.p_val_cate1(row) = r2p(res_table.r_val_cate1(row), N);
-            res_table.p_val_cate2(row) = r2p(res_table.r_val_cate2(row), N);
+
+            % p val
+            if cfg.permutation_test
+                % get p value from random permutation (one-sided test aginst
+                % permutation distribution)
+                p_value = sum(perm_r_mat(row,:) >= res_table.r_val(row)) / cfg.n_permutations;
+                res_table.p_val(row) = p_value;
+                % get p values for categories
+                res_table.p_val_cate1(row) = ...
+                    sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{1})(row,:)...
+                    >= res_table.r_val_cate1(row)) / cfg.n_permutations;
+                res_table.p_val_cate2(row) = ...
+                    sum(d.compare_roi_to_predictor.permutation_test.(roi).(cfg.categories{2})(row,:)...
+                    >= res_table.r_val_cate2(row)) / cfg.n_permutations;
+                res_table.ci_upper(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 5);
+                res_table.ci_lower(row) = res_table.r_val(row) - prctile(perm_r_mat(row,:), 95);
+            else
+                % get p values from r values
+                N = nchoosek(cfg.n, 2);
+                res_table.p_val(row) = r2p(res_table.r_val(row), N);
+                res_table.p_val_cate1(row) = r2p(res_table.r_val_cate1(row), N);
+                res_table.p_val_cate2(row) = r2p(res_table.r_val_cate2(row), N);
+            end
         end
 
         % store in data struct
@@ -378,9 +302,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
             for xiPos = 1:height(res_table)
                 current_x_pos = previous_x_pos + xiPos;
                 if cfg.permutation_test
-                    Y = {perm_r_mat(cfg.plotting_predictors(xiPos),:)'};
-                elseif cfg.bootstrapping
-                    Y = {bootstrapping_r_vals(cfg.plotting_predictors(xiPos),:)'};
+                    Y = {perm_r_mat(xiPos,:)'};
                 end
 
                 % make violin plot
@@ -421,7 +343,7 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                 end
             end
 
-            if cfg.permutation_test || cfg.bootstrapping
+            if cfg.permutation_test
                 if strcmp(cfg.plot_type, 'bar')
                     % add confidence interval if available
                     if ismember('ci_lower', res_table.Properties.VariableNames)
@@ -429,11 +351,6 @@ for roi_i = 1:numel(cfg.rois_of_interest)
                         errorHandles(current_x_pos) = errorbar(current_x_pos,...
                             r_val, r_val-res_table.ci_lower(xiPos),...
                             res_table.ci_upper(xiPos)-r_val, 'k', 'LineWidth', 1);  % Error bars
-                    end
-                    % add bootstrapping median if available
-                    if ismember('boot_median', res_table.Properties.VariableNames)
-                        text(current_x_pos, res_table.boot_median(xiPos),...
-                            '-', 'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold');
                     end
                 elseif strcmp(cfg.plot_type, 'violin')
                     % plot oberseved mean r
