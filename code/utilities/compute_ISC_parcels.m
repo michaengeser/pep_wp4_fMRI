@@ -11,7 +11,6 @@ if ~isfield(cfg, 'outputPath'); error('Need cfg.outputPath'); end
 if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 3; end
 if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 3; end
 if ~isfield(cfg, 'dissimilarity'); cfg.dissimilarity = true; end
-if ~isfield(cfg, 'searchlightSource'); cfg.searchlightSource = 'HCP'; end
 if ~isfield(cfg, 'runSample'); cfg.runSample = 1:cfg.nRuns; end
 if ~isfield(cfg, 'numVoxels'); cfg.numVoxels = [1,2,5,10,20,50,100,200,500,1000,5000,inf]; end % inf = all voxels
 if ~isfield(cfg, 'rois_of_interest'); cfg.rois_of_interest = {'V1', 'LOC', 'PPA', 'TOS', 'LPFC'}; end
@@ -27,13 +26,10 @@ for iVox = 1:length(cfg.numVoxels)
         category = char(category);
 
         % check if file exists already
-        if strcmp(cfg.searchlightSource, 'HCP')
-            outFile = fullfile(cfg.outputPath,'group_level', ...
-                sprintf('ISC_HCP_%s_%d_voxels.mat', category, nVox));
-        elseif strcmp(cfg.searchlightSource, 'allROI')
-            outFile = fullfile(cfg.outputPath,'group_level', ...
-                sprintf('ISC_allROI_%s_%d_voxels.mat', category, nVox));
-        end
+
+        outFile = fullfile(cfg.outputPath,'group_level', ...
+            sprintf('ISC_HCP_%s_%d_voxels.mat', category, nVox));
+
         if cfg.skipIfExists && exist(outFile, 'file')
             disp(['Skipping existing file: ' outFile])
             continue
@@ -47,14 +43,9 @@ for iVox = 1:length(cfg.numVoxels)
         end
 
         % container for runwise results
-        if strcmp(cfg.searchlightSource, 'HCP')
-            nParcels = 180; % HCP atlas fixed
-            d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs = nan(nPairs, nParcels, numel(runSample));
-        elseif strcmp(cfg.searchlightSource, 'allROI')
-            nParcels = length(cfg.rois_of_interest); 
-            d.allROI_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs = nan(nPairs, nParcels, numel(runSample));
-        end
 
+        nParcels = 180; % HCP atlas fixed
+        d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs = nan(nPairs, nParcels, numel(runSample));
 
         % loop runs
         for iRun = 1:numel(runSample)
@@ -73,13 +64,9 @@ for iVox = 1:length(cfg.numVoxels)
                     tcDir = fullfile(cfg.outputPath,subID,'timecourses_with_targets');
                 end
 
-                if strcmp(cfg.searchlightSource, 'HCP')
-                    fileName = fullfile(tcDir, ...
-                        sprintf('mean_HCP_timecourses_%s_run-%02d_%d_voxels.mat',category,currentRun, nVox));
-                elseif strcmp(cfg.searchlightSource, 'allROI')
-                    fileName = fullfile(tcDir, ...
-                        sprintf('mean_allROI_timecourses_%s_run-%02d_%d_voxels.mat',category,currentRun, nVox));
-                end
+                fileName = fullfile(tcDir, ...
+                    sprintf('mean_HCP_timecourses_%s_run-%02d_%d_voxels.mat',category,currentRun, nVox));
+
                 tmp = load(fileName,'timecourses'); % [time × parcels]
                 tc  = tmp.timecourses;
 
@@ -107,31 +94,18 @@ for iVox = 1:length(cfg.numVoxels)
 
                 % make everything NaN if too many NaNs
                 if sum(isnan(R),'all') > sum(~isnan(R),'all')
-                   R = nan(size(R));
-                end 
-                R(eye(size(R) ) == 1) = 0;
-
-                if strcmp(cfg.searchlightSource, 'HCP')
-                    d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs(:,parc,iRun) = squareform(R)';
-                elseif strcmp(cfg.searchlightSource, 'allROI')
-                    d.allROI_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs(:,parc,iRun) = squareform(R)';
+                    R = nan(size(R));
                 end
-
+                d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs(:,parc,iRun) = squareform(R)';
             end
         end
 
         % save runwise ISC results
         if cfg.saving
 
-            if strcmp(cfg.searchlightSource, 'HCP')
-                meanISC = mean(d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs, 3); % [pairs × parcels × runs]
-                d.HCP_ISC.(category).(['vox',num2str(nVox)]).mean = meanISC;
+            meanISC = mean(d.HCP_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs, 3); % [pairs × parcels × runs]
+            d.HCP_ISC.(category).(['vox',num2str(nVox)]).mean = meanISC;
 
-            elseif strcmp(cfg.searchlightSource, 'allROI')
-                meanISC = mean(d.allROI_ISC.(category).(['vox',num2str(nVox)]).runwiseVecRDMs, 3); % [pairs × parcels × runs]
-                d.allROI_ISC.(category).(['vox',num2str(nVox)]).mean = meanISC;
-
-            end
             save(outFile,'meanISC','subPairs','-v7.3');
 
         end

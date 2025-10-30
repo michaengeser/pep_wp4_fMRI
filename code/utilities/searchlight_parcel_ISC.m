@@ -13,7 +13,6 @@ if ~isfield(cfg, 'partial_correlation_type'); cfg.partial_correlation_type = 'Pe
 if ~exist(cfg.outputPath,'dir'); mkdir(cfg.outputPath); end
 if ~isfield(cfg, 'permutation_tail'); cfg.permutation_tail = 'right'; end
 if ~isfield(cfg, 'save_perms'); cfg.save_perms = false; end
-if ~isfield(cfg, 'searchlightSource'); cfg.searchlightSource = 'HCP'; end
 if ~isfield(cfg, 'rois_of_interest'); cfg.rois_of_interest = {'V1', 'LOC', 'PPA', 'TOS', 'LPFC'}; end
 if ~isfield(cfg, 'numVoxels'); cfg.numVoxels = [1,2,5,10,20,50,100,200,500,1000,5000,inf]; end % inf = all voxels
 if ~isfield(cfg, 'random_RDM_vecs')
@@ -59,11 +58,8 @@ X = [kit_preds(:,2:end), ones(size(kit_preds,1),1)];
 b = X \ kit_preds(:,1);
 kit_resid = kit_preds(:,1) - X*b;
 
-if strcmp(cfg.searchlightSource, 'HCP')
-    nParcels = 180;
-elseif strcmp(cfg.searchlightSource, 'allROI')
-    nParcels = length(cfg.rois_of_interest);
-end
+% preallocate
+nParcels = 180;
 allR = nan(nParcels, length(cfg.numVoxels));
 allP = allR;
 
@@ -73,17 +69,11 @@ for iVox = 1:length(cfg.numVoxels)
 
     % ---------------- Load ISC data ----------------
 
-    if strcmp(cfg.searchlightSource, 'HCP')
-        fn_bat = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_HCP_%s_%d_voxels.mat', 'bathroom', nVox));
-        fn_kit = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_HCP_%s_%d_voxels.mat', 'kitchen', nVox));
-    elseif strcmp(cfg.searchlightSource, 'allROI')
-        fn_bat = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_allROI_%s_%d_voxels.mat', 'bathroom', nVox));
-        fn_kit = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_allROI_%s_%d_voxels.mat', 'kitchen', nVox));
-    end
+    fn_bat = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_HCP_%s_%d_voxels.mat', 'bathroom', nVox));
+    fn_kit = fullfile(cfg.outputPath, 'group_level', sprintf('ISC_HCP_%s_%d_voxels.mat', 'kitchen', nVox));
 
     Sbat = load(fn_bat,'meanISC','subPairs');
     Skit = load(fn_kit,'meanISC','subPairs');
-
 
     % ---------------- Observed correlations ----------------
     fprintf('Computing observed parcel correlations...\n');
@@ -168,84 +158,83 @@ for iVox = 1:length(cfg.numVoxels)
 
     %% restrict analysis to parcel subsets
 
-    if strcmp(cfg.searchlightSource, 'HCP')
-        % Load the atlas labels
-        labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
-        labels = labels(1:nParcels, :);
-        labels.r = r_avg';
-        labels.p_fdr_all = p_fdr';
-        labels.uncorrected_p = p_uncorr';
-        labels.uncorrected_p_norm = p_norm';
-        results(iVox).labels_all = labels;
+    % Load the atlas labels
+    labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
+    labels = labels(1:nParcels, :);
+    labels.r = r_avg';
+    labels.p_fdr_all = p_fdr';
+    labels.uncorrected_p = p_uncorr';
+    labels.uncorrected_p_norm = p_norm';
+    results(iVox).labels_all = labels;
 
-        %
-        %         % Requested parcels
-        %         parcel_names = {...
-        %             'FEF','PEF','55b','8Av','8Ad','9m','8BL','9p','10d','8C',...
-        %             '44','45','47l','a47r','6r','IFJa','IFJp','IFSp','IFSa',...
-        %             'p9-46v','46','a9-46v','9-46d','9a','10v','a10p','10pp',...
-        %             '6a','i6-8','s6-8','p10p','p47r'};
-        %
-        %         % Match ROI numbers
-        %         mask = ismember(labels.roi, parcel_names);
-        %         lpfc_rois = labels.num_roi(mask);
-        %
-        %         % index LPFC
-        %         lpfc_rs = r_avg(lpfc_rois);
-        %         p_uncorr_lpfc = p_uncorr(lpfc_rois);
-        %         [~,~,~,p_fdr_lpfc] = fdr_bh(p_uncorr_lpfc);
-        %
-        %         % lpfc parcels table
-        %         lpfcParcelTable = labels(lpfc_rois, :);
-        %         lpfcParcelTable.p_fdr = p_fdr_lpfc';
-        %         lpfcParcelTable.r = r_avg(lpfc_rois)';
-        %
-        %         % significant parcels
-        %         sigParcels = lpfc_rois((p_fdr_lpfc < 0.05));
-        %         sigParcelsLabels = labels(sigParcels, :);
-        %         sigParcelsLabels.p_fdr = p_fdr_lpfc((p_fdr_lpfc < 0.05))';
-        %         sigParcelsLabels.r = lpfc_rs((p_fdr_lpfc < 0.05))';
-        %         disp(newline)
-        %         disp('Significant parcels in lateeral prefrontal cortex')
-        %         disp(newline)
-        %         disp(sigParcelsLabels)
-        %
-        %         results.lpfc.p_uncorr = p_uncorr_lpfc;
-        %         results.lpfc.p_fdr = p_fdr_lpfc;
-        %         results.lpfc.significant_parcels = sigParcels;
-        %         results.lpfc.significant_parcels_labels = sigParcelsLabels.roi;
-        %
-        %
-        %         % visual cortex
-        %         visual_rois = [...
-        %             1,2,3,4,5,6,7,13,16,17,18,19,20,21,22,23,...
-        %             137,138,152,153,154,156,157,158,159,160,163];
-        %
-        %         % index visual cortex
-        %         vis_rs = r_avg(visual_rois);
-        %         p_uncorr_vis = p_uncorr(visual_rois);
-        %         [~,~,~,p_fdr_vis] = fdr_bh(p_uncorr_vis);
-        %
-        %         % visual parcels table
-        %         visParcelTable = labels(visual_rois, :);
-        %         visParcelTable.p_fdr = p_fdr_vis';
-        %         visParcelTable.r = r_avg(visual_rois)';
-        %
-        %         % significant parcels
-        %         sigParcels = visual_rois((p_fdr_vis < 0.05));
-        %         sigParcelsLabels = labels(sigParcels, :);
-        %         sigParcelsLabels.p_fdr = p_fdr_vis((p_fdr_vis < 0.05))';
-        %         sigParcelsLabels.r = vis_rs((p_fdr_vis < 0.05))';
-        %         disp(newline)
-        %         disp('Significant parcels in visual cortex')
-        %         disp(newline)
-        %         disp(sigParcelsLabels)
-        %
-        %         results.visual.p_uncorr = p_uncorr_vis;
-        %         results.visual.p_fdr = p_fdr_vis;
-        %         results.visual.significant_parcels = sigParcels;
-        %         results.visual.significant_parcels_labels = sigParcelsLabels.roi;
-    end
+    %
+    %         % Requested parcels
+    %         parcel_names = {...
+    %             'FEF','PEF','55b','8Av','8Ad','9m','8BL','9p','10d','8C',...
+    %             '44','45','47l','a47r','6r','IFJa','IFJp','IFSp','IFSa',...
+    %             'p9-46v','46','a9-46v','9-46d','9a','10v','a10p','10pp',...
+    %             '6a','i6-8','s6-8','p10p','p47r'};
+    %
+    %         % Match ROI numbers
+    %         mask = ismember(labels.roi, parcel_names);
+    %         lpfc_rois = labels.num_roi(mask);
+    %
+    %         % index LPFC
+    %         lpfc_rs = r_avg(lpfc_rois);
+    %         p_uncorr_lpfc = p_uncorr(lpfc_rois);
+    %         [~,~,~,p_fdr_lpfc] = fdr_bh(p_uncorr_lpfc);
+    %
+    %         % lpfc parcels table
+    %         lpfcParcelTable = labels(lpfc_rois, :);
+    %         lpfcParcelTable.p_fdr = p_fdr_lpfc';
+    %         lpfcParcelTable.r = r_avg(lpfc_rois)';
+    %
+    %         % significant parcels
+    %         sigParcels = lpfc_rois((p_fdr_lpfc < 0.05));
+    %         sigParcelsLabels = labels(sigParcels, :);
+    %         sigParcelsLabels.p_fdr = p_fdr_lpfc((p_fdr_lpfc < 0.05))';
+    %         sigParcelsLabels.r = lpfc_rs((p_fdr_lpfc < 0.05))';
+    %         disp(newline)
+    %         disp('Significant parcels in lateeral prefrontal cortex')
+    %         disp(newline)
+    %         disp(sigParcelsLabels)
+    %
+    %         results.lpfc.p_uncorr = p_uncorr_lpfc;
+    %         results.lpfc.p_fdr = p_fdr_lpfc;
+    %         results.lpfc.significant_parcels = sigParcels;
+    %         results.lpfc.significant_parcels_labels = sigParcelsLabels.roi;
+    %
+    %
+    %         % visual cortex
+    %         visual_rois = [...
+    %             1,2,3,4,5,6,7,13,16,17,18,19,20,21,22,23,...
+    %             137,138,152,153,154,156,157,158,159,160,163];
+    %
+    %         % index visual cortex
+    %         vis_rs = r_avg(visual_rois);
+    %         p_uncorr_vis = p_uncorr(visual_rois);
+    %         [~,~,~,p_fdr_vis] = fdr_bh(p_uncorr_vis);
+    %
+    %         % visual parcels table
+    %         visParcelTable = labels(visual_rois, :);
+    %         visParcelTable.p_fdr = p_fdr_vis';
+    %         visParcelTable.r = r_avg(visual_rois)';
+    %
+    %         % significant parcels
+    %         sigParcels = visual_rois((p_fdr_vis < 0.05));
+    %         sigParcelsLabels = labels(sigParcels, :);
+    %         sigParcelsLabels.p_fdr = p_fdr_vis((p_fdr_vis < 0.05))';
+    %         sigParcelsLabels.r = vis_rs((p_fdr_vis < 0.05))';
+    %         disp(newline)
+    %         disp('Significant parcels in visual cortex')
+    %         disp(newline)
+    %         disp(sigParcelsLabels)
+    %
+    %         results.visual.p_uncorr = p_uncorr_vis;
+    %         results.visual.p_fdr = p_fdr_vis;
+    %         results.visual.significant_parcels = sigParcels;
+    %         results.visual.significant_parcels_labels = sigParcelsLabels.roi;
+
 
 end
 
@@ -255,16 +244,19 @@ save(outfn,'results','-v7.3');
 fprintf('Saved results to %s\n', outfn);
 
 % plot results
+
 %clrs = jet(height(allP));
 clrMap = cfg.colormaps.gist_ncar(1:end-10, :);
 clrs = clrMap(round((1:nParcels) * (height(clrMap)/nParcels)), :);
+
+
 figure;
 hold on
 
 for i = 1:height(allP)
 
     % plot line
-    allLinePlots(i) = plot(allR(i, :)', 'Color', clrs(i, :));
+    allLinePlots(i) = plot(allR(i, :)', 'Color', clrs(i, :),  'LineWidth',2);
     for ii = 1:width(allP)
 
         % add significance markers
@@ -282,143 +274,110 @@ if 1 < length(cfg.numVoxels)
     xlim([1, length(cfg.numVoxels)])
 end
 xlabel('Number of voxels')
-
-if strcmp(cfg.searchlightSource, 'allROI')
-    legendLables = cfg.rois_of_interest;
-    legend(allLinePlots, legendLables, 'Location','eastoutside')
-end
-
-
 title('All parcels')
+set(gca, 'LineWidth', 2, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
+ax = gca;
+ax.Box = 'off';
 
 % get all parcels with at least one sigificant test
 
-
 % add labels
-if strcmp(cfg.searchlightSource, 'HCP')
 
-    sigPoints = allP < 0.05;
-    sigParcels = find(mean(sigPoints, 2) > 0);
-    sigR = allR(sigParcels, :);
-    sigP = allP(sigParcels, :);
+sigPoints = allP < 0.05;
+sigParcels = find(mean(sigPoints, 2) > 0);
+sigR = allR(sigParcels, :);
+sigP = allP(sigParcels, :);
 
-    % plot results
-    figure;
-    hold on
+% plot results
+figure;
+hold on
 
-    for i = 1:height(sigP)
+for i = 1:height(sigP)
 
-        % plot line
-        linePlots(i) = plot(sigR(i, :)', 'Color', clrs(sigParcels(i), :));
-        for ii = 1:width(sigP)
+    % plot line
+    linePlots(i) = plot(sigR(i, :)', 'Color', clrs(sigParcels(i), :));
+    for ii = 1:width(sigP)
 
-            % add significance markers
-            if sigP(i, ii) < 0.05
-                plot(ii, sigR(i, ii), 'o',...
-                    'MarkerFaceColor', clrs(sigParcels(i), :), 'MarkerEdgeColor', clrs(sigParcels(i), :))
-            end
-
+        % add significance markers
+        if sigP(i, ii) < 0.05
+            plot(ii, sigR(i, ii), 'o',...
+                'MarkerFaceColor', clrs(sigParcels(i), :), 'MarkerEdgeColor', clrs(sigParcels(i), :))
         end
+
     end
-
-    % configure axis
-    xticks(1:length(cfg.numVoxels))
-    xticklabels(string(cfg.numVoxels))
-    xlim([1, length(cfg.numVoxels)])
-    xlabel('Number of voxels')
-    xtickangle(45)
-    ylabel(['Partial correlation [r]', newline]);
-    ylim([-0.1, 0.3])
-    yline(0, 'LineWidth', 2, 'Color', 'k');
-
-    % add labels
-    labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
-    legendLables = labels.community(sigParcels);
-    legend(linePlots, legendLables, 'Location','eastoutside')
-
-    title('Parcels with at least one significant test')
-
-
-    %% plot all parcel that are significant at 200 voxels
-    sig200Points = allP(:, cfg.numVoxels == 200) < 0.05;
-    sig200Parcels = find(sig200Points > 0);
-    sig200R = allR(sig200Parcels, :);
-    sig200P = allP(sig200Parcels, :);
-    sig200Plabels = labels(sig200Parcels, :);
-
-    % make new Order for plotting
-    newOrder = [3,7,8,9,5,6,4,10,11,13,1,12,2]; % hard coded 
-    sig200R = sig200R(newOrder, :);
-    sig200P = sig200P(newOrder, :);
-    sig200Plabels = sig200Plabels(newOrder, :);
-
-    structPos = find(cfg.numVoxels == 200);
-    results(structPos).sig200Parcels = sig200Parcels(newOrder);
-    results(structPos).newOrder = newOrder;
-
-    % plot results
-    figure;
-    hold on
-
-    % get colors
-    load(fullfile(pwd, 'utilities', 'parcelColors.mat'))
-
-    for i = 1:height(sig200P)
-        % plot line
-        linePlots(i) = plot(sig200R(i, :)', 'Color', parcelColors{i}, 'LineWidth',2);
-        legendLabel{i} = [sig200Plabels.community{i}, ' (', sig200Plabels.roi{i}, ')'];
-        for ii = 1:width(sig200P)
-            % add significance markers
-            if sig200P(i, ii) < 0.05
-                plot(ii, sig200R(i, ii), 'o',...
-                    'MarkerFaceColor', [parcelColors{i}], 'MarkerEdgeColor', parcelColors{i})
-            end
-        end
-    end
-
-    % get x ticks
-    xticks(1:length(cfg.numVoxels))
-    xticklabels(string(cfg.numVoxels))
-    xlim([1, length(cfg.numVoxels)])
-    xlabel('Number of voxels')
-
-    % add labels
-    labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
-    legend(linePlots, legendLabel, 'Location','eastoutside')
-
-
-    set(gca, 'LineWidth', 2, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
-    ax = gca;
-    ax.Box = 'off';
 end
 
+% configure axis
+xticks(1:length(cfg.numVoxels))
+xticklabels(string(cfg.numVoxels))
+xlim([1, length(cfg.numVoxels)])
+xlabel('Number of voxels')
+xtickangle(45)
+ylabel(['Partial correlation [r]', newline]);
+ylim([-0.1, 0.3])
+yline(0, 'LineWidth', 2, 'Color', 'k');
 
-% if strcmp(cfg.searchlightSource, 'LPFC')
-%
-%     % make plotting
-%     if cfg.cutTargets
-%         tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses');
-%     else
-%         tcDir = fullfile(cfg.outputPath, 'sub-101', 'timecourses_with_targets');
-%     end
-%     fileName = fullfile(tcDir, ...
-%         sprintf('mean_timecourses_voxel_steps_LPFC_%s_run-%02d.mat','bathroom',1));
-%     tmp = load(fileName,'step_sizes'); % [time × parcels]
-%
-%     figure
-%     hold on
-%     plot(1:length(tmp.step_sizes), r_avg)
-%     xticks(1:length(tmp.step_sizes))
-%     xticklabels(string(tmp.step_sizes))
-%
-%     for voxNum = 1:length(tmp.step_sizes)
-%         if p_fdr(voxNum) < 0.05
-%             text(voxNum, max(r_avg) + 0.02, '*', 'Color',[0,0,0])
-%         end
-%     end
-%
-%     ylim([0, 0.2]);
-%     xlim([1,length(tmp.step_sizes)])
-%
-% end
+% add labels
+labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
+legendLables = labels.community(sigParcels);
+legend(linePlots, legendLables, 'Location','eastoutside')
+
+
+title('Parcels with at least one significant test')
+
+
+%% plot all parcel that are significant at 200 voxels
+sig200Points = allP(:, cfg.numVoxels == 200) < 0.05;
+sig200Parcels = find(sig200Points > 0);
+sig200R = allR(sig200Parcels, :);
+sig200P = allP(sig200Parcels, :);
+sig200Plabels = labels(sig200Parcels, :);
+
+% make new Order for plotting
+newOrder = [3,7,8,9,5,6,4,10,11,13,1,12,2]; % hard coded
+sig200R = sig200R(newOrder, :);
+sig200P = sig200P(newOrder, :);
+sig200Plabels = sig200Plabels(newOrder, :);
+
+structPos = find(cfg.numVoxels == 200);
+results(structPos).sig200Parcels = sig200Parcels(newOrder);
+results(structPos).newOrder = newOrder;
+
+% plot results
+figure;
+hold on
+
+% get colors
+load(fullfile(pwd, 'utilities', 'parcelColors.mat'))
+
+for i = 1:height(sig200P)
+    % plot line
+    linePlots(i) = plot(sig200R(i, :)', 'Color', parcelColors{i}, 'LineWidth',2);
+    legendLabel{i} = [sig200Plabels.community{i}, ' (', sig200Plabels.roi{i}, ')'];
+    for ii = 1:width(sig200P)
+        % add significance markers
+        if sig200P(i, ii) < 0.05
+            plot(ii, sig200R(i, ii), 'o',...
+                'MarkerFaceColor', [parcelColors{i}], 'MarkerEdgeColor', parcelColors{i})
+        end
+    end
+end
+
+% get x ticks
+xticks(1:length(cfg.numVoxels))
+xticklabels(string(cfg.numVoxels))
+xtickangle(45)
+xlim([1, length(cfg.numVoxels)])
+xlabel('Number of voxels')
+yline(0, 'LineWidth', 2, 'Color', 'k');
+
+% add labels
+labels = readtable(fullfile(pwd, '..', 'MNI_ROIs', 'HCP_atlas_lables.csv'));
+legend(linePlots, legendLabel, 'Location','eastoutside')
+
+
+set(gca, 'LineWidth', 2, 'FontName', cfg.FontName, 'FontSize', cfg.FontSize, 'FontWeight', 'bold')
+ax = gca;
+ax.Box = 'off';
+
 end

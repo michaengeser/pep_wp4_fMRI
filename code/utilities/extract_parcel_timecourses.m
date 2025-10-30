@@ -33,15 +33,18 @@ for iVox = 1:length(cfg.numVoxels)
         disp(['Subject: ', num2str(subs(iSub))])
         subID = sprintf('sub-%0.3d', subs(iSub));
 
-        % Load contrast file
-        contrast_path = fullfile(main_path, subID, contrast_folder);
-        contrast_nii_path = fullfile(contrast_path, 'con_0004.nii');
-        if ~isfile(contrast_nii_path)
-            warning(['Contrast file not found: ', contrast_nii_path]);
+        % Load contrast files
+        if strcmp(cfg.searchlightSource, 'HCP')
+            contrast_path = fullfile(main_path, subID, contrast_folder);
+            contrast_nii_path = fullfile(contrast_path, 'con_0004.nii');
+            if ~isfile(contrast_nii_path)
+                warning(['Contrast file not found: ', contrast_nii_path]);
+            end
+            contrast_nii = load_untouch_nii(contrast_nii_path);
+            contrast_data = contrast_nii.img;
+            contrast_data = contrast_data(:);
+        elseif strcmp(cfg.searchlightSource, 'allROI')
         end
-        contrast_nii = load_untouch_nii(contrast_nii_path);
-        contrast_data = contrast_nii.img;
-        contrast_data = contrast_data(:);
 
         % make make output folder doesn't exist yet
         if cfg.cutTargets
@@ -108,29 +111,26 @@ for iVox = 1:length(cfg.numVoxels)
 
                     if nVox ~= inf
 
-       
                         % Apply ROI mask to contrast map
                         masked_flat = contrast_data(voxIdx);
                         masked_flat(isnan(masked_flat)) = 0;
 
                         % Sort voxels by contrast
                         [tVals, sorted_indices] = sort(masked_flat,'descend');
-                        sorted_indices(tVals <= 0) = []; % drop voxels wiht zero or negative t
 
-                        % check if enough voxels are left
-                        if nVox > length(sorted_indices) && cfg.stopTooLargeVoxelNum
-                            roi_ts = nan(1, size(func2D, 2));
-                        else
-                            % get top voxels
-                            if length(sorted_indices) >= nVox
-                                top_idx = sorted_indices(1:nVox);
-                            else
-                                top_idx = sorted_indices;
-                            end
-
-                            voxIdx_values = find(voxIdx);
-                            roi_ts = mean(func2D(voxIdx_values(top_idx),:), 1); % voxels x time
+                        if strcmp(cfg.searchlightSource, 'HCP')
+                            sorted_indices(tVals <= 0) = []; % drop voxels wiht zero or negative t
                         end
+
+                        if length(sorted_indices) >= nVox
+                            top_idx = sorted_indices(1:nVox);
+                        else
+                            top_idx = sorted_indices;
+                        end
+
+                        voxIdx_values = find(voxIdx);
+                        roi_ts = mean(func2D(voxIdx_values(top_idx),:), 1); % voxels x time
+                        % end
                     else
                         roi_ts = mean(func2D(voxIdx,:), 1);
                     end

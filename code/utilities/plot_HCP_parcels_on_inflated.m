@@ -3,12 +3,18 @@ function plot_HCP_parcels_on_inflated(results)
 % This function requires the GIFT toolbox from matlab https://de.mathworks.com/matlabcentral/fileexchange/112570-gift
 % and Connectome Workbench https://www.humanconnectome.org/software/connectome-workbench
 
-
 %----------------------------------------------------------
 % INPUT FILES
 %----------------------------------------------------------
 surf_file = fullfile('C:', 'HCP_files', 'S1200.R.inflated_MSMAll.32k_fs_LR.surf.gii'); % Inflated right hemisphere
 dlabel_file = fullfile('C:', 'HCP_files', 'Q1-Q6_RelatedValidation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii');
+
+if ~exist(surf_file, 'file') || ~exist(dlabel_file, 'file')
+    error(['Inflated brain and label file must be unter C:\HCP_files\ because ', ...
+        'Connectome Workbench does not work well with relative paths. ', ...
+        'Alternatively, hard code the path to the MNI_ROIs folder on your machine'])
+end
+
 
 %----------------------------------------------------------
 % SETTINGS
@@ -53,7 +59,7 @@ camlight('left');
 hold on;
 
 
-% %% --- DRAW PARCEL BORDERS ---
+%% --- DRAW PARCEL BORDERS ---  (This does not realy work...)
 % 
 % disp('Drawing parcel borders...');
 % unique_labels = unique(labels);
@@ -78,7 +84,7 @@ hold on;
 %% --- HIGHLIGHT SELECTED PARCELS ---
 disp('Highlighting selected parcels...');
 for i = 1:numel(highlight_parcels)
-    parcel_id = highlight_parcels(i)
+    parcel_id = highlight_parcels(i);
     mask = (labels == parcel_id);
     p = patch('Vertices', vertices, 'Faces', faces(any(mask(faces),2),:), ...
         'FaceColor', parcelColors{i}, 'EdgeColor', 'none', ...
