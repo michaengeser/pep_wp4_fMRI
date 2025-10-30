@@ -1,11 +1,11 @@
 % --- CONFIGURATION ---
-sourceRoot = 'D:\pep_wp4_fMRI';    % path to project backup on hard drive
-targetRoot = 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI'; % path to project folder on laptop
-filePattern = 'swrsub*bold.nii'; % files of interest
+sourceRoot = 'D:\pep_wp4_fMRI';    % i.e., path to project backup on hard drive
+targetRoot = 'C:\Users\JLU-SU\OneDrive - Justus-Liebig-Universität Gießen\Dokumente\GitHub\pep_wp4_fMRI'; % i.e., path to project folder on laptop
+filePattern = 'wrsub-1*'; % files of interest
 
 % --- FIND FILES ---
 % Get list of all files starting with swsub recursively
-files = dir(fullfile(backupRoot, '**', filePattern));
+files = dir(fullfile(sourceRoot, '**', filePattern));
 
 fprintf('Found %d files to copy.\n', numel(files));
 
@@ -26,6 +26,19 @@ for i = 1:numel(files)
 
     % Construct full destination file path
     destFile = fullfile(destFolder, files(i).name);
+
+    % Skip existing files
+    if exist(destFile, 'file')
+        fprintf('Skip: File %s exists already', destFile);
+        disp(newline)
+        continue
+    end
+
+    if contains(destFile,  {'sub-118', 'sub-125', 'sub-131'})
+        fprintf('Skip %s. Excluded subject', destFile);
+        disp(newline)
+        continue
+    end
 
     % Copy the file
     copyfile(srcFile, destFile);
