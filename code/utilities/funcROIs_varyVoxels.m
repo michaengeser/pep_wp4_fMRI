@@ -3,13 +3,15 @@ function funcROIs_varyVoxels(cfg)
 
 %% Configuration
 if ~isfield(cfg, 'func_roi_names'); cfg.func_roi_names = {'LPFC'}; end
-if ~isfield(cfg, 'steps'); cfg.steps = [1,2,5,10,20,50,100,200,500,1000,5000,10000,20000,50000,100000]; end
+if ~isfield(cfg, 'numVoxels'); cfg.numVoxels = [1,2,5,10,20,50,100,200,500,1000,5000,inf]; end % inf = all voxels
 if ~isfield(cfg, 'fmri_pattern'); cfg.fmri_pattern = 'wsub-*_task-*_bold.nii'; end % adjust to your data
 if ~isfield(cfg, 'nRuns'); cfg.nRuns = 12; end
 if ~isfield(cfg, 'skipIfExists'); cfg.skipIfExists = false; end
 if ~isfield(cfg, 'tr'); cfg.tr = 1.85; end
 if ~isfield(cfg, 'nVols'); cfg.nVols = 188; end
 if ~isfield(cfg, 'cutTargets'); cfg.cutTargets = false; end
+if ~isfield(cfg, 'TRstartBuffer'); cfg.TRstartBuffer = 3; end
+if ~isfield(cfg, 'TRendBuffer'); cfg.TRendBuffer = 3; end
 
 % Paths
 main_path = fullfile(pwd, '..', 'derivatives');
@@ -65,7 +67,7 @@ for iRoi = 1:numel(cfg.func_roi_names)
             contrast_data{c} = contrast_nii.img;
         end
 
-        % Pick contrast based on ROI 
+        % Pick contrast based on ROI
         if ismember(cfg.func_roi_names{iRoi}, {'PPA','TOS','RSC'})
             contrast_map = single(contrast_data{1});
         elseif ismember(cfg.func_roi_names{iRoi}, {'LOC'})
@@ -99,7 +101,7 @@ for iRoi = 1:numel(cfg.func_roi_names)
             % Output file
             outFile = fullfile(outdir, ...
                 sprintf('mean_timecourses_voxel_steps_%s_%s_run-%02d.mat', ...
-                 cfg.func_roi_names{iRoi}, currentCat, iRun));
+                cfg.func_roi_names{iRoi}, currentCat, iRun));
             if cfg.skipIfExists && exist(outFile, 'file')
                 disp(['Skipping existing file: ' outFile])
                 continue
@@ -127,16 +129,18 @@ for iRoi = 1:numel(cfg.func_roi_names)
             nTRs = size(func,4);
             func_2D = reshape(func, [], nTRs);
 
-            % Define step sizes up to full ROI size
-            max_vox = numel(sorted_indices);
-            step_sizes = unique([cfg.steps(cfg.steps<max_vox), max_vox]);
-
             % Preallocate matrix (time x voxels) for each step
-            nSizes = length(step_sizes);
+            nSizes = length(cfg.numVoxels);
             timecourses = nan(nTRs, nSizes, 'single');
             for iStep = 1:nSizes
-                step = step_sizes(iStep);
-                top_idx = sorted_indices(1:step);
+                step = cfg.numVoxels(iStep);
+
+                % if step if larger than ROI size
+                if length(sorted_indices) <= step
+                    top_idx = sorted_indices;
+                else
+                    top_idx = sorted_indices(1:step);
+                end
                 roi_tc = func_2D(top_idx,:); % voxels x time
                 if step > 1
                     timecourses(:, iStep) = mean(roi_tc)';  % take mean
@@ -145,7 +149,7 @@ for iRoi = 1:numel(cfg.func_roi_names)
                 end
             end
 
-            save(outFile, 'timecourses', 'nTRs', 'step_sizes')
+            save(outFile, 'timecourses', 'nTRs')
             disp(['Saved: ' outFile])
 
         end
