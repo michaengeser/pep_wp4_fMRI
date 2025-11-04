@@ -1,29 +1,9 @@
 
-*.nii
-*.json
-/derivatives
-*.tiff
-*.jpg
-*.png
 /vgg16_imagenet
-*.fig
-*.asv
-/dnn_features
-/ISCtoolbox/kitchen/fMRIpreprocessed
-/ISCtoolbox/bathroom/fMRIpreprocessed
-/ISCtoolbox/kitchen/stats
-/ISCtoolbox/bathroom/stats
-/stimuli/Neuer Ordner
-/sourcedata/sub-*/beh/onsets
-/localizer/onsets
-/ISCtoolbox/kitchen/results
-/ISCtoolbox/bathroom/results
-/ISCtoolbox/bat
 /vgg16_places365
-/ISCtoolbox/bathroom_s12
-/ISCtoolbox/kitchen_s12
-/ISCtoolbox/bathroom2
-/ISCtoolbox/bathroom3
-/ISCtoolbox/kitchen2
-/ISCtoolbox/kitchen3
-ISCtoolbox/all_perms_s6_common_mask.mat
+*.asv
+/ISCtoolbox
+/photos
+/derivatives/sub-*/func/wrsub-*xxxx_task-scenes_run-*_bold.nii
+/sourcedata
+/derivatives/sub-*/func/
