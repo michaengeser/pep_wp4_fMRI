@@ -5,5 +5,7 @@
 /ISCtoolbox
 /photos
 /derivatives/sub-*/func/wrsub-*xxxx_task-scenes_run-*_bold.nii
-/sourcedata
-/derivatives/sub-*/func/
+/sourcedata/sub-*/anat/*.nii
+/sourcedata/sub-*/func/*.nii
+/derivatives/sub-*/func/*.nii
+/sourcedata/**/.import
