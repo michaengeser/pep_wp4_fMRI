@@ -8,9 +8,9 @@ items = dir(parentFolder);
 subFolders = items([items.isdir] & ~ismember({items.name}, {'.', '..'}));
 
 % Loop through each subfolder
-for i = 1:numel(subFolders)
+for i = 2:numel(subFolders)
     subFolderName = subFolders(i).name;
-    subFolderPath = fullfile(parentFolder, subFolderName);
+    subFolderPath = fullfile(parentFolder, subFolderName, 'func');
     
     % Define output zip file name (in the same parent folder)
     zipFileName = fullfile(parentFolder, [subFolderName, '.zip']);
